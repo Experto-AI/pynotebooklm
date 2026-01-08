@@ -1,15 +1,19 @@
 import asyncio
+
 import typer
 from rich.console import Console
+
 from pynotebooklm.auth import AuthManager
 
 app = typer.Typer(help="PyNotebookLM CLI - Management Tools")
 console = Console()
 
+
 @app.command()
-def login(timeout: int = typer.Option(300, help="Timeout in seconds")):
+def login(timeout: int = typer.Option(300, help="Timeout in seconds")) -> None:
     """Login to Google NotebookLM."""
-    async def _run_login():
+
+    async def _run_login() -> None:
         auth = AuthManager()
         try:
             await auth.login(timeout=timeout)
@@ -17,12 +21,13 @@ def login(timeout: int = typer.Option(300, help="Timeout in seconds")):
             console.print(f"  Auth file: {auth.auth_path}")
         except Exception as e:
             console.print(f"[red]Login failed: {e}[/red]")
-            raise typer.Exit(1)
-            
+            raise typer.Exit(1) from e
+
     asyncio.run(_run_login())
 
+
 @app.command()
-def check():
+def check() -> None:
     """Check authentication status."""
     auth = AuthManager()
     if auth.is_authenticated():
@@ -35,12 +40,14 @@ def check():
         console.print("  Run 'pynotebooklm login' to authenticate")
         raise typer.Exit(1)
 
+
 @app.command()
-def logout():
+def logout() -> None:
     """Log out and clear authentication state."""
     auth = AuthManager()
     auth.logout()
     console.print("[green]✓ Logged out successfully[/green]")
+
 
 if __name__ == "__main__":
     app()

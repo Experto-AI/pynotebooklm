@@ -11,7 +11,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
-from playwright.async_api import Browser, Error as PlaywrightError, Page, async_playwright
+from playwright.async_api import Browser, Page, async_playwright
+from playwright.async_api import Error as PlaywrightError
 
 from .exceptions import AuthenticationError, BrowserError
 from .models import AuthState, Cookie
@@ -243,7 +244,9 @@ class AuthManager:
             try:
                 # Check if browser or page was closed
                 if not browser.is_connected() or page.is_closed():
-                    raise AuthenticationError("Browser or page was closed before login completed")
+                    raise AuthenticationError(
+                        "Browser or page was closed before login completed"
+                    )
 
                 # Check if we're on NotebookLM main page (indicates successful login)
                 current_url = page.url
