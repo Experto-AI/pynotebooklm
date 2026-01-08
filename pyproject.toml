@@ -3,14 +3,14 @@ name = "pynotebooklm"
 version = "0.1.0"
 description = "Production-grade Python library for NotebookLM automation with 31 tools"
 authors = ["Victor"]
-license = "MIT"
+license = "Apache-2.0"
 readme = "README.md"
 packages = [{include = "pynotebooklm", from = "src"}]
 keywords = ["notebooklm", "google", "automation", "podcast", "ai", "notebook"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
