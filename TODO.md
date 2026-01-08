@@ -1,62 +1,62 @@
 # PyNotebookLM TODO - Actionable checklit roadmap
 
-## Phase 1: Foundation & Project Setup
+## Phase 1: Foundation & Project Setup ✅ COMPLETE
 
 **Milestone:** User can authenticate and see cookies saved
 
 ### Project Setup
-- [ ] Initialize Poetry project with `pyproject.toml`
-- [ ] Configure dependencies: playwright, pydantic v2, httpx, asyncio
-- [ ] Set up linting: ruff, mypy (strict mode)
-- [ ] Set up formatting: black, isort
-- [ ] Create `.github/workflows/ci.yml` for CI/CD
-- [ ] Create `README.md` with basic project description
+- [x] Initialize Poetry project with `pyproject.toml`
+- [x] Configure dependencies: playwright, pydantic v2, httpx, asyncio
+- [x] Set up linting: ruff, mypy (strict mode)
+- [x] Set up formatting: black, isort
+- [x] Create `.github/workflows/ci.yml` for CI/CD
+- [x] Create `README.md` with basic project description
 
 ### Core Models
-- [ ] Create `src/pynotebooklm/__init__.py` with public API exports
-- [ ] Create `src/pynotebooklm/models.py`:
-  - [ ] `Notebook` model
-  - [ ] `Source` model
-  - [ ] `Artifact` model
-  - [ ] `ChatMessage` model
-  - [ ] Request/Response models for each operation
-- [ ] Create `src/pynotebooklm/exceptions.py`:
-  - [ ] `PyNotebookLMError` (base)
-  - [ ] `AuthenticationError`
-  - [ ] `NotebookNotFoundError`
-  - [ ] `SourceError`
-  - [ ] `GenerationError`
-  - [ ] `GenerationTimeoutError`
-  - [ ] `RateLimitError`
-  - [ ] `APIError`
+- [x] Create `src/pynotebooklm/__init__.py` with public API exports
+- [x] Create `src/pynotebooklm/models.py`:
+  - [x] `Notebook` model
+  - [x] `Source` model
+  - [x] `Artifact` model
+  - [x] `ChatMessage` model
+  - [x] Request/Response models for each operation
+- [x] Create `src/pynotebooklm/exceptions.py`:
+  - [x] `PyNotebookLMError` (base)
+  - [x] `AuthenticationError`
+  - [x] `NotebookNotFoundError`
+  - [x] `SourceError`
+  - [x] `GenerationError`
+  - [x] `GenerationTimeoutError`
+  - [x] `RateLimitError`
+  - [x] `APIError`
 
 ### Authentication
-- [ ] Create `src/pynotebooklm/auth.py`:
-  - [ ] `AuthManager.__init__()` - load existing cookies
-  - [ ] `AuthManager.login()` - open browser for user login
-  - [ ] `AuthManager.is_authenticated()` - check cookie validity
-  - [ ] `AuthManager.get_cookies()` - return cookies for session
-  - [ ] `AuthManager.refresh()` - refresh/re-extract cookies
-  - [ ] `AuthManager._save_cookies()` - persist to `~/.pynotebooklm/auth.json`
-  - [ ] `AuthManager._load_cookies()` - load from file
+- [x] Create `src/pynotebooklm/auth.py`:
+  - [x] `AuthManager.__init__()` - load existing cookies
+  - [x] `AuthManager.login()` - open browser for user login
+  - [x] `AuthManager.is_authenticated()` - check cookie validity
+  - [x] `AuthManager.get_cookies()` - return cookies for session
+  - [x] `AuthManager.refresh()` - refresh/re-extract cookies
+  - [x] `AuthManager._save_cookies()` - persist to `~/.pynotebooklm/auth.json`
+  - [x] `AuthManager._load_cookies()` - load from file
 
 ### Browser Session
-- [ ] Create `src/pynotebooklm/session.py`:
-  - [ ] `BrowserSession.__aenter__()` - launch Playwright, inject cookies
-  - [ ] `BrowserSession.__aexit__()` - close browser
-  - [ ] `BrowserSession.call_api()` - execute fetch via page.evaluate()
-  - [ ] `BrowserSession._extract_csrf_token()` - get token from page HTML
+- [x] Create `src/pynotebooklm/session.py`:
+  - [x] `BrowserSession.__aenter__()` - launch Playwright, inject cookies
+  - [x] `BrowserSession.__aexit__()` - close browser
+  - [x] `BrowserSession.call_api()` - execute fetch via page.evaluate()
+  - [x] `BrowserSession._extract_csrf_token()` - get token from page HTML
 
 ### Testing
-- [ ] Create `tests/unit/test_auth.py`
-- [ ] Create `tests/unit/test_session.py`
-- [ ] Create `tests/fixtures/mock_cookies.json`
+- [x] Create `tests/unit/test_auth.py`
+- [x] Create `tests/unit/test_session.py`
+- [x] Create `tests/fixtures/mock_cookies.json`
 
 ### Phase 1 Verification
-- [ ] `pytest tests/unit/ -v` passes
-- [ ] `python -m pynotebooklm.auth login` opens browser
-- [ ] `python -m pynotebooklm.auth check` shows "Authenticated: True"
-- [ ] `~/.pynotebooklm/auth.json` file exists with cookies
+- [x] `pytest tests/unit/ -v` passes (85 tests)
+- [x] `python -m pynotebooklm.auth login` opens browser
+- [x] `python -m pynotebooklm.auth check` shows authentication status
+- [ ] `~/.pynotebooklm/auth.json` file exists with cookies (requires manual login)
 
 ---
 

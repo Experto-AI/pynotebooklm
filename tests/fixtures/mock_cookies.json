@@ -1,0 +1,67 @@
+{
+  "cookies": [
+    {
+      "name": "SID",
+      "value": "mock_sid_value_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": true,
+      "secure": true,
+      "same_site": "Lax"
+    },
+    {
+      "name": "HSID",
+      "value": "mock_hsid_value_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": true,
+      "secure": false,
+      "same_site": "Lax"
+    },
+    {
+      "name": "SSID",
+      "value": "mock_ssid_value_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": true,
+      "secure": true,
+      "same_site": "Lax"
+    },
+    {
+      "name": "APISID",
+      "value": "mock_apisid_value_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": false,
+      "secure": false,
+      "same_site": "Lax"
+    },
+    {
+      "name": "SAPISID",
+      "value": "mock_sapisid_value_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": false,
+      "secure": true,
+      "same_site": "Lax"
+    },
+    {
+      "name": "__Secure-1PSID",
+      "value": "mock_secure_1psid_12345",
+      "domain": ".google.com",
+      "path": "/",
+      "expires": null,
+      "http_only": true,
+      "secure": true,
+      "same_site": "Lax"
+    }
+  ],
+  "csrf_token": "mock_csrf_token_SNlM0e_12345",
+  "authenticated_at": "2026-01-08T10:00:00",
+  "expires_at": "2026-01-22T10:00:00"
+}
