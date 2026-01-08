@@ -1,6 +1,16 @@
 # PyNotebookLM
 
-[![CI](https://github.com/victor/pynotebooklm/actions/workflows/ci.yml/badge.svg)](https://github.com/victor/pynotebooklm/actions/workflows/ci.yml)
+<!--
+📄 DOCUMENTATION SCOPE: This file is the user-facing README for the project. It should contain:
+- Installation instructions, quick start guides, and usage examples
+- Feature highlights and CLI command references
+- How-to-run development commands (tests, linting, etc.)
+- Project structure overview for end users
+
+DO NOT include here: Detailed implementation plans, architectural decisions, or internal technical details. Those belong in plan.md.
+-->
+
+[![CI](https://img.shields.io/github/actions/workflow/status/victor/pynotebooklm/ci.yml?branch=main)](https://github.com/victor/pynotebooklm/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

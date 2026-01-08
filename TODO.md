@@ -1,4 +1,14 @@
-# PyNotebookLM TODO - Actionable checklit roadmap
+# PyNotebookLM TODO - Actionable Checklist Roadmap
+
+<!--
+✅ DOCUMENTATION SCOPE: This file is the actionable task checklist for development. It should contain:
+- Phase-based TODO items with checkboxes for tracking progress
+- Specific implementation tasks (create files, write functions, tests)
+- Verification steps for each phase
+- Current work-in-progress items
+
+DO NOT include here: Architectural rationale, detailed technical explanations, or design decisions. Those belong in plan.md. Keep this file focused on "what needs to be done" not "why" or "how".
+-->
 
 ## Phase 1: Foundation & Project Setup ✅ COMPLETE
 

@@ -1,4 +1,17 @@
-# PyNotebookLM - Detailed Technical Implementation Plan
+# PyNotebookLM - Technical Implementation Plan & Architecture
+
+<!--
+🏗️ DOCUMENTATION SCOPE: This file is the comprehensive technical reference for the project. It should contain:
+- Complete architecture diagrams and technology stack decisions
+- Detailed implementation plans for all phases
+- RPC protocol documentation and API reverse-engineering notes
+- Architectural decisions with rationale (why we chose X over Y)
+- Technical deep dives (auth flow, browser automation patterns, async polling)
+- Risk assessments and mitigation strategies
+- Complete tool inventory with RPC IDs and parameters
+
+DO NOT include here: Simple TODO checkboxes (use TODO.md) or user-facing documentation (use README.md). This is the "source of truth" for technical architecture and implementation details.
+-->
 
 Production-grade Python library for NotebookLM automation with 31 tools.
 
