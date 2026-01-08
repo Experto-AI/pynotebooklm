@@ -63,9 +63,9 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 - [x] Create `tests/fixtures/mock_cookies.json`
 
 ### Phase 1 Verification
-- [x] `pytest tests/unit/ -v` passes (85 tests)
-- [x] `python -m pynotebooklm.auth login` opens browser
-- [x] `python -m pynotebooklm.auth check` shows authentication status
+- [x] `poetry run pytest tests/unit/ -v` passes (85 tests)
+- [x] `poetry run python -m pynotebooklm.auth login` opens browser
+- [x] `poetry run python -m pynotebooklm.auth check` shows authentication status
 - [ ] `~/.pynotebooklm/auth.json` file exists with cookies (requires manual login)
 
 ---

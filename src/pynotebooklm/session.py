@@ -18,8 +18,8 @@ from playwright.async_api import (
     async_playwright,
 )
 
-from pynotebooklm.auth import AuthManager
-from pynotebooklm.exceptions import (
+from .auth import AuthManager
+from .exceptions import (
     APIError,
     AuthenticationError,
     BrowserError,

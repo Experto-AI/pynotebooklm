@@ -5,8 +5,8 @@ This library provides programmatic access to Google NotebookLM functionality
 including notebook management, source handling, and content generation.
 """
 
-from pynotebooklm.auth import AuthManager
-from pynotebooklm.exceptions import (
+from .auth import AuthManager
+from .exceptions import (
     APIError,
     AuthenticationError,
     BrowserError,
@@ -18,7 +18,7 @@ from pynotebooklm.exceptions import (
     SessionError,
     SourceError,
 )
-from pynotebooklm.models import (
+from .models import (
     Artifact,
     ArtifactStatus,
     ArtifactType,
@@ -28,7 +28,7 @@ from pynotebooklm.models import (
     SourceStatus,
     SourceType,
 )
-from pynotebooklm.session import BrowserSession
+from .session import BrowserSession
 
 __version__ = "0.1.0"
 

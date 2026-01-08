@@ -11,10 +11,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
-from playwright.async_api import Browser, Page, async_playwright
+from playwright.async_api import Browser, Error as PlaywrightError, Page, async_playwright
 
-from pynotebooklm.exceptions import AuthenticationError, BrowserError
-from pynotebooklm.models import AuthState, Cookie
+from .exceptions import AuthenticationError, BrowserError
+from .models import AuthState, Cookie
 
 logger = logging.getLogger(__name__)
 
@@ -240,26 +240,34 @@ class AuthManager:
         check_interval = 2  # seconds
 
         while (datetime.now() - start_time).seconds < timeout:
-            # Check if browser was closed
-            if not browser.is_connected():
-                raise AuthenticationError("Browser was closed before login completed")
+            try:
+                # Check if browser or page was closed
+                if not browser.is_connected() or page.is_closed():
+                    raise AuthenticationError("Browser or page was closed before login completed")
 
-            # Check if we're on NotebookLM main page (indicates successful login)
-            current_url = page.url
-            if (
-                NOTEBOOKLM_URL in current_url
-                and "accounts.google.com" not in current_url
-            ):
-                # Verify we have the essential cookies
-                context = page.context
-                cookies = await context.cookies()
-                cookie_names = {c["name"] for c in cookies}
+                # Check if we're on NotebookLM main page (indicates successful login)
+                current_url = page.url
+                if (
+                    NOTEBOOKLM_URL in current_url
+                    and "accounts.google.com" not in current_url
+                ):
+                    # Verify we have the essential cookies
+                    context = page.context
+                    cookies = await context.cookies()
+                    cookie_names = {c["name"] for c in cookies}
 
-                if ESSENTIAL_COOKIES.issubset(cookie_names):
-                    logger.info("Authentication detected!")
-                    return
+                    if ESSENTIAL_COOKIES.issubset(cookie_names):
+                        logger.info("Authentication detected!")
+                        return
 
-            await page.wait_for_timeout(check_interval * 1000)
+                await page.wait_for_timeout(check_interval * 1000)
+            except PlaywrightError as e:
+                # Catch "Target closed" errors which occur if user closes browser/tab
+                if "closed" in str(e).lower():
+                    raise AuthenticationError(
+                        "Browser or page was closed before login completed"
+                    ) from e
+                raise
 
         raise AuthenticationError(
             f"Login timed out after {timeout} seconds. Please try again."
