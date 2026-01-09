@@ -9,7 +9,7 @@ import logging
 import re
 from typing import TYPE_CHECKING
 
-from .api import NotebookLMAPI, parse_source_response
+from .api import NotebookLMAPI, parse_notebook_response, parse_source_response
 from .models import Source, SourceType
 
 if TYPE_CHECKING:
@@ -254,17 +254,12 @@ class SourceManager:
 
         raw_notebook = await self._api.get_notebook(notebook_id)
 
-        sources: list[Source] = []
-
-        # Sources are typically in the notebook response
-        if isinstance(raw_notebook, list) and len(raw_notebook) > 3:
-            sources_data = raw_notebook[3] if isinstance(raw_notebook[3], list) else []
-            for raw in sources_data:
-                try:
-                    source = parse_source_response(raw)
-                    sources.append(source)
-                except Exception as e:
-                    logger.warning("Failed to parse source: %s", e)
+        try:
+            notebook = parse_notebook_response(raw_notebook)
+            sources = notebook.sources
+        except Exception as e:
+            logger.warning("Failed to parse notebook sources: %s", e)
+            sources = []
 
         logger.info("Found %d sources", len(sources))
         return sources

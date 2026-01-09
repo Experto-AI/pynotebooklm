@@ -59,7 +59,7 @@ class BrowserSession:
         self,
         auth: AuthManager,
         headless: bool = True,
-        timeout: int = 30000,
+        timeout: int = 60000,
     ) -> None:
         """
         Initialize the browser session.
@@ -131,7 +131,7 @@ class BrowserSession:
             self._page.set_default_timeout(self.timeout)
 
             logger.debug("Navigating to NotebookLM...")
-            await self._page.goto(NOTEBOOKLM_URL, wait_until="networkidle")
+            await self._page.goto(NOTEBOOKLM_URL, wait_until="load")
 
             # Verify we're authenticated
             if "accounts.google.com" in self._page.url:
@@ -367,14 +367,20 @@ class BrowserSession:
         if text.startswith(ANTI_XSSI_PREFIX):
             text = text[len(ANTI_XSSI_PREFIX) :]
 
-        # Split by newlines - first line is byte count, second is data
-        lines = text.strip().split("\n")
-        if len(lines) < 2:
-            raise APIError("Invalid response format: too few lines")
+        # Get all non-empty lines
+        lines = [line.strip() for line in text.split("\n") if line.strip()]
+        if not lines:
+            raise APIError("Empty response from API")
+
+        # In batchexecute responses, line 0 is often a byte count and line 1 is data.
+        # But sometimes the byte count is missing or multiple chunks are present.
+        target_line = lines[0]
+        if target_line.isdigit() and len(lines) > 1:
+            target_line = lines[1]
 
         try:
             # Parse the data line
-            data = json.loads(lines[1])
+            data = json.loads(target_line)
 
             # Navigate nested structure to get actual response
             # Response is usually at data[0][2] but wrapped in another string

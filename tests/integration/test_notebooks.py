@@ -105,9 +105,9 @@ class TestListNotebooks:
         # Mix of valid and invalid data
         mock_session.call_rpc.return_value = [
             [
-                ["valid_id", "Valid Notebook", 12345, []],
+                ["Valid Notebook", [], "valid_id", 12345, None],
                 None,  # Invalid entry
-                ["another_id", "Another Notebook", 12346, []],
+                ["Another Notebook", [], "another_id", 12346, None],
             ]
         ]
 
@@ -217,7 +217,7 @@ class TestRenameNotebook:
         # First call for rename, second for get
         mock_session.call_rpc.side_effect = [
             None,  # Rename response
-            ["nb_123", "Updated Name", 12345, []],  # Get response
+            ["Updated Name", [], "nb_123", 12345, None],  # Get response
         ]
 
         notebook = await notebook_manager.rename("nb_123", "Updated Name")

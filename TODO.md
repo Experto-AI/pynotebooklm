@@ -115,13 +115,12 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 - [x] Create `tests/fixtures/mock_rpc_responses.py`
 
 ### Phase 2 Verification
-- [x] `pytest tests/integration/test_notebooks.py -v` passes (17 tests)
-- [x] `pytest tests/integration/test_sources.py -v` passes (23 tests)
-- [x] All 131 unit and integration tests pass
-- [ ] Can list notebooks from real account (requires manual login)
-- [ ] Can create a test notebook (requires manual login)
-- [ ] Can add URL source to notebook (requires manual login)
-- [ ] Can delete test notebook (requires manual login)
+- [x] `make test-integration` passes (all notebook & source tests)
+- [x] `poetry run python -m pynotebooklm notebooks list`
+- [x] `poetry run python -m pynotebooklm notebooks create "My Project"`
+- [x] `poetry run python -m pynotebooklm notebooks delete <id>`
+- [x] `poetry run python -m pynotebooklm sources list <notebook_id>`
+- [x] `poetry run python -m pynotebooklm sources add <notebook_id> "https://example.com"`
 
 ---
 
@@ -150,10 +149,10 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 - [ ] Test with mock status responses
 
 ### Phase 3 Verification
-- [ ] `pytest tests/integration/test_content.py -v` passes
-- [ ] Can generate a podcast from notebook with sources
-- [ ] Status polling works correctly
-- [ ] Download URL is valid and accessible
+- [ ] `make test-integration-content` passes (once tests created)
+- [ ] `pynotebooklm generate podcast <notebook_id>` starts generation
+- [ ] `pynotebooklm generate status <artifact_id>` checks progress
+- [ ] Download URL is provided once generation is 100%
 
 ---
 
@@ -182,10 +181,10 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 - [ ] Create `tests/integration/test_research.py`
 
 ### Phase 4 Verification
-- [ ] `pytest tests/integration/test_research.py -v` passes
-- [ ] Can query notebook and get AI response
-- [ ] Can start research and see discovered sources
-- [ ] Can import sources from research
+- [ ] `make test-integration-research` passes
+- [ ] `pynotebooklm query <notebook_id> "What is this about?"` returns answer
+- [ ] `pynotebooklm research start "Topic"` returns a research ID
+- [ ] Citations are included in the query response
 
 ---
 
@@ -216,10 +215,10 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 - [ ] Create `tests/integration/test_study.py`
 
 ### Phase 5 Verification
-- [ ] `pytest tests/integration/test_mindmaps.py -v` passes
-- [ ] `pytest tests/integration/test_study.py -v` passes
-- [ ] All 31 tools implemented
-- [ ] Mind map exports valid XML
+- [ ] `make test-integration-mindmaps` passes
+- [ ] `make test-integration-study` passes
+- [ ] `pynotebooklm mindmaps list <notebook_id>` lists mind maps
+- [ ] `pynotebooklm study flashcards <notebook_id>` returns flashcards
 
 ---
 
@@ -235,16 +234,12 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
   - [ ] Expose `notebooks`, `sources`, `content`, `research`, `mindmaps`, `study`
 
 ### CLI Interface
-- [ ] Create `src/pynotebooklm/cli.py` with Typer:
-  - [ ] `pynotebooklm auth login`
-  - [ ] `pynotebooklm auth check`
-  - [ ] `pynotebooklm auth logout`
-  - [ ] `pynotebooklm notebooks list`
-  - [ ] `pynotebooklm notebooks create <name>`
-  - [ ] `pynotebooklm notebooks delete <id>`
-  - [ ] `pynotebooklm sources add <notebook_id> <url>`
-  - [ ] `pynotebooklm generate podcast <notebook_id>`
-  - [ ] `pynotebooklm query <notebook_id> <question>`
+- [x] Create `src/pynotebooklm/cli.py` with Typer base
+- [x] Phase 1: `pynotebooklm auth login|check|logout`
+- [x] Phase 2: `pynotebooklm notebooks list|create|delete`
+- [x] Phase 2: `pynotebooklm sources add|list`
+- [ ] Phase 3: `pynotebooklm generate podcast <notebook_id>`
+- [ ] Phase 4: `pynotebooklm query <notebook_id> <question>`
 - [ ] Add `[tool.poetry.scripts]` entry in pyproject.toml
 
 ### Docker Support

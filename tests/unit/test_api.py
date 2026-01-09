@@ -65,8 +65,8 @@ class TestListNotebooks:
         """list_notebooks returns list of notebooks."""
         mock_session.call_rpc.return_value = [
             [
-                ["nb1", "Notebook 1", 1234567890],
-                ["nb2", "Notebook 2", 1234567891],
+                ["Notebook 1", [], "nb1", 1234567890, None],
+                ["Notebook 2", [], "nb2", 1234567891, None],
             ]
         ]
 
@@ -106,11 +106,11 @@ class TestCreateNotebook:
         self, api: NotebookLMAPI, mock_session: MagicMock
     ) -> None:
         """create_notebook calls RPC with correct params."""
-        mock_session.call_rpc.return_value = ["nb123", "Test Notebook"]
+        mock_session.call_rpc.return_value = ["Test Notebook", [], "nb123"]
 
         result = await api.create_notebook("Test Notebook")
 
-        assert result == ["nb123", "Test Notebook"]
+        assert result == ["Test Notebook", [], "nb123"]
         mock_session.call_rpc.assert_called_once_with(
             "CCqFvf", ["Test Notebook", None, None, [2], []]
         )
@@ -124,11 +124,14 @@ class TestGetNotebook:
         self, api: NotebookLMAPI, mock_session: MagicMock
     ) -> None:
         """get_notebook returns notebook data."""
-        mock_session.call_rpc.return_value = ["nb123", "Test", 12345, []]
+        mock_session.call_rpc.return_value = ["Test", [], "nb123", 12345]
 
         result = await api.get_notebook("nb123")
 
-        assert result[0] == "nb123"
+        assert result[2] == "nb123"
+        mock_session.call_rpc.assert_called_once_with(
+            "rLM1Ne", ["nb123", None, [2], None, 0]
+        )
 
     @pytest.mark.asyncio
     async def test_get_notebook_not_found(
@@ -498,7 +501,7 @@ class TestParseNotebookResponse:
 
     def test_parse_basic_notebook(self) -> None:
         """Parses basic notebook structure."""
-        data = ["nb123", "Test Notebook", 1704067200000]
+        data = ["Test Notebook", [], "nb123", 1704067200000]
 
         notebook = parse_notebook_response(data)
 
@@ -509,12 +512,12 @@ class TestParseNotebookResponse:
     def test_parse_notebook_with_sources(self) -> None:
         """Parses notebook with sources."""
         data = [
-            "nb123",
             "Test Notebook",
-            1704067200000,
             [
                 ["src1", "Source 1", 1, "https://example.com", 1],
             ],
+            "nb123",
+            1704067200000,
         ]
 
         notebook = parse_notebook_response(data)
@@ -524,7 +527,7 @@ class TestParseNotebookResponse:
 
     def test_parse_notebook_missing_name(self) -> None:
         """Uses default name when missing."""
-        data = ["nb123", None]
+        data = [None, [], "nb123"]
 
         notebook = parse_notebook_response(data)
 
@@ -542,7 +545,7 @@ class TestParseNotebookResponse:
 
     def test_parse_notebook_seconds_timestamp(self) -> None:
         """Parses timestamp in seconds."""
-        data = ["nb123", "Test", 1704067200]  # Seconds, not milliseconds
+        data = ["Test", [], "nb123", 1704067200]  # Seconds, not milliseconds
 
         notebook = parse_notebook_response(data)
 

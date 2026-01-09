@@ -299,6 +299,53 @@ async def poll_artifact_status(
         delay = min(delay * backoff_factor, max_delay)
 ```
 
+### Reverse Engineering RPC Calls
+
+**Goal:** Capture internal API payloads and response structures when documentation is missing or outdated.
+
+**Workflow:**
+
+1. **Automate Browser Interaction:**
+   Use a script (e.g., `reverse_engineer_rpc.py`) to launch a Playwright browser with your active cookies.
+
+2. **Intercept Network Requests:**
+   Listen for POST requests to `batchexecute`. This endpoint handles almost all RPC calls.
+
+   ```python
+   # Example Interception Pattern
+   async def handle_request(request):
+       if "batchexecute" in request.url and request.method == "POST":
+           post_data = request.post_data
+           if post_data:
+               parsed = urllib.parse.parse_qs(post_data)
+               if 'f.req' in parsed:
+                   freq = parsed['f.req'][0]
+                   # Inner JSON contains the RPC ID and params
+                   payload = json.loads(freq)
+                   print(f"Captured RPC: {payload}")
+   
+   page.on("request", handle_request)
+   ```
+
+3. **Decode Payloads:**
+   The `f.req` parameter contains a double-JSON encoded list.
+   - Outer layer: `[[["rpc_id", "json_params", null, "generic"]]]`
+   - Inner `json_params`: The actual arguments for the function.
+
+4. **Identify RPC IDs:**
+   Match the captured RPC ID (e.g., `izAoDd`) with the action you performed in the UI (e.g., "Add Source").
+
+5. **Analyze Response Structure:**
+   The response is also a nested JSON structure, often containing the result deeply buried.
+   - Use `json.dumps(result, indent=2)` to visualize the hierarchy.
+   - Look for the relevant data (IDs, titles, status) within the arrays.
+
+**Common RPC IDs (Verified Jan 2026):**
+- `izAoDd`: Add Source (URL, YouTube, Drive)
+- `wXbhsf`: List Notebooks
+- `CCqFvf`: Create Notebook
+- `rLM1Ne`: Get Notebook Details / List Sources
+
 ---
 
 ## Pydantic Models

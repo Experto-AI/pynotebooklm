@@ -12,35 +12,36 @@ from typing import Any
 # =============================================================================
 
 # Sample notebook data structure
+# Sample notebook data structure
 MOCK_NOTEBOOK_1 = [
-    "nb_abc123",  # Notebook ID
     "My Research Notebook",  # Name
-    1704067200000,  # Created timestamp (milliseconds)
     [],  # Sources (empty)
-    None,  # Other metadata
+    "nb_abc123",  # Notebook ID
+    1704067200000,  # Created timestamp (milliseconds)
+    None,  # Updated timestamp/metadata
 ]
 
 MOCK_NOTEBOOK_2 = [
-    "nb_def456",
     "Project Notes",
-    1704153600000,
     [  # Sources
         ["src_111", "Wikipedia Article", 1, "https://en.wikipedia.org/wiki/Python", 1],
         ["src_222", "Research Paper", 1, "https://arxiv.org/abs/2301.00001", 1],
     ],
+    "nb_def456",
+    1704153600000,
     None,
 ]
 
 MOCK_NOTEBOOK_WITH_SOURCES = [
-    "nb_xyz789",
     "Full Notebook",
-    1704240000000,
     [
         ["src_001", "Web Article", 1, "https://example.com/article", 1],
         ["src_002", "YouTube Tutorial", 2, "https://youtube.com/watch?v=abc123", 1],
         ["src_003", "Google Doc", 3, "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms", 1],
         ["src_004", "My Notes", 4, None, 1],
     ],
+    "nb_xyz789",
+    1704240000000,
     None,
 ]
 
@@ -52,10 +53,10 @@ MOCK_LIST_NOTEBOOKS_RESPONSE = [
 
 # Create notebook response
 MOCK_CREATE_NOTEBOOK_RESPONSE = [
-    "nb_new123",
     "New Notebook",
-    1704326400000,
     [],
+    "nb_new123",
+    1704326400000,
     None,
 ]
 

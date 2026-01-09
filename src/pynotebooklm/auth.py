@@ -197,7 +197,7 @@ class AuthManager:
                     page = await context.new_page()
 
                     # Navigate to NotebookLM
-                    await page.goto(NOTEBOOKLM_URL, wait_until="networkidle")
+                    await page.goto(NOTEBOOKLM_URL, wait_until="load")
 
                     # Wait for user to complete login
                     await self._wait_for_authentication(page, browser, timeout)
@@ -385,7 +385,7 @@ class AuthManager:
                     await context.add_cookies(self.get_cookies())  # type: ignore[arg-type]
 
                     page = await context.new_page()
-                    await page.goto(NOTEBOOKLM_URL, wait_until="networkidle")
+                    await page.goto(NOTEBOOKLM_URL, wait_until="load")
 
                     # Check if still authenticated
                     current_url = page.url
