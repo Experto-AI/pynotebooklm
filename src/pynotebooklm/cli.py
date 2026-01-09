@@ -261,8 +261,15 @@ def delete_source(
 @research_app.command("start")
 def start_research(
     topic: str = typer.Argument(..., help="Research topic or query"),
+    notebook_id: str = typer.Option(
+        None, "--notebook", "-n", help="Notebook ID to associate research with"
+    ),
+    deep: bool = typer.Option(
+        False, "--deep", "-d", help="Use deep research (more comprehensive)"
+    ),
 ) -> None:
     """Start a web research session on a topic."""
+    from pynotebooklm.research import ResearchType
 
     async def _run() -> None:
         auth = AuthManager()
@@ -270,13 +277,20 @@ def start_research(
             console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
             raise typer.Exit(1)
 
+        research_type = ResearchType.DEEP if deep else ResearchType.FAST
+
         async with BrowserSession(auth) as session:
             research = ResearchDiscovery(session)
-            result = await research.start_web_research(topic)
+            result = await research.start_web_research(
+                topic,
+                notebook_id=notebook_id,
+                research_type=research_type,
+            )
 
             console.print("[green]✓ Started research session[/green]")
             console.print(f"  ID: [cyan]{result.id}[/cyan]")
             console.print(f"  Topic: {result.topic}")
+            console.print(f"  Type: {research_type.value}")
             console.print(f"  Status: {result.status.value}")
 
             if result.error_message:

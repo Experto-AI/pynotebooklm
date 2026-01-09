@@ -23,15 +23,29 @@ logger = logging.getLogger(__name__)
 
 
 # =============================================================================
-# RPC Constants - These would need to be discovered via reverse engineering
+# RPC Constants - Discovered via browser reverse engineering (Jan 2026)
 # =============================================================================
 
-# Research operations (placeholder IDs - need to be RE'd)
-RPC_START_RESEARCH = "placeholder_research_start"
-RPC_RESEARCH_STATUS = "placeholder_research_status"
-RPC_IMPORT_RESEARCH = "placeholder_research_import"
-RPC_SYNC_DRIVE = "placeholder_sync_drive"
+# Research operations - Discovered RPC IDs
+RPC_FAST_RESEARCH = "Ljjv0c"  # Fast/quick web research (parameter: 1)
+RPC_DEEP_RESEARCH = "QA9ei"  # Deep research (parameter: 5)
+RPC_RESEARCH_STATUS = "e3bVqc"  # Check research progress/status
+RPC_IMPORT_RESEARCH = "LBwxtb"  # Import research findings to notebook
+
+# Per-source operations - accessed via source context menu
+RPC_SYNC_DRIVE = "placeholder_sync_drive"  # Sync is per-source, not notebook-wide
+
+# Topic suggestions - These appear as chips after chat responses in the UI
+# In practice, they are generated as part of chat/notebook guide responses
+# Keeping as placeholder for API compatibility
 RPC_SUGGEST_TOPICS = "placeholder_suggest_topics"
+
+
+class ResearchType(str, Enum):
+    """Type of research to perform."""
+
+    FAST = "fast"  # Quick research with immediate results
+    DEEP = "deep"  # Comprehensive research with detailed analysis
 
 
 # =============================================================================
@@ -113,15 +127,24 @@ class ResearchDiscovery:
         # In-memory cache for research sessions (simulated)
         self._research_sessions: dict[str, ResearchSession] = {}
 
-    async def start_web_research(self, topic: str) -> ResearchSession:
+    async def start_web_research(
+        self,
+        topic: str,
+        notebook_id: str | None = None,
+        research_type: ResearchType = ResearchType.FAST,
+    ) -> ResearchSession:
         """
         Start a web research session on a topic.
 
         This initiates a research process that discovers relevant sources
-        and information about the given topic.
+        and information about the given topic. NotebookLM supports two types:
+        - FAST: Quick research with immediate results (default)
+        - DEEP: Comprehensive research with detailed analysis
 
         Args:
             topic: The research topic or query string.
+            notebook_id: Optional notebook ID to associate research with.
+            research_type: Type of research (FAST or DEEP).
 
         Returns:
             ResearchSession with initial status.
@@ -131,14 +154,17 @@ class ResearchDiscovery:
             APIError: If the research cannot be started.
 
         Example:
-            >>> session = await research.start_web_research("Machine learning trends")
+            >>> session = await research.start_web_research(
+            ...     "Machine learning trends",
+            ...     research_type=ResearchType.DEEP
+            ... )
             >>> print(f"Research ID: {session.id}")
         """
         if not topic or not topic.strip():
             raise ValueError("Research topic cannot be empty")
 
         topic = topic.strip()
-        logger.info("Starting web research for topic: %s", topic)
+        logger.info("Starting %s research for topic: %s", research_type.value, topic)
 
         # Generate a unique research ID
         research_id = f"research_{uuid.uuid4().hex[:12]}"
@@ -151,13 +177,20 @@ class ResearchDiscovery:
             started_at=datetime.now(),
         )
 
+        # Select RPC ID and parameter based on research type
+        if research_type == ResearchType.DEEP:
+            rpc_id = RPC_DEEP_RESEARCH
+            research_param = 5  # Deep research uses parameter 5
+        else:
+            rpc_id = RPC_FAST_RESEARCH
+            research_param = 1  # Fast research uses parameter 1
+
         try:
-            # Attempt to call the research RPC
-            # Note: The actual RPC ID needs to be reverse-engineered
-            result = await self._session.call_rpc(
-                RPC_START_RESEARCH,
-                [topic, None, [2]],
-            )
+            # Build the research payload
+            # Structure observed: [topic, notebook_id, research_param, [2]]
+            payload = [topic, notebook_id, research_param, [2]]
+
+            result = await self._session.call_rpc(rpc_id, payload)
 
             # Parse the research results if available
             if result:
@@ -166,22 +199,20 @@ class ResearchDiscovery:
                 )
             else:
                 # If no result, mark as completed with empty results
-                # (the real API would return actual results)
                 research_session.status = ResearchStatus.COMPLETED
                 research_session.completed_at = datetime.now()
 
         except APIError as e:
-            # If the RPC is not yet implemented/discovered, simulate a response
-            if "placeholder" in RPC_START_RESEARCH or e.status_code == 400:
+            # Handle API errors gracefully
+            if e.status_code == 400:
                 logger.warning(
-                    "Research RPC not available, returning simulated session: %s", e
+                    "Research RPC returned 400, may require notebook context: %s", e
                 )
                 research_session.status = ResearchStatus.COMPLETED
                 research_session.completed_at = datetime.now()
-                # Add placeholder message
                 research_session.error_message = (
-                    "Research API not yet reverse-engineered. "
-                    "Results must be added manually."
+                    "Research requires notebook context. "
+                    "Please provide a notebook_id parameter."
                 )
             else:
                 research_session.status = ResearchStatus.FAILED

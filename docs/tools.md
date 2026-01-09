@@ -37,11 +37,14 @@ Tests: `tests/integration/test_research.py`
 
 | Tool | ID | Description |
 |------|----|-------------|
-| `research_start` | placeholder | Start web research on topic |
-| `research_status` | placeholder | Check research progress |
-| `research_import` | (uses `izAoDd`) | Import results to notebook |
-| `source_sync_drive` | placeholder | Sync Drive sources |
-| `suggest_topics` | placeholder | Get related topic suggestions |
+| `research_fast` | `Ljjv0c` | Start fast web research (param: 1) |
+| `research_deep` | `QA9ei` | Start deep research (param: 5) |
+| `research_status` | `e3bVqc` | Check research progress |
+| `research_import` | `LBwxtb` | Import research findings to notebook |
+
+### Notes:
+- **Drive Sync**: Per-source operation, accessed via individual source context menu (not notebook-wide)
+- **Topic Suggestions**: Appear as follow-up chips after chat responses; generated as part of chat, not a separate RPC
 
 ## Mind Maps (Phase 4)
 Tests: `tests/integration/test_mindmaps.py`

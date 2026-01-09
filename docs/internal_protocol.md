@@ -41,6 +41,10 @@ The response is a custom format that needs text processing before JSON parsing:
 | `CCqFvf` | Create Notebook | `[title, null, null, [2], [...]]` |
 | `izAoDd` | Add Source | `[[source_data], notebook_id, [2]]` |
 | `tGMBJ` | Delete Source | `[[[source_id]], [2]]` |
+| `Ljjv0c` | Fast Research | `[topic, notebook_id, 1, [2]]` |
+| `QA9ei` | Deep Research | `[topic, notebook_id, 5, [2]]` |
+| `e3bVqc` | Research Status | `[research_id, [2]]` |
+| `LBwxtb` | Import Research | `[notebook_id, research_data, [2]]` |
 
 ## Authentication Flow
 

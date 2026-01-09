@@ -35,6 +35,7 @@ from .research import (
     ResearchResult,
     ResearchSession,
     ResearchStatus,
+    ResearchType,
     TopicSuggestion,
 )
 from .session import BrowserSession
@@ -64,6 +65,7 @@ __all__ = [
     "ResearchSession",
     "ResearchResult",
     "ResearchStatus",
+    "ResearchType",
     "TopicSuggestion",
     # Exceptions
     "PyNotebookLMError",
