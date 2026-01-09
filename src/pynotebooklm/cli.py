@@ -260,15 +260,17 @@ def delete_source(
 
 @research_app.command("start")
 def start_research(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to perform research in"),
     topic: str = typer.Argument(..., help="Research topic or query"),
-    notebook_id: str = typer.Option(
-        None, "--notebook", "-n", help="Notebook ID to associate research with"
-    ),
     deep: bool = typer.Option(
         False, "--deep", "-d", help="Use deep research (more comprehensive)"
     ),
 ) -> None:
-    """Start a web research session on a topic."""
+    """Start a web research session on a topic.
+
+    Research is performed in the context of a notebook. Results are stored
+    on NotebookLM's servers and persist in the notebook for later retrieval.
+    """
     from pynotebooklm.research import ResearchType
 
     async def _run() -> None:
@@ -282,12 +284,13 @@ def start_research(
         async with BrowserSession(auth) as session:
             research = ResearchDiscovery(session)
             result = await research.start_web_research(
-                topic,
                 notebook_id=notebook_id,
+                topic=topic,
                 research_type=research_type,
             )
 
             console.print("[green]✓ Started research session[/green]")
+            console.print(f"  Notebook: [cyan]{notebook_id}[/cyan]")
             console.print(f"  ID: [cyan]{result.id}[/cyan]")
             console.print(f"  Topic: {result.topic}")
             console.print(f"  Type: {research_type.value}")
@@ -298,145 +301,6 @@ def start_research(
 
             if result.results:
                 console.print(f"  Results: {len(result.results)} found")
-
-    asyncio.run(_run())
-
-
-@research_app.command("status")
-def research_status(
-    research_id: str = typer.Argument(..., help="Research session ID"),
-) -> None:
-    """Check the status of a research session."""
-
-    async def _run() -> None:
-        auth = AuthManager()
-        if not auth.is_authenticated():
-            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
-            raise typer.Exit(1)
-
-        async with BrowserSession(auth) as session:
-            research = ResearchDiscovery(session)
-
-            try:
-                result = await research.get_status(research_id)
-
-                console.print(f"[bold]Research Session: {result.id}[/bold]")
-                console.print(f"  Topic: {result.topic}")
-                console.print(f"  Status: {result.status.value}")
-
-                if result.started_at:
-                    console.print(f"  Started: {result.started_at.isoformat()}")
-                if result.completed_at:
-                    console.print(f"  Completed: {result.completed_at.isoformat()}")
-
-                if result.results:
-                    console.print(f"\n[bold]Results ({len(result.results)}):[/bold]")
-                    table = Table(show_header=True, header_style="bold magenta")
-                    table.add_column("#", style="dim", justify="right")
-                    table.add_column("Title", style="white")
-                    table.add_column("URL", style="cyan")
-                    table.add_column("Score", style="green", justify="right")
-
-                    for i, res in enumerate(result.results, 1):
-                        url = (
-                            res.url[:50] + "..."
-                            if res.url and len(res.url) > 50
-                            else (res.url or "N/A")
-                        )
-                        table.add_row(
-                            str(i),
-                            (
-                                res.title[:40] + "..."
-                                if len(res.title) > 40
-                                else res.title
-                            ),
-                            url,
-                            f"{res.relevance_score:.2f}",
-                        )
-
-                    console.print(table)
-
-                if result.error_message:
-                    console.print(f"\n[red]Error: {result.error_message}[/red]")
-
-            except ValueError as e:
-                console.print(f"[red]Error: {e}[/red]")
-                raise typer.Exit(1) from e
-
-    asyncio.run(_run())
-
-
-@research_app.command("import")
-def import_research(
-    notebook_id: str = typer.Argument(..., help="Target notebook ID"),
-    research_id: str = typer.Argument(..., help="Research session ID"),
-    limit: int = typer.Option(10, "--limit", "-l", help="Maximum results to import"),
-) -> None:
-    """Import research results as sources into a notebook."""
-
-    async def _run() -> None:
-        auth = AuthManager()
-        if not auth.is_authenticated():
-            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
-            raise typer.Exit(1)
-
-        async with BrowserSession(auth) as session:
-            research = ResearchDiscovery(session)
-
-            try:
-                # Get the research session
-                research_session = await research.get_status(research_id)
-
-                if not research_session.results:
-                    console.print("[yellow]No results to import.[/yellow]")
-                    return
-
-                # Limit the results
-                results_to_import = research_session.results[:limit]
-
-                console.print(
-                    f"Importing {len(results_to_import)} results to notebook {notebook_id}..."
-                )
-
-                source_ids = await research.import_research_results(
-                    notebook_id, results_to_import
-                )
-
-                console.print(
-                    f"[green]✓ Imported {len(source_ids)} sources successfully[/green]"
-                )
-
-                for source_id in source_ids:
-                    console.print(f"  - {source_id}")
-
-            except ValueError as e:
-                console.print(f"[red]Error: {e}[/red]")
-                raise typer.Exit(1) from e
-
-    asyncio.run(_run())
-
-
-@research_app.command("sync")
-def sync_drive(
-    notebook_id: str = typer.Argument(..., help="Notebook ID"),
-) -> None:
-    """Sync Google Drive sources for a notebook."""
-
-    async def _run() -> None:
-        auth = AuthManager()
-        if not auth.is_authenticated():
-            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
-            raise typer.Exit(1)
-
-        async with BrowserSession(auth) as session:
-            research = ResearchDiscovery(session)
-
-            count = await research.sync_drive_sources(notebook_id)
-
-            if count > 0:
-                console.print(f"[green]✓ Synced {count} Drive source(s)[/green]")
-            else:
-                console.print("[yellow]No Drive sources to sync.[/yellow]")
 
     asyncio.run(_run())
 

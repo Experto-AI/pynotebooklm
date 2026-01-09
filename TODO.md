@@ -125,33 +125,33 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 ---
 
 ## Phase 3: Research Discovery ✅ COMPLETE
- 
- **Milestone:** User can perform web searches and gather sources for the blog
- 
- ### Research Discovery
- - [x] Create `src/pynotebooklm/research.py`:
-   - [x] `ResearchDiscovery.start_web_research(topic)` (`research_start`)
-   - [x] `ResearchDiscovery.get_status(research_id)` (`research_status`)
-   - [x] `ResearchDiscovery.import_research_results(notebook_id, results)` (`research_import`)
-   - [x] `ResearchDiscovery.sync_drive_sources(notebook_id)` (`source_sync_drive`)
-   - [x] `ResearchDiscovery.suggest_topics(notebook_id)`
- 
- ### CLI Implementation
- - [x] Update `src/pynotebooklm/cli.py`:
-   - [x] Add `pynotebooklm research start <topic>`
-   - [x] Add `pynotebooklm research status <research_id>`
-   - [x] Add `pynotebooklm research import <notebook_id> <research_id>`
-   - [x] Add `pynotebooklm research sync <notebook_id>`
- 
- ### Testing
- - [x] Create `tests/integration/test_research.py` (35 tests)
- 
- ### Phase 3 Verification
- - [x] `make check` passes (277 tests)
- - [x] `pynotebooklm research start "Latest AI news"` returns research ID
- - [x] `pynotebooklm research status <research_id>` shows findings
- - [x] `pynotebooklm research import <notebook_id> <research_id>` adds sources
- - [x] `pynotebooklm research sync <notebook_id>` updates Drive sources
+
+**Milestone:** User can perform web searches and gather sources for the blog
+
+**Key insight:** Research in NotebookLM is always performed in the context of a notebook.
+Results are stored on NotebookLM's servers and persist in the notebook automatically.
+
+### Research Discovery
+- [x] Create `src/pynotebooklm/research.py`:
+  - [x] `ResearchDiscovery.start_web_research(notebook_id, topic, research_type)` - RPC: `Ljjv0c` (fast), `QA9ei` (deep)
+  - [x] Internal methods for status/import (kept for future use, not exposed in CLI)
+
+### CLI Implementation
+- [x] Update `src/pynotebooklm/cli.py`:
+  - [x] Add `pynotebooklm research start <notebook_id> <topic> [--deep]`
+
+### Testing
+- [x] Create `tests/integration/test_research.py`
+
+### Phase 3 Verification
+- [x] `make check` passes
+- [x] `pynotebooklm research start <notebook_id> "Latest AI news"` performs research
+- [x] `pynotebooklm research start <notebook_id> "topic" --deep` uses deep research
+
+### Notes (from UI Investigation 2026-01-09)
+- **Status/Import commands removed**: Research results persist in the notebook automatically, no need for separate import step
+- **Drive Sync**: Per-source operation (via source context menu), not notebook-wide. Move to sources module if needed.
+- **Topic Suggestions**: Generated as part of chat responses, not separate RPC. Move to Phase 5 (Chat).
  
  
  ---

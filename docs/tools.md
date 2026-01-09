@@ -43,6 +43,7 @@ Tests: `tests/integration/test_research.py`
 | `research_import` | `LBwxtb` | Import research findings to notebook |
 
 ### Notes:
+- **Notebook Context Required**: All research operations require a `notebook_id` - research is performed and persisted within a notebook
 - **Drive Sync**: Per-source operation, accessed via individual source context menu (not notebook-wide)
 - **Topic Suggestions**: Appear as follow-up chips after chat responses; generated as part of chat, not a separate RPC
 

@@ -129,42 +129,55 @@ class ResearchDiscovery:
 
     async def start_web_research(
         self,
+        notebook_id: str,
         topic: str,
-        notebook_id: str | None = None,
         research_type: ResearchType = ResearchType.FAST,
     ) -> ResearchSession:
         """
         Start a web research session on a topic.
 
         This initiates a research process that discovers relevant sources
-        and information about the given topic. NotebookLM supports two types:
+        and information about the given topic. Research is always performed
+        in the context of a notebook - results are stored in NotebookLM's
+        servers and can be retrieved later via the notebook.
+
+        NotebookLM supports two research types:
         - FAST: Quick research with immediate results (default)
         - DEEP: Comprehensive research with detailed analysis
 
         Args:
+            notebook_id: The notebook ID to associate research with (required).
             topic: The research topic or query string.
-            notebook_id: Optional notebook ID to associate research with.
             research_type: Type of research (FAST or DEEP).
 
         Returns:
-            ResearchSession with initial status.
+            ResearchSession with initial status and results.
 
         Raises:
-            ValueError: If topic is empty.
+            ValueError: If notebook_id or topic is empty.
             APIError: If the research cannot be started.
 
         Example:
             >>> session = await research.start_web_research(
+            ...     "notebook123",
             ...     "Machine learning trends",
             ...     research_type=ResearchType.DEEP
             ... )
             >>> print(f"Research ID: {session.id}")
         """
+        if not notebook_id or not notebook_id.strip():
+            raise ValueError("Notebook ID cannot be empty")
         if not topic or not topic.strip():
             raise ValueError("Research topic cannot be empty")
 
+        notebook_id = notebook_id.strip()
         topic = topic.strip()
-        logger.info("Starting %s research for topic: %s", research_type.value, topic)
+        logger.info(
+            "Starting %s research for topic '%s' in notebook %s",
+            research_type.value,
+            topic,
+            notebook_id,
+        )
 
         # Generate a unique research ID
         research_id = f"research_{uuid.uuid4().hex[:12]}"

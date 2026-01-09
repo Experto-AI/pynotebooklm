@@ -111,7 +111,9 @@ class TestStartWebResearch:
             "RPC not available", status_code=400
         )
 
-        session = await research_discovery.start_web_research("AI trends 2024")
+        session = await research_discovery.start_web_research(
+            "nb_123", "AI trends 2024"
+        )
 
         assert isinstance(session, ResearchSession)
         assert session.topic == "AI trends 2024"
@@ -124,16 +126,22 @@ class TestStartWebResearch:
             "RPC not available", status_code=400
         )
 
-        session1 = await research_discovery.start_web_research("Topic 1")
-        session2 = await research_discovery.start_web_research("Topic 2")
+        session1 = await research_discovery.start_web_research("nb_123", "Topic 1")
+        session2 = await research_discovery.start_web_research("nb_123", "Topic 2")
 
         assert session1.id != session2.id
 
     @pytest.mark.asyncio
     async def test_start_rejects_empty_topic(self, research_discovery):
         """Should reject empty topic."""
-        with pytest.raises(ValueError, match="cannot be empty"):
-            await research_discovery.start_web_research("")
+        with pytest.raises(ValueError, match="topic cannot be empty"):
+            await research_discovery.start_web_research("nb_123", "")
+
+    @pytest.mark.asyncio
+    async def test_start_rejects_empty_notebook_id(self, research_discovery):
+        """Should reject empty notebook ID."""
+        with pytest.raises(ValueError, match="Notebook ID cannot be empty"):
+            await research_discovery.start_web_research("", "Test topic")
 
     @pytest.mark.asyncio
     async def test_start_strips_whitespace(self, research_discovery, mock_session):
@@ -142,7 +150,9 @@ class TestStartWebResearch:
             "RPC not available", status_code=400
         )
 
-        session = await research_discovery.start_web_research("  Padded Topic  ")
+        session = await research_discovery.start_web_research(
+            "nb_123", "  Padded Topic  "
+        )
 
         assert session.topic == "Padded Topic"
 
@@ -153,7 +163,7 @@ class TestStartWebResearch:
             "RPC not available", status_code=400
         )
 
-        session = await research_discovery.start_web_research("Test topic")
+        session = await research_discovery.start_web_research("nb_123", "Test topic")
 
         assert session.started_at is not None
         assert isinstance(session.started_at, datetime)
@@ -163,7 +173,7 @@ class TestStartWebResearch:
         """Should parse valid research response."""
         mock_session.call_rpc.return_value = MOCK_RESEARCH_STARTED
 
-        session = await research_discovery.start_web_research("AI topics")
+        session = await research_discovery.start_web_research("nb_123", "AI topics")
 
         assert session.status == ResearchStatus.IN_PROGRESS
 
@@ -174,7 +184,7 @@ class TestStartWebResearch:
         """Should parse completed research with results."""
         mock_session.call_rpc.return_value = MOCK_RESEARCH_COMPLETED
 
-        session = await research_discovery.start_web_research("AI topics")
+        session = await research_discovery.start_web_research("nb_123", "AI topics")
 
         assert session.status == ResearchStatus.COMPLETED
         assert len(session.results) == 3
@@ -197,7 +207,7 @@ class TestGetStatus:
         )
 
         # First, create a session
-        created = await research_discovery.start_web_research("Test topic")
+        created = await research_discovery.start_web_research("nb_123", "Test topic")
 
         # Then get its status
         status = await research_discovery.get_status(created.id)

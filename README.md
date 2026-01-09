@@ -104,10 +104,8 @@ pynotebooklm sources add <notebook_id> <url>
 pynotebooklm sources delete <notebook_id> <source_id>
 
 # Research
-pynotebooklm research start "topic"
-pynotebooklm research status <research_id>
-pynotebooklm research import <notebook_id> <research_id>
-pynotebooklm research sync <notebook_id>
+pynotebooklm research start <notebook_id> "topic"
+pynotebooklm research start <notebook_id> "topic" --deep
 ```
 
 ## Development
