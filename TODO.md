@@ -124,174 +124,182 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 
 ---
 
-## Phase 3: Content Generation
-
-**Milestone:** User can generate a podcast from a notebook
-
-### Content Generator
-- [ ] Create `src/pynotebooklm/content.py`:
-  - [ ] `ContentGenerator.generate_podcast(notebook_id, style)` - RPC ID: `R7cb6c`
-  - [ ] `ContentGenerator.generate_video(notebook_id, style)`
-  - [ ] `ContentGenerator.generate_infographic(notebook_id, orientation)`
-  - [ ] `ContentGenerator.generate_slides(notebook_id)`
-  - [ ] `ContentGenerator.get_status(artifact_id)` - RPC ID: `gArtLc`
-  - [ ] `ContentGenerator._poll_until_ready()` - exponential backoff polling
-
-### Polling Implementation
-- [ ] Implement exponential backoff (2s → 3s → 4.5s → 10s max)
-- [ ] Handle timeout (default 300s)
-- [ ] Handle generation failure status
-- [ ] Return download URL when ready
-
-### Testing
-- [ ] Create `tests/integration/test_content.py`
-- [ ] Test with timeout handling
-- [ ] Test with mock status responses
-
-### Phase 3 Verification
-- [ ] `make test-integration-content` passes (once tests created)
-- [ ] `pynotebooklm generate podcast <notebook_id>` starts generation
-- [ ] `pynotebooklm generate status <artifact_id>` checks progress
-- [ ] Download URL is provided once generation is 100%
-
----
-
-## Phase 4: Research & Analysis
-
-**Milestone:** User can query notebook and import research
-
-### Research Discovery
-- [ ] Create `src/pynotebooklm/research.py`:
-  - [ ] `ResearchDiscovery.query(notebook_id, question)` - ask question
-  - [ ] `ResearchDiscovery.describe(notebook_id)` - AI summary of notebook
-  - [ ] `ResearchDiscovery.describe_source(notebook_id, source_id)` - source summary
-  - [ ] `ResearchDiscovery.start_web_research(topic)` - start discovery
-  - [ ] `ResearchDiscovery.start_drive_research(topic)` - search Drive
-  - [ ] `ResearchDiscovery.get_research_status(research_id)`
-  - [ ] `ResearchDiscovery.import_sources(notebook_id, source_ids)`
-  - [ ] `ResearchDiscovery.sync_drive_sources(notebook_id)` - refresh Drive docs
-  - [ ] `ResearchDiscovery.configure_chat(notebook_id, config)` - set chat style
-
-### Streaming Response Handling
-- [ ] Handle streaming chat responses
-- [ ] Accumulate chunks until complete
-- [ ] Parse citations from response
-
-### Testing
-- [ ] Create `tests/integration/test_research.py`
-
-### Phase 4 Verification
-- [ ] `make test-integration-research` passes
-- [ ] `pynotebooklm query <notebook_id> "What is this about?"` returns answer
-- [ ] `pynotebooklm research start "Topic"` returns a research ID
-- [ ] Citations are included in the query response
-
----
-
-## Phase 5: Mind Maps & Advanced Features
-
-**Milestone:** All 31 tools implemented and tested
-
-### Mind Map Generator
-- [ ] Create `src/pynotebooklm/mindmaps.py`:
-  - [ ] `MindMapGenerator.create(notebook_id)`
-  - [ ] `MindMapGenerator.list(notebook_id)`
-  - [ ] `MindMapGenerator.export_xml(mindmap_id)` - FreeMind format
-  - [ ] `MindMapGenerator.export_opml(mindmap_id)` - OPML format
-
-### Study Tools
-- [ ] Create `src/pynotebooklm/study.py`:
-  - [ ] `StudyTools.create_flashcards(notebook_id, difficulty)`
-  - [ ] `StudyTools.create_quiz(notebook_id, question_count)`
-  - [ ] `StudyTools.create_briefing(notebook_id)`
-  - [ ] `StudyTools.create_data_table(notebook_id)`
-
-### Studio Management
-- [ ] Add `ContentGenerator.delete(artifact_id)` - delete generated content
-- [ ] Add `AuthManager.save_tokens()` - explicitly save auth state
-
-### Testing
-- [ ] Create `tests/integration/test_mindmaps.py`
-- [ ] Create `tests/integration/test_study.py`
-
-### Phase 5 Verification
-- [ ] `make test-integration-mindmaps` passes
-- [ ] `make test-integration-study` passes
-- [ ] `pynotebooklm mindmaps list <notebook_id>` lists mind maps
-- [ ] `pynotebooklm study flashcards <notebook_id>` returns flashcards
-
----
-
-## Phase 6: Production Readiness
-
-**Milestone:** Library is pip-installable and documented
-
-### Client Unification
-- [ ] Create `src/pynotebooklm/client.py`:
-  - [ ] `NotebookLMClient.__init__()` - initialize all managers
-  - [ ] `NotebookLMClient.__aenter__()` - async context manager
-  - [ ] `NotebookLMClient.__aexit__()` - cleanup
-  - [ ] Expose `notebooks`, `sources`, `content`, `research`, `mindmaps`, `study`
-
-### CLI Interface
-- [x] Create `src/pynotebooklm/cli.py` with Typer base
-- [x] Phase 1: `pynotebooklm auth login|check|logout`
-- [x] Phase 2: `pynotebooklm notebooks list|create|delete`
-- [x] Phase 2: `pynotebooklm sources add|list`
-- [ ] Phase 3: `pynotebooklm generate podcast <notebook_id>`
-- [ ] Phase 4: `pynotebooklm query <notebook_id> <question>`
-- [ ] Add `[tool.poetry.scripts]` entry in pyproject.toml
-
-### Docker Support
-- [ ] Create `Dockerfile`:
-  - [ ] Base image with Python 3.11
-  - [ ] Install Playwright and browsers
-  - [ ] Volume mount for `~/.pynotebooklm`
-- [ ] Create `docker-compose.yml`
-- [ ] Test headless operation in container
-
-### Documentation
-- [ ] Create `docs/index.md` - overview
-- [ ] Create `docs/quickstart.md` - getting started
-- [ ] Create `docs/authentication.md` - auth setup
-- [ ] Create `docs/api-reference.md` - full API docs
-- [ ] Create `docs/tools.md` - all 31 tools explained
-- [ ] Create `docs/examples.md` - usage examples
-- [ ] Configure `mkdocs.yml`
-
-### Examples
-- [ ] Create `examples/basic_usage.py`
-- [ ] Create `examples/podcast_generation.py`
-- [ ] Create `examples/research_workflow.py`
-- [ ] Create `examples/batch_processing.py`
-
-### Final Testing
-- [ ] Run full test suite with coverage
-- [ ] Ensure 80%+ code coverage
-- [ ] Test installation via `pip install .`
-- [ ] Test CLI commands work
-- [ ] Test Docker build and run
-
-### Phase 6 Verification
-- [ ] `pip install .` works
-- [ ] `pynotebooklm --version` shows version
-- [ ] `pynotebooklm notebooks list` works
-- [ ] `docker build -t pynotebooklm .` succeeds
-- [ ] `mkdocs serve` shows documentation
-
----
-
-## Post-Release
-
-### Maintenance
-- [ ] Set up daily CI tests against real NotebookLM (detect API changes)
-- [ ] Create CHANGELOG.md
-- [ ] Tag v1.0.0 release
-- [ ] Publish to PyPI
-
-### DeterminAgent Integration (Separate Project)
-- [ ] Create `NotebookLMAdapter` class
-- [ ] Map all 31 tools to adapter methods
-- [ ] Implement sync/async bridge
-- [ ] Add to DeterminAgent ADAPTERS registry
-- [ ] Write integration tests
+## Phase 3: Research Discovery
+ 
+ **Milestone:** User can perform web searches and gather sources for the blog
+ 
+ ### Research Discovery
+ - [ ] Create `src/pynotebooklm/research.py`:
+   - [ ] `ResearchDiscovery.start_web_research(topic)` (`research_start`)
+   - [ ] `ResearchDiscovery.get_status(research_id)` (`research_status`)
+   - [ ] `ResearchDiscovery.import_research_results(notebook_id, results)` (`research_import`)
+   - [ ] `ResearchDiscovery.sync_drive_sources(notebook_id)` (`source_sync_drive`)
+   - [ ] `ResearchDiscovery.suggest_topics(notebook_id)`
+ 
+ ### CLI Implementation
+ - [ ] Update `src/pynotebooklm/cli.py`:
+   - [ ] Add `pynotebooklm research start <topic>`
+   - [ ] Add `pynotebooklm research status <research_id>`
+   - [ ] Add `pynotebooklm research import <notebook_id> <research_id>`
+   - [ ] Add `pynotebooklm research sync <notebook_id>`
+ 
+ ### Testing
+ - [ ] Create `tests/integration/test_research.py`
+ 
+ ### Phase 3 Verification
+ - [ ] `make test-integration-research` passes
+ - [ ] `pynotebooklm research start "Latest AI news"` returns research ID
+ - [ ] `pynotebooklm research status <research_id>` shows findings
+ - [ ] `pynotebooklm research import <notebook_id> <research_id>` adds sources
+ - [ ] `pynotebooklm research sync <notebook_id>` updates Drive sources
+ 
+ ---
+ 
+ ## Phase 4: Mind Maps
+ 
+ **Milestone:** User can visualize research connections before writing
+ 
+ ### Mind Map Generator
+ - [ ] Create `src/pynotebooklm/mindmaps.py`:
+   - [ ] `MindMapGenerator.create(notebook_id)` (`mindmap_create`)
+   - [ ] `MindMapGenerator.list(notebook_id)` (`mindmap_list`)
+   - [ ] `MindMapGenerator.export(notebook_id, format)` - XML/OPML (`mindmap_export_xml/opml`)
+ 
+ ### CLI Implementation
+ - [ ] Update `src/pynotebooklm/cli.py`:
+   - [ ] Add `pynotebooklm mindmap create <notebook_id>`
+   - [ ] Add `pynotebooklm mindmap list <notebook_id>`
+   - [ ] Add `pynotebooklm mindmap export <mindmap_id>`
+ 
+ ### Testing
+ - [ ] Create `tests/integration/test_mindmaps.py`
+ 
+ ### Phase 4 Verification
+ - [ ] `make test-integration-mindmaps` passes
+ - [ ] `pynotebooklm mindmap create <notebook_id>` succeeds
+ - [ ] `pynotebooklm mindmap list <notebook_id>` shows created maps
+ - [ ] `pynotebooklm mindmap export <mindmap_id> --format pdf` saves file
+ 
+ ---
+ 
+ ## Phase 5: Chat, Writing & Tone
+ 
+ **Milestone:** User can write the blog post with specific tone handling
+ 
+ ### Query & Writer Engine
+ - [ ] Create `src/pynotebooklm/chat.py` (or add to `notebooks.py`):
+   - [ ] `ChatSession.query(notebook_id, question)` - write text (`notebook_query`)
+   - [ ] `ChatSession.configure(notebook_id, config)` - set tone/style (`chat_configure`)
+   - [ ] `ChatSession.get_citation(citation_id)` - retrieve refs
+   - [ ] `ChatSession.get_notebook_summary(notebook_id)` (`notebook_describe`)
+   - [ ] `ChatSession.get_source_summary(notebook_id, source_id)` (`source_describe`)
+   - [ ] `ChatSession.create_briefing(notebook_id)` - generate structured blog/brief (`briefing_create`)
+ 
+ ### CLI Implementation
+ - [ ] Update `src/pynotebooklm/cli.py`:
+   - [ ] Add `pynotebooklm query <notebook_id> <question>`
+   - [ ] Add `pynotebooklm query configure <notebook_id>` (Set tone)
+   - [ ] Add `pynotebooklm query summary <notebook_id>`
+   - [ ] Add `pynotebooklm query briefing <notebook_id>`
+ 
+ ### Testing
+ - [ ] Create `tests/integration/test_chat.py`
+ 
+ ### Phase 5 Verification
+ - [ ] `make test-integration-chat` passes
+ - [ ] `pynotebooklm query configure <notebook_id> --style "Professional Blog"` updates settings
+ - [ ] `pynotebooklm query <notebook_id> "Write a blog post based on the sources"` returns text
+ - [ ] `pynotebooklm query briefing <notebook_id>` returns structured document
+ 
+ ---
+ 
+ ## Phase 6: Multi-modal Content Generation
+ 
+ **Milestone:** User can generate Audio, Video, Slides, and Infographics (Optional for Blog)
+ 
+ ### Content Generator
+ - [ ] Create `src/pynotebooklm/content.py`:
+   - [ ] `ContentGenerator.generate_audio(notebook_id)` - Podcast (`audio_overview_create`)
+   - [ ] `ContentGenerator.generate_video(notebook_id)` - (`video_overview_create`)
+   - [ ] `ContentGenerator.generate_infographic(notebook_id)` - (`infographic_create`)
+   - [ ] `ContentGenerator.generate_slides(notebook_id)` - (`slide_deck_create`)
+   - [ ] `ContentGenerator.get_status(notebook_id)` - (`studio_status`)
+   - [ ] `ContentGenerator.get_download_url(notebook_id)`
+   - [ ] `ContentGenerator.delete(artifact_id)` - (`studio_delete`)
+   - [ ] Implement exponential backoff polling
+ 
+ ### CLI Implementation
+ - [ ] Update `src/pynotebooklm/cli.py`:
+   - [ ] Add `pynotebooklm generate audio|video|slides|infographic <notebook_id>`
+   - [ ] Add `pynotebooklm studio status <notebook_id>`
+ 
+ ### Testing
+ - [ ] Create `tests/integration/test_content.py`
+ 
+ ### Phase 6 Verification
+ - [ ] `make test-integration-content` passes
+ - [ ] `pynotebooklm generate audio <notebook_id>` triggers generation
+ - [ ] `pynotebooklm studio status <notebook_id>` shows progress
+ 
+ ---
+ 
+ ## Phase 7: Study Tools
+ 
+ **Milestone:** User can generate additional study aids
+ 
+ ### Study Manager
+ - [ ] Create `src/pynotebooklm/study.py`:
+   - [ ] `StudyManager.create_flashcards(notebook_id)` (`flashcard_create`)
+   - [ ] `StudyManager.create_quiz(notebook_id)` (`quiz_create`)
+   - [ ] `StudyManager.create_data_table(notebook_id)` (`data_table_create`)
+   - Note: `briefing_create` moved to Phase 5
+ 
+ ### CLI Implementation
+ - [ ] Update `src/pynotebooklm/cli.py`:
+   - [ ] Add `pynotebooklm study flashcards <notebook_id>`
+   - [ ] Add `pynotebooklm study quiz <notebook_id>`
+   - [ ] Add `pynotebooklm study table <notebook_id>`
+ 
+ ### Testing
+ - [ ] Create `tests/integration/test_study.py`
+ 
+ ### Phase 7 Verification
+ - [ ] `make test-integration-study` passes
+ - [ ] `pynotebooklm study flashcards <notebook_id>` returns cards
+ - [ ] `pynotebooklm study quiz <notebook_id>` returns quiz questions
+ 
+ ---
+ 
+ ## Phase 8: Production Readiness
+ 
+ **Milestone:** Library is pip-installable, documented, and Dockerized
+ 
+ ### Client Unification
+ - [ ] Create `src/pynotebooklm/client.py`:
+   - [ ] Unified `NotebookLMClient` exposing all managers
+   - [ ] Async context manager support
+   - [ ] `NotebookLMClient.save_auth_tokens()` (`save_auth_tokens`)
+ 
+ ### CLI Polish
+ - [ ] Ensure all commands have nice output (spinners, tables)
+ - [ ] Add `[tool.poetry.scripts]` entry
+ 
+ ### Docker Support
+ - [ ] Create `Dockerfile` & `docker-compose.yml`
+ 
+ ### Documentation
+ - [ ] Create complete `docs/` structure (index, quickstart, api-ref)
+ - [ ] Configure `mkdocs`
+ 
+ ### Global Verification
+ - [ ] `pip install .` works
+ - [ ] Full test suite passes
+ - [ ] Docker container runs
+ 
+ ---
+ 
+ ## Post-Release / Future
+ 
+ - [ ] **Phase 9**: Additional content types (Video, Slides - subject to availability)
+ - [ ] **Maintenance**: Daily CI checks
+ - [ ] **Integration**: DeterminAgent adapter
