@@ -114,3 +114,19 @@ clean:
 	rm -rf htmlcov/ .coverage coverage.json
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Cleaned!"
+
+# Bump version
+# Usage: make bump-version 0.1.1
+SUPPORTED_COMMANDS := bump-version
+SUPPORTS_MAKE_ARGS := $(findstring $(firstword $(MAKECMDGOALS)), $(SUPPORTED_COMMANDS))
+ifneq "$(SUPPORTS_MAKE_ARGS)" ""
+  VERSION_ARG := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
+  $(eval $(VERSION_ARG):;@:)
+endif
+
+bump-version:
+	@if [ -z "$(VERSION_ARG)" ]; then echo "Error: version argument required (e.g. make bump-version 0.1.1)"; exit 1; fi
+	@poetry version $(VERSION_ARG)
+	@sed -i 's/__version__ = "[^"]*"/__version__ = "$(VERSION_ARG)"/' src/pynotebooklm/__init__.py
+	@echo "✅ Version bumped to $(VERSION_ARG)"
+

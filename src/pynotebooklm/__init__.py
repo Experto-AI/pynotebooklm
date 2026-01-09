@@ -33,7 +33,7 @@ from .notebooks import NotebookManager
 from .session import BrowserSession
 from .sources import SourceManager
 
-__version__ = "0.1.0"
+__version__ = "0.11.0"
 
 __all__ = [
     # Version

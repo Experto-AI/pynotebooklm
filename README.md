@@ -7,7 +7,7 @@
 - How-to-run development commands (tests, linting, etc.)
 - Project structure overview for end users
 
-DO NOT include here: Detailed implementation plans, architectural decisions, or internal technical details. Those belong in plan.md.
+DO NOT include here: Detailed implementation plans, architectural decisions, or internal technical details. Those belong in `docs/architecture.md` and `docs/implementation_plan.md`.
 -->
 
 [![CI](https://img.shields.io/github/actions/workflow/status/victor/pynotebooklm/ci.yml?branch=main)](https://github.com/victor/pynotebooklm/actions)
