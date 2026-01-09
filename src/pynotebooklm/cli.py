@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -74,7 +73,9 @@ def logout() -> None:
 
 @notebooks_app.command("list")
 def list_notebooks(
-    detailed: bool = typer.Option(False, "--detailed", "-d", help="Show detailed information"),
+    detailed: bool = typer.Option(
+        False, "--detailed", "-d", help="Show detailed information"
+    ),
     short: bool = typer.Option(False, "--short", "-s", help="Show only IDs and names"),
 ) -> None:
     """List all notebooks."""
@@ -93,9 +94,11 @@ def list_notebooks(
                 console.print("No notebooks found.")
                 return
 
-            table = Table(title="Your Notebooks", show_header=True, header_style="bold magenta")
+            table = Table(
+                title="Your Notebooks", show_header=True, header_style="bold magenta"
+            )
             table.add_column("#", style="dim", justify="right")
-            
+
             if short:
                 table.add_column("ID", style="cyan", no_wrap=True)
                 table.add_column("Name", style="white")
@@ -107,7 +110,11 @@ def list_notebooks(
                 table.add_column("Sources", style="green", justify="right")
                 table.add_column("Created At", style="blue")
                 for i, nb in enumerate(notebooks, 1):
-                    created = nb.created_at.strftime("%Y-%m-%d %H:%M") if nb.created_at else "Unknown"
+                    created = (
+                        nb.created_at.strftime("%Y-%m-%d %H:%M")
+                        if nb.created_at
+                        else "Unknown"
+                    )
                     table.add_row(str(i), nb.id, nb.name, str(nb.source_count), created)
             else:
                 # Standard view
@@ -131,7 +138,9 @@ def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> No
         async with BrowserSession(auth) as session:
             manager = NotebookManager(session)
             nb = await manager.create(name)
-            console.print(f"[green]✓ Created notebook: [bold]{nb.name}[/bold] ({nb.id})[/green]")
+            console.print(
+                f"[green]✓ Created notebook: [bold]{nb.name}[/bold] ({nb.id})[/green]"
+            )
 
     asyncio.run(_run())
 
@@ -147,13 +156,15 @@ def delete_notebook(
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = NotebookManager(session)
-            
+
             if not force:
-                confirm = typer.confirm(f"Are you sure you want to delete notebook {notebook_id}?")
+                confirm = typer.confirm(
+                    f"Are you sure you want to delete notebook {notebook_id}?"
+                )
                 if not confirm:
                     console.print("Aborted.")
                     return
-            
+
             await manager.delete(notebook_id, confirm=True)
             console.print(f"[green]✓ Deleted notebook: {notebook_id}[/green]")
 
@@ -177,7 +188,9 @@ def add_source(
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
             source = await manager.add_url(notebook_id, url)
-            console.print(f"[green]✓ Added source: [bold]{source.title}[/bold] ({source.id})[/green]")
+            console.print(
+                f"[green]✓ Added source: [bold]{source.title}[/bold] ({source.id})[/green]"
+            )
 
     asyncio.run(_run())
 
@@ -222,13 +235,15 @@ def delete_source(
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
-            
+
             if not force:
-                confirm = typer.confirm(f"Are you sure you want to delete source {source_id} from notebook {notebook_id}?")
+                confirm = typer.confirm(
+                    f"Are you sure you want to delete source {source_id} from notebook {notebook_id}?"
+                )
                 if not confirm:
                     console.print("Aborted.")
                     return
-            
+
             await manager.delete(notebook_id, source_id)
             console.print(f"[green]✓ Deleted source: {source_id}[/green]")
 

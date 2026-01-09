@@ -170,7 +170,7 @@ class TestLogoutCommand:
             mock_auth = MagicMock()
             mock_auth_cls.return_value = mock_auth
 
-            result = runner.invoke(app, ["logout"])
+            result = runner.invoke(app, ["auth", "logout"])
 
             assert result.exit_code == 0
             assert "Logged out" in result.output

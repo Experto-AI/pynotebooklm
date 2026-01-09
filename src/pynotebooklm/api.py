@@ -202,18 +202,16 @@ class NotebookLMAPI:
     # Source Operations
     # =========================================================================
 
-    async def add_url_source(self, notebook_id: str, url: str) -> dict[str, Any]:
+    async def add_url_source(self, notebook_id: str, url: str) -> Any:
         """
         Add a URL as a source to a notebook.
         """
         logger.debug("Adding URL source to %s: %s", notebook_id, url)
 
         # New signature (reversed engineered Jan 2026)
-        source_info = [
-            None, None, [url], None, None, None, None, None, None, None, 1
-        ]
+        source_info = [None, None, [url], None, None, None, None, None, None, None, 1]
         extra_param = [1, None, None, None, None, None, None, None, None, None, [1]]
-        
+
         try:
             result = await self._session.call_rpc(
                 RPC_ADD_URL_SOURCE,
@@ -227,7 +225,7 @@ class NotebookLMAPI:
                 raise SourceError(f"Failed to add URL: {url}") from e
             raise
 
-    async def add_youtube_source(self, notebook_id: str, url: str) -> dict[str, Any]:
+    async def add_youtube_source(self, notebook_id: str, url: str) -> Any:
         """
         Add a YouTube video as a source to a notebook.
         """
@@ -240,9 +238,7 @@ class NotebookLMAPI:
 
         # YouTube uses type 2
         # Note: URL field still takes the full URL in the list
-        source_info = [
-            None, None, [url], None, None, None, None, None, None, None, 2
-        ]
+        source_info = [None, None, [url], None, None, None, None, None, None, None, 2]
         extra_param = [1, None, None, None, None, None, None, None, None, None, [1]]
 
         try:
@@ -258,7 +254,7 @@ class NotebookLMAPI:
 
     async def add_text_source(
         self, notebook_id: str, content: str, title: str | None = None
-    ) -> dict[str, Any]:
+    ) -> Any:
         """
         Add plain text as a source to a notebook.
         Note: The RPC ID for text might be different (dqfPBf), but let's assume
@@ -268,30 +264,28 @@ class NotebookLMAPI:
         Let's try to assume a similar structure for 'dqfPBf' or maybe it uses 'izAoDd' now?
         'izAoDd' seems to be 'Add Source' generic.
         Let's mark text source as potentially broken or try to use izAoDd with type 4?
-        For now, I will leave add_text_source mostly alone but add a TODO, 
-        or try to adapt it if I'm confident. 
+        For now, I will leave add_text_source mostly alone but add a TODO,
+        or try to adapt it if I'm confident.
         The previous fail suggest parameters were wrong.
         Let's stick to fixing add_url first.
         """
         logger.debug("Adding text source to %s (title: %s)", notebook_id, title)
         source_title = title or "Untitled Text"
-        
-        # NOTE: Text source RPC 'dqfPBf' fails with 400. 
+
+        # NOTE: Text source RPC 'dqfPBf' fails with 400.
         # It needs reverse engineering. For now, we restore original code but warn.
         try:
             result = await self._session.call_rpc(
                 RPC_ADD_TEXT_SOURCE,
                 [notebook_id, source_title, content, [2]],
             )
-            return result  # type: ignore[no-any-return]
+            return result
         except APIError as e:
             if "not found" in str(e).lower():
                 raise NotebookNotFoundError(notebook_id) from e
             raise SourceError(f"Failed to add text source: {title}") from e
 
-    async def add_drive_source(
-        self, notebook_id: str, drive_doc_id: str
-    ) -> dict[str, Any]:
+    async def add_drive_source(self, notebook_id: str, drive_doc_id: str) -> Any:
         """
         Add a Google Drive document as a source to a notebook.
         """
@@ -300,7 +294,17 @@ class NotebookLMAPI:
         # Drive sources use type 3
         # Format might be slightly different - drive ID instead of URL list?
         source_info = [
-            None, None, [drive_doc_id], None, None, None, None, None, None, None, 3
+            None,
+            None,
+            [drive_doc_id],
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            3,
         ]
         extra_param = [1, None, None, None, None, None, None, None, None, None, [1]]
 
@@ -315,7 +319,7 @@ class NotebookLMAPI:
                 raise NotebookNotFoundError(notebook_id) from e
             raise SourceError(f"Failed to add Drive document: {drive_doc_id}") from e
 
-    def _unwrap_add_source_response(self, result: Any) -> dict[str, Any]:
+    def _unwrap_add_source_response(self, result: Any) -> Any:
         """Helper to unwrap the deeply nested response from add source RPCs."""
         # Response: [[[["id"], "Title", ...]]]
         if (
@@ -333,14 +337,14 @@ class NotebookLMAPI:
             # level 1: list
             # level 2: list
             # level 3: list (source obj)
-            
+
             # Let's be safe and recursive or check types
             inner = result[0][0]
             if isinstance(inner, list):
                 # Verify it looks like a source (index 0 is list of ID)
                 if len(inner) > 0 and isinstance(inner[0], list):
-                    return inner 
-        
+                    return inner
+
         # Fallback or error
         logger.warning(f"Unexpected add_source response structure: {result}")
         return result
@@ -439,12 +443,12 @@ def _parse_timestamp(ts_data: Any) -> datetime | None:
 
     try:
         ts_val = None
-        if isinstance(ts_data, (int, float)):
+        if isinstance(ts_data, int | float):
             ts_val = ts_data
         elif (
             isinstance(ts_data, list)
             and len(ts_data) > 0
-            and isinstance(ts_data[0], (int, float))
+            and isinstance(ts_data[0], int | float)
         ):
             ts_val = ts_data[0]
 

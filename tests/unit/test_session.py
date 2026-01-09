@@ -83,7 +83,7 @@ class TestBrowserSessionInit:
     def test_init_default_timeout(self, mock_auth_manager: AuthManager) -> None:
         """BrowserSession has default timeout."""
         session = BrowserSession(mock_auth_manager)
-        assert session.timeout == 30000
+        assert session.timeout == 60000
 
     def test_init_custom_timeout(self, mock_auth_manager: AuthManager) -> None:
         """BrowserSession accepts custom timeout."""
