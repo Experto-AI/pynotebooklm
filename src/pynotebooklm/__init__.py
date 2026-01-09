@@ -5,6 +5,7 @@ This library provides programmatic access to Google NotebookLM functionality
 including notebook management, source handling, and content generation.
 """
 
+from .api import NotebookLMAPI
 from .auth import AuthManager
 from .exceptions import (
     APIError,
@@ -28,7 +29,9 @@ from .models import (
     SourceStatus,
     SourceType,
 )
+from .notebooks import NotebookManager
 from .session import BrowserSession
+from .sources import SourceManager
 
 __version__ = "0.1.0"
 
@@ -38,6 +41,9 @@ __all__ = [
     # Core classes
     "AuthManager",
     "BrowserSession",
+    "NotebookLMAPI",
+    "NotebookManager",
+    "SourceManager",
     # Models
     "Notebook",
     "Source",
