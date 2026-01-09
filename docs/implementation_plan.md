@@ -41,57 +41,73 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
   pynotebooklm notebooks delete <id>
   ```
 
-## Phase 3: Content Generation
-**Goal:** User can generate a podcast from a notebook.
+## Phase 3: Research Discovery
+**Goal:** User can perform web searches and gather sources.
+**Status:** ✅ Complete
+
+### Key Components
+- `ResearchDiscovery` class (`src/pynotebooklm/research.py`).
+- `start_web_research()`, `get_status()`, `import_research_results()`.
+- `sync_drive_sources()`, `suggest_topics()`.
+- CLI commands: `research start/status/import/sync`.
+
+### Verification
+- `pytest tests/integration/test_research.py` (35 tests).
+- CLI: `pynotebooklm research start "topic"` returns research ID.
+
+## Phase 4: Mind Maps
+**Goal:** User can visualize research connections.
+**Status:** 🚧 Planned
+
+### Key Components
+- `MindMapGenerator` class.
+- Create, list, and export mind maps (XML/OPML).
+
+### Verification
+- `pytest tests/integration/test_mindmaps.py`
+
+## Phase 5: Chat, Writing & Tone
+**Goal:** User can write blog posts with specific tone.
+**Status:** 🚧 Planned
+
+### Key Components
+- `ChatSession` for querying notebooks.
+- Tone/style configuration.
+- Briefing document generation.
+
+### Verification
+- `pytest tests/integration/test_chat.py`
+
+## Phase 6: Multi-modal Content Generation
+**Goal:** Generate Audio, Video, Slides, Infographics.
 **Status:** 🚧 Planned
 
 ### Key Components
 - `ContentGenerator` class.
-- Support for Audio (Podcast), Video, Infographic, and Slides.
-- Async polling mechanism for long-running generation tasks.
+- Async polling for long-running tasks.
 
 ### Verification
 - `pytest tests/integration/test_content.py`
-- Manual test: Generate a deep dive podcast and download the audio.
 
-## Phase 4: Research & Analysis
-**Goal:** User can query notebook and import research.
+## Phase 7: Study Tools
+**Goal:** Generate flashcards, quizzes, and data tables.
 **Status:** 🚧 Planned
 
 ### Key Components
-- `ResearchDiscovery` class.
-- Query/Chat interface with citation parsing.
-- Web and Drive research capabilities.
-- Streaming response handling.
+- `StudyManager` class.
 
 ### Verification
-- `pytest tests/integration/test_research.py`
-- Manual test: Ask a question to a notebook and verify citations.
-
-## Phase 5: Mind Maps & Advanced Features
-**Goal:** All 31 tools implemented and tested.
-**Status:** 🚧 Planned
-
-### Key Components
-- `MindMapGenerator`: Create and export mind maps.
-- `StudyTools`: Flashcards, Quizzes, Briefings.
-- Studio management (delete artifacts).
-
-### Verification
-- `pytest tests/integration/test_mindmaps.py`
 - `pytest tests/integration/test_study.py`
 
-## Phase 6: Production Readiness
+## Phase 8: Production Readiness
 **Goal:** Library is pip-installable and documented.
 **Status:** 🚧 Planned
 
 ### Key Components
 - Unified `NotebookLMClient`.
-- Complete CLI interface.
-- Docker support (`Dockerfile`, `docker-compose.yml`).
-- Comprehensive documentation (`mkdocs`).
+- Docker support.
+- Documentation (`mkdocs`).
 
 ### Verification
 - `pip install .` works.
-- Docker container runs successfully.
-- Documentation is live and accurate.
+- Docker container runs.

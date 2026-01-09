@@ -199,3 +199,52 @@ def make_error_response(
         "statusText": message,
         "text": message,
     }
+
+
+# =============================================================================
+# Research Responses (Phase 3)
+# =============================================================================
+
+MOCK_RESEARCH_STARTED = [
+    "in_progress",
+    [],
+]
+
+MOCK_RESEARCH_COMPLETED = [
+    "completed",
+    [
+        [
+            "res_001",
+            "AI Trends 2024",
+            "https://example.com/ai-trends",
+            "Summary of AI trends",
+            0.95,
+        ],
+        [
+            "res_002",
+            "Machine Learning Guide",
+            "https://example.com/ml-guide",
+            "ML overview",
+            0.88,
+        ],
+        [
+            "res_003",
+            "Deep Learning Paper",
+            "https://arxiv.org/abs/2401.00001",
+            "Research paper",
+            0.82,
+        ],
+    ],
+]
+
+MOCK_TOPIC_SUGGESTIONS = [
+    ["Reinforcement Learning", "Advanced RL techniques and applications", "high"],
+    ["Natural Language Processing", "NLP trends and transformers", "high"],
+    ["Computer Vision", "Image recognition and object detection", "medium"],
+]
+
+MOCK_RESEARCH_FAILED = [
+    "failed",
+    [],
+    "Could not complete research: Rate limit exceeded",
+]

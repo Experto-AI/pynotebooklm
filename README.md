@@ -93,16 +93,21 @@ pynotebooklm auth login    # Login with Google account
 pynotebooklm auth check    # Check authentication status
 pynotebooklm auth logout   # Clear saved authentication
 
-# Notebooks (coming in Phase 2)
+# Notebooks
 pynotebooklm notebooks list
 pynotebooklm notebooks create "My Notebook"
 pynotebooklm notebooks delete <notebook_id>
 
-# Sources (coming in Phase 2)
+# Sources
+pynotebooklm sources list <notebook_id>
 pynotebooklm sources add <notebook_id> <url>
+pynotebooklm sources delete <notebook_id> <source_id>
 
-# Content Generation (coming in Phase 3)
-pynotebooklm generate podcast <notebook_id>
+# Research
+pynotebooklm research start "topic"
+pynotebooklm research status <research_id>
+pynotebooklm research import <notebook_id> <research_id>
+pynotebooklm research sync <notebook_id>
 ```
 
 ## Development
@@ -151,20 +156,22 @@ poetry run mypy src
 
 ```
 pynotebooklm/
-├── src/
-│   └── pynotebooklm/
-│       ├── __init__.py        # Public API exports
-│       ├── auth.py            # Authentication manager
-│       ├── session.py         # Browser session management
-│       ├── models.py          # Pydantic data models
-│       ├── exceptions.py      # Custom exceptions
-│       └── cli.py             # CLI interface (coming soon)
+├── src/pynotebooklm/
+│   ├── __init__.py        # Public API exports
+│   ├── auth.py            # Authentication manager
+│   ├── session.py         # Browser session management
+│   ├── api.py             # Low-level RPC wrapper
+│   ├── notebooks.py       # Notebook management
+│   ├── sources.py         # Source management
+│   ├── research.py        # Research discovery
+│   ├── models.py          # Pydantic data models
+│   ├── exceptions.py      # Custom exceptions
+│   └── cli.py             # CLI interface
 ├── tests/
-│   ├── unit/                  # Unit tests
-│   ├── integration/           # Integration tests
-│   └── fixtures/              # Test fixtures
-├── pyproject.toml             # Project configuration
-└── README.md
+│   ├── unit/              # Unit tests (85)
+│   ├── integration/       # Integration tests (192)
+│   └── fixtures/          # Mock responses
+└── docs/                  # Documentation
 ```
 
 ## How It Works
@@ -186,11 +193,13 @@ This approach provides:
 ## Roadmap
 
 - [x] **Phase 1**: Foundation & Authentication
-- [ ] **Phase 2**: Notebook & Source Management
-- [ ] **Phase 3**: Content Generation (Podcasts, Videos)
-- [ ] **Phase 4**: Research & Analysis
-- [ ] **Phase 5**: Mind Maps & Study Tools
-- [ ] **Phase 6**: CLI & Production Readiness
+- [x] **Phase 2**: Notebook & Source Management
+- [x] **Phase 3**: Research Discovery
+- [ ] **Phase 4**: Mind Maps
+- [ ] **Phase 5**: Chat, Writing & Tone
+- [ ] **Phase 6**: Content Generation (Podcasts, Videos)
+- [ ] **Phase 7**: Study Tools
+- [ ] **Phase 8**: Production Readiness
 
 ## License
 

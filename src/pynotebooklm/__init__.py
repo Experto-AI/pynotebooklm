@@ -30,10 +30,17 @@ from .models import (
     SourceType,
 )
 from .notebooks import NotebookManager
+from .research import (
+    ResearchDiscovery,
+    ResearchResult,
+    ResearchSession,
+    ResearchStatus,
+    TopicSuggestion,
+)
 from .session import BrowserSession
 from .sources import SourceManager
 
-__version__ = "0.11.0"
+__version__ = "0.12.0"
 
 __all__ = [
     # Version
@@ -43,6 +50,7 @@ __all__ = [
     "BrowserSession",
     "NotebookLMAPI",
     "NotebookManager",
+    "ResearchDiscovery",
     "SourceManager",
     # Models
     "Notebook",
@@ -53,6 +61,10 @@ __all__ = [
     "ArtifactType",
     "ArtifactStatus",
     "ChatMessage",
+    "ResearchSession",
+    "ResearchResult",
+    "ResearchStatus",
+    "TopicSuggestion",
     # Exceptions
     "PyNotebookLMError",
     "AuthenticationError",

@@ -32,7 +32,37 @@ Tests: `tests/integration/test_sources.py`
 | `source_describe` | (Phase 4) | AI summary of single source |
 | `source_sync_drive` | (Phase 4) | Sync/update Drive sources |
 
-## Content Generation (Phase 3)
+## Research Discovery (Phase 3) ✅
+Tests: `tests/integration/test_research.py`
+
+| Tool | ID | Description |
+|------|----|-------------|
+| `research_start` | placeholder | Start web research on topic |
+| `research_status` | placeholder | Check research progress |
+| `research_import` | (uses `izAoDd`) | Import results to notebook |
+| `source_sync_drive` | placeholder | Sync Drive sources |
+| `suggest_topics` | placeholder | Get related topic suggestions |
+
+## Mind Maps (Phase 4)
+Tests: `tests/integration/test_mindmaps.py`
+
+| Tool | Description |
+|------|-------------|
+| `mindmap_create` | Generate mind map from sources |
+| `mindmap_list` | List existing mind maps |
+| `mindmap_export_xml` | Export to FreeMind format |
+| `mindmap_export_opml` | Export to OPML format |
+
+## Query & Chat (Phase 5)
+Tests: `tests/integration/test_chat.py`
+
+| Tool | Description |
+|------|-------------|
+| `notebook_query` | Ask question, get AI answer with citations |
+| `chat_configure` | Set chat style, response length, goals |
+| `briefing_create` | Generate briefing document |
+
+## Content Generation (Phase 6)
 Tests: `tests/integration/test_content.py`
 
 | Tool | ID | Description |
@@ -42,44 +72,16 @@ Tests: `tests/integration/test_content.py`
 | `infographic_create` | N/A | Generate infographic image |
 | `slide_deck_create` | N/A | Generate presentation slides |
 | `studio_status` | `gArtLc` | Check generation progress |
-| `studio_delete` | (Phase 5) | Delete generated artifact |
+| `studio_delete` | N/A | Delete generated artifact |
 
-## Query & Chat (Phase 4)
-Tests: `tests/integration/test_research.py`
-
-| Tool | Description |
-|------|-------------|
-| `notebook_query` | Ask question, get AI answer with citations |
-| `chat_configure` | Set chat style, response length, goals |
-
-## Research (Phase 4)
-Tests: `tests/integration/test_research.py`
-
-| Tool | Description |
-|------|-------------|
-| `research_start` | Start web/Drive research on topic |
-| `research_status` | Check research discovery progress |
-| `research_import` | Import discovered sources to notebook |
-
-## Study Tools (Phase 5)
+## Study Tools (Phase 7)
 Tests: `tests/integration/test_study.py`
 
 | Tool | Description |
 |------|-------------|
 | `flashcard_create` | Generate study flashcards |
 | `quiz_create` | Generate quiz questions |
-| `briefing_create` | Generate briefing document |
 | `data_table_create` | Generate data analysis table |
-
-## Mind Maps (Phase 5)
-Tests: `tests/integration/test_mindmaps.py`
-
-| Tool | Description |
-|------|-------------|
-| `mindmap_create` | Generate mind map from sources |
-| `mindmap_list` | List existing mind maps |
-| `mindmap_export_xml` | Export to FreeMind format |
-| `mindmap_export_opml` | Export to OPML format |
 
 ## Utilities
 
