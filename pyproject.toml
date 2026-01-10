@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pynotebooklm"
-version = "0.17.0"
+version = "0.18.0"
 description = "Production-grade Python library for NotebookLM automation with 31 tools"
 authors = ["Victor"]
 license = "Apache-2.0"
