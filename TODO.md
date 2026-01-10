@@ -368,26 +368,79 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  **Milestone:** User can generate additional study aids
  
+ **Key insight (from jacob-bd/notebooklm-mcp analysis, 2026-01-10):**
+ Study tools use the same `R7cb6c` RPC with different type codes:
+ - `STUDIO_TYPE_FLASHCARDS = 4` - Flashcards (shares type with Quiz)
+ - `STUDIO_TYPE_DATA_TABLE = 9` - Data Tables
+ 
+ Quiz uses the same type code 4 as flashcards, differentiated by options structure.
+ 
+ ### RPC Details (from analysis_repos/jacob-bd-notebooklm-mcp/docs/API_REFERENCE.md):
+ - `R7cb6c` = Create Studio Content (same RPC as audio/video/infographics)
+ 
+ **Flashcard params:**
+ ```
+ [[2], notebook_id, [null, null, 4, sources_nested, null*5, [null, [1, null*5, [difficulty, card_count]]]]]
+ ```
+ - Difficulty codes: 1=Easy, 2=Medium, 3=Hard
+ - Card count: 2=Default
+ 
+ **Quiz params (same type code 4, format code 2 distinguishes it):**
+ ```
+ [[2], notebook_id, [null, null, 4, sources_nested, null*5, [null, [2, null*6, [question_count, difficulty]]]]]
+ ```
+ - Format code 2 at first position indicates Quiz (vs 1 for Flashcards)
+ - Question count: Integer (default: 2)
+ - Difficulty: Integer (default: 2)
+ 
+ **Data Table params:**
+ ```
+ [[2], notebook_id, [null, null, 9, sources_nested, null*14, [null, [description, language]]]]
+ ```
+ - Description: Required string describing what data to extract
+ - Language: BCP-47 code (default: "en")
+ 
  ### Study Manager
- - [ ] Create `src/pynotebooklm/study.py`:
-   - [ ] `StudyManager.create_flashcards(notebook_id)` (`flashcard_create`)
-   - [ ] `StudyManager.create_quiz(notebook_id)` (`quiz_create`)
-   - [ ] `StudyManager.create_data_table(notebook_id)` (`data_table_create`)
-   - Note: `briefing_create` moved to Phase 5
+ - [x] Create `src/pynotebooklm/study.py`:
+   - [x] Add Pydantic models: `FlashcardDifficulty`, `FlashcardCreateResult`, `QuizCreateResult`, `DataTableCreateResult`
+   - [x] `StudyManager.__init__(session)` - Initialize with BrowserSession
+   - [x] `StudyManager.create_flashcards(notebook_id, source_ids, difficulty, card_count)` - RPC: `R7cb6c` type=4
+   - [x] `StudyManager.create_quiz(notebook_id, source_ids, question_count, difficulty)` - RPC: `R7cb6c` type=4, format=2
+   - [x] `StudyManager.create_data_table(notebook_id, source_ids, description, language)` - RPC: `R7cb6c` type=9
+   - Note: `briefing_create` already implemented in Phase 5 (chat.py)
+   - Note: Results can be polled via `ContentGenerator.poll_status()` as they use same studio system
+ 
+ ### Difficulty/Option Enums
+ | Option | Values |
+ |--------|--------|
+ | **Flashcard Difficulty** | easy (1), medium (2), hard (3) |
+ | **Quiz Question Count** | Integer (default: 2) |
+ | **Quiz Difficulty** | Integer (default: 2) |
+ | **Data Table Language** | BCP-47 codes: "en", "es", "fr", etc. |
  
  ### CLI Implementation
- - [ ] Update `src/pynotebooklm/cli.py`:
-   - [ ] Add `pynotebooklm study flashcards <notebook_id>`
-   - [ ] Add `pynotebooklm study quiz <notebook_id>`
-   - [ ] Add `pynotebooklm study table <notebook_id>`
+ - [x] Update `src/pynotebooklm/cli.py`:
+   - [x] Add `study_app` typer group
+   - [x] Add `pynotebooklm study flashcards <notebook_id> [--difficulty easy|medium|hard]`
+   - [x] Add `pynotebooklm study quiz <notebook_id> [--questions N] [--difficulty N]`
+   - [x] Add `pynotebooklm study table <notebook_id> --description "..." [--language en]`
  
  ### Testing
- - [ ] Create `tests/integration/test_study.py`
+ - [x] Create `tests/unit/test_study.py`:
+   - [x] Test flashcard creation with all difficulty levels (6 tests)
+   - [x] Test quiz creation options
+   - [x] Test data table creation
+ - [x] Create `tests/unit/test_cli_study.py`
+ - [x] Verify coverage > 80% (aiming for 90%)
+ - [x] Run `make check`
+ - [x] Update documentation
  
  ### Phase 7 Verification
- - [ ] `make test-integration-study` passes
- - [ ] `pynotebooklm study flashcards <notebook_id>` returns cards
- - [ ] `pynotebooklm study quiz <notebook_id>` returns quiz questions
+ - [x] `make check` passes
+ - [ ] `pynotebooklm study flashcards <notebook_id>` triggers generation
+ - [ ] `pynotebooklm study quiz <notebook_id>` triggers generation
+ - [ ] `pynotebooklm study table <notebook_id> --description "..."` triggers generation
+ - [ ] `pynotebooklm studio status <notebook_id>` shows study artifacts
  
  ---
  

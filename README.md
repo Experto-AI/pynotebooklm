@@ -170,6 +170,27 @@ pynotebooklm generate slides <notebook_id> --format presenter_slides  # Format: 
 pynotebooklm generate slides <notebook_id> --length short          # Length: short, default
 ```
 
+```
+
+### Study Tools
+
+```bash
+# Flashcards
+pynotebooklm study flashcards <notebook_id>                    # Generate flashcards
+pynotebooklm study flashcards <notebook_id> --difficulty hard  # Difficulty: easy, medium, hard
+
+# Quiz
+pynotebooklm study quiz <notebook_id>                          # Generate quiz (default 2 questions)
+pynotebooklm study quiz <notebook_id> --questions 10           # Number of questions
+pynotebooklm study quiz <notebook_id> --difficulty 3           # Difficulty: 1 (easy) to 3 (hard)
+
+# Data Table
+pynotebooklm study table <notebook_id> --description "Extract dates"     # Extract structured data
+pynotebooklm study table <notebook_id> --description "..." --language es # Output language
+
+pynotebooklm studio status <notebook_id> # shows study artifacts
+```
+
 ### Studio (Artifact Management)
 
 ```bash
@@ -235,6 +256,7 @@ pynotebooklm/
 │   ├── sources.py         # Source management
 │   ├── research.py        # Research discovery
 │   ├── mindmaps.py        # Mind map generation
+│   ├── study.py           # Study tools (flashcards, quiz, tables)
 │   ├── content.py         # Content generation (audio, video, etc.)
 │   ├── chat.py            # Chat and query functionality
 │   ├── models.py          # Pydantic data models

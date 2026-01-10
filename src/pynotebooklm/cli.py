@@ -28,6 +28,7 @@ from pynotebooklm.notebooks import NotebookManager
 from pynotebooklm.research import ResearchDiscovery
 from pynotebooklm.session import BrowserSession
 from pynotebooklm.sources import SourceManager
+from pynotebooklm.study import FlashcardDifficulty, StudyManager
 
 app = typer.Typer(help="PyNotebookLM CLI - Management Tools")
 auth_app = typer.Typer(help="Authentication management")
@@ -39,6 +40,7 @@ query_app = typer.Typer(help="Chat and query tools")
 generate_app = typer.Typer(
     help="Content generation (audio, video, infographic, slides)"
 )
+study_app = typer.Typer(help="Study tools (flashcards, quiz, data table)")
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
@@ -47,6 +49,7 @@ app.add_typer(research_app, name="research")
 app.add_typer(mindmap_app, name="mindmap")
 app.add_typer(query_app, name="query")
 app.add_typer(generate_app, name="generate")
+app.add_typer(study_app, name="study")
 
 console = Console()
 
@@ -1211,6 +1214,200 @@ def generate_slides(
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
             console.print(f"  Format: {result.format}")
             console.print(f"  Length: {result.length}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+# =============================================================================
+# Study Commands
+# =============================================================================
+
+
+@study_app.command("flashcards")
+def create_flashcards(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    difficulty: str = typer.Option(
+        "medium", "--difficulty", "-d", help="Difficulty: easy, medium, hard"
+    ),
+) -> None:
+    """Create flashcards from notebook sources.
+
+    Generates study flashcards from all sources in the notebook.
+    Results can be viewed with 'studio status'.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        # Validate difficulty
+        difficulty_map = {
+            "easy": FlashcardDifficulty.EASY,
+            "medium": FlashcardDifficulty.MEDIUM,
+            "hard": FlashcardDifficulty.HARD,
+        }
+        if difficulty.lower() not in difficulty_map:
+            console.print(
+                f"[red]Invalid difficulty: {difficulty}. Use easy, medium, or hard.[/red]"
+            )
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            # Get all source IDs from the notebook
+            manager = NotebookManager(session)
+            nb = await manager.get(notebook_id)
+            if not nb:
+                console.print(f"[red]Notebook not found: {notebook_id}[/red]")
+                raise typer.Exit(1)
+
+            source_ids = [src.id for src in nb.sources]
+            if not source_ids:
+                console.print("[red]No sources found in notebook[/red]")
+                raise typer.Exit(1)
+
+            console.print(
+                f"[dim]Creating flashcards from {len(source_ids)} sources...[/dim]"
+            )
+
+            study = StudyManager(session)
+            result = await study.create_flashcards(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                difficulty=difficulty_map[difficulty.lower()],
+            )
+
+            console.print("[green]✓ Flashcard generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Difficulty: {result.difficulty}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+@study_app.command("quiz")
+def create_quiz(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    questions: int = typer.Option(
+        2, "--questions", "-q", help="Number of quiz questions"
+    ),
+    difficulty: int = typer.Option(
+        2, "--difficulty", "-d", help="Difficulty level (1-3)"
+    ),
+) -> None:
+    """Create a quiz from notebook sources.
+
+    Generates a quiz with multiple-choice questions from all sources.
+    Results can be viewed with 'studio status'.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            # Get all source IDs from the notebook
+            manager = NotebookManager(session)
+            nb = await manager.get(notebook_id)
+            if not nb:
+                console.print(f"[red]Notebook not found: {notebook_id}[/red]")
+                raise typer.Exit(1)
+
+            source_ids = [src.id for src in nb.sources]
+            if not source_ids:
+                console.print("[red]No sources found in notebook[/red]")
+                raise typer.Exit(1)
+
+            console.print(
+                f"[dim]Creating quiz with {questions} questions from {len(source_ids)} sources...[/dim]"
+            )
+
+            study = StudyManager(session)
+            result = await study.create_quiz(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                question_count=questions,
+                difficulty=difficulty,
+            )
+
+            console.print("[green]✓ Quiz generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Questions: {result.question_count}")
+            console.print(f"  Difficulty: {result.difficulty}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+@study_app.command("table")
+def create_data_table(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    description: str = typer.Option(
+        ..., "--description", "-d", help="Description of data to extract"
+    ),
+    language: str = typer.Option(
+        "en", "--language", "-l", help="Language code (e.g., en, es)"
+    ),
+) -> None:
+    """Create a data table from notebook sources.
+
+    Extracts structured data based on the provided description.
+    For example: 'Extract key dates and events' or 'List all company names and revenues'.
+    Results can be viewed with 'studio status'.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            # Get all source IDs from the notebook
+            manager = NotebookManager(session)
+            nb = await manager.get(notebook_id)
+            if not nb:
+                console.print(f"[red]Notebook not found: {notebook_id}[/red]")
+                raise typer.Exit(1)
+
+            source_ids = [src.id for src in nb.sources]
+            if not source_ids:
+                console.print("[red]No sources found in notebook[/red]")
+                raise typer.Exit(1)
+
+            console.print(
+                f"[dim]Creating data table from {len(source_ids)} sources...[/dim]"
+            )
+            console.print(f"[dim]Description: {description}[/dim]")
+
+            study = StudyManager(session)
+            result = await study.create_data_table(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                description=description,
+                language=language,
+            )
+
+            console.print("[green]✓ Data table generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Description: {result.description}")
+            console.print(f"  Language: {result.language}")
             console.print(f"  Status: {result.status}")
             console.print()
             console.print(

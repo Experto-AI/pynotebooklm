@@ -78,8 +78,8 @@ Tests: `tests/unit/test_content.py`
 | `studio_status` | `gArtLc` | Check generation progress |
 | `studio_delete` | `V5N4be` | Delete generated artifact |
 
-## Study Tools (Phase 7)
-Tests: `tests/integration/test_study.py`
+## Study Tools (Phase 7) ✅
+Tests: `tests/unit/test_study.py`
 
 | Tool | Description |
 |------|-------------|

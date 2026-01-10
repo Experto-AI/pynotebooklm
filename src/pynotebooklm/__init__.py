@@ -65,8 +65,15 @@ from .research import (
 )
 from .session import BrowserSession
 from .sources import SourceManager
+from .study import (
+    DataTableCreateResult,
+    FlashcardCreateResult,
+    FlashcardDifficulty,
+    QuizCreateResult,
+    StudyManager,
+)
 
-__version__ = "0.16.0"
+__version__ = "0.17.0"
 
 __all__ = [
     # Version
@@ -80,6 +87,7 @@ __all__ = [
     "SourceManager",
     "MindMapGenerator",
     "ContentGenerator",
+    "StudyManager",
     # Models
     "Notebook",
     "Source",
@@ -111,6 +119,11 @@ __all__ = [
     "InfographicDetailLevel",
     "SlideDeckFormat",
     "SlideDeckLength",
+    # Study tool types
+    "FlashcardDifficulty",
+    "FlashcardCreateResult",
+    "QuizCreateResult",
+    "DataTableCreateResult",
     # Export functions
     "export_to_opml",
     "export_to_freemind",

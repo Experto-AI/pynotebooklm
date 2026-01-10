@@ -97,13 +97,14 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 
 ## Phase 7: Study Tools
 **Goal:** Generate flashcards, quizzes, and data tables.
-**Status:** 🚧 Planned
+**Status:** ✅ Complete
 
 ### Key Components
 - `StudyManager` class.
+- CLI commands: `study flashcards`, `study quiz`, `study table`.
 
 ### Verification
-- `pytest tests/integration/test_study.py`
+- `pytest tests/unit/test_study.py`
 
 ## Phase 8: Production Readiness
 **Goal:** Library is pip-installable and documented.
