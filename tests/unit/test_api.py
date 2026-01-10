@@ -631,3 +631,150 @@ class TestParseSourceResponse:
         source = parse_source_response(data)
 
         assert source.title == "Untitled"
+
+    def test_parse_source_list_id(self) -> None:
+        """Parses source ID when wrapped in a list."""
+        data = [["src_wrapped"], "Title", 1, "url", 1]
+        source = parse_source_response(data)
+        assert source.id == "src_wrapped"
+
+
+class TestApiInternalHelpers:
+    """Tests for internal helper methods of NotebookLMAPI."""
+
+    def test_parse_timestamp_list(self) -> None:
+        """Parses timestamp provided as a list."""
+        from pynotebooklm.api import _parse_timestamp
+
+        ts = 1704067200.0
+        result = _parse_timestamp([ts])
+        assert result is not None
+        assert result.timestamp() == ts
+
+    def test_parse_timestamp_ms(self) -> None:
+        """Parses timestamp in milliseconds."""
+        from pynotebooklm.api import _parse_timestamp
+
+        ts_ms = 1704067200000.0
+        result = _parse_timestamp(ts_ms)
+        assert result is not None
+        assert result.timestamp() == 1704067200.0
+
+    def test_parse_timestamp_invalid(self) -> None:
+        """Handles invalid timestamp formats."""
+        from pynotebooklm.api import _parse_timestamp
+
+        assert _parse_timestamp(None) is None
+        assert _parse_timestamp("not a ts") is None
+        assert _parse_timestamp([]) is None
+
+    def test_unwrap_add_source_response_complex(self, api: NotebookLMAPI) -> None:
+        """Tests unwrapping of deeply nested source response."""
+        nested = [[[["id"], "Title"]]]
+        result = api._unwrap_add_source_response(nested)
+        assert result == [["id"], "Title"]
+
+    def test_unwrap_add_source_response_invalid(self, api: NotebookLMAPI) -> None:
+        """Handles unexpected response structure."""
+        assert api._unwrap_add_source_response(None) is None
+        assert api._unwrap_add_source_response([]) == []
+        assert api._unwrap_add_source_response([[]]) == [[]]
+
+
+class TestParseNotebookResponseDetailed:
+    """Extra tests for parse_notebook_response."""
+
+    def test_parse_notebook_with_metadata(self) -> None:
+        """Parses notebook using metadata at index 5."""
+        # [name, sources, id, ts3, ts4, [..., ..., ..., ..., ..., created_ts, ..., ..., updated_ts]]
+        meta = [None, None, None, None, None, 1700000000, None, None, 1710000000]
+        data = ["Test", [], "nb123", None, None, meta]
+
+        notebook = parse_notebook_response(data)
+        assert notebook.created_at is not None
+        assert notebook.updated_at is not None
+        assert notebook.created_at.timestamp() == 1700000000
+        assert notebook.updated_at.timestamp() == 1710000000
+
+    def test_parse_notebook_nested_list(self) -> None:
+        """Handles notebook data wrapped in extra list."""
+        data = [["Test", [], "nb123"]]
+        notebook = parse_notebook_response(data)
+        assert notebook.id == "nb123"
+
+
+class TestPhase5ApiOps:
+    """Tests for Phase 5 API operations."""
+
+    @pytest.mark.asyncio
+    async def test_configure_chat_custom(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """configure_chat handles custom goal and prompt."""
+        mock_session.call_rpc.return_value = {}
+        await api.configure_chat("nb_id", goal=2, custom_prompt="Be helpful")
+
+        mock_session.call_rpc.assert_called_once()
+        args = mock_session.call_rpc.call_args[0][1]
+        # Params: [notebook_id, [[None, None, None, None, None, None, None, [[2, "Be helpful"], [1]]]]]
+        assert args[0] == "nb_id"
+        assert args[1][0][7][0] == [2, "Be helpful"]
+
+    @pytest.mark.asyncio
+    async def test_get_source_guide(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """get_source_guide calls correct RPC."""
+        mock_session.call_rpc.return_value = {}
+        await api.get_source_guide("src_id")
+        mock_session.call_rpc.assert_called_once_with("tr032e", [[[["src_id"]]]])
+
+    @pytest.mark.asyncio
+    async def test_create_studio_artifact(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """create_studio_artifact calls correct RPC."""
+        mock_session.call_rpc.return_value = {}
+        await api.create_studio_artifact("nb_id", 2, ["params"])
+        mock_session.call_rpc.assert_called_once_with(
+            "R7cb6c", [[2], "nb_id", ["params"]]
+        )
+
+    @pytest.mark.asyncio
+    async def test_list_studio_artifacts_parsing(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """list_studio_artifacts parses various statuses."""
+        # Status 1 -> in_progress, 2 -> completed, 3 -> completed
+        mock_session.call_rpc.return_value = [
+            [
+                ["id1", "Title 1", 2, None, 1],
+                ["id2", "Title 2", 1, None, 2],
+                ["id3", "Title 3", 3, None, 3],
+                ["id4", "Title 4", 2, None, 99],
+            ]
+        ]
+
+        results = await api.list_studio_artifacts("nb_id")
+        assert len(results) == 4
+        assert results[0]["status"] == "in_progress"
+        assert results[1]["status"] == "completed"
+        assert results[2]["status"] == "completed"
+        assert results[3]["status"] == "unknown"
+
+    @pytest.mark.asyncio
+    async def test_query_notebook_full(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """query_notebook builds correct request and handles CSRF."""
+        mock_session.csrf_token = "test_token"
+        mock_session.call_api_raw = AsyncMock(return_value="response")
+
+        result = await api.query_notebook("nb_id", "query", source_ids=["s1"])
+
+        assert result["raw_response"] == "response"
+        mock_session.call_api_raw.assert_called_once()
+        call_kwargs = mock_session.call_api_raw.call_args[1]
+        assert "at=test_token" in call_kwargs["body"]
+        assert "f.req=" in call_kwargs["body"]
+        assert "s1" in call_kwargs["body"]

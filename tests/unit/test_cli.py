@@ -604,3 +604,96 @@ class TestResearchPollCommand:
             assert result.exit_code == 0
             assert "AI Article" in result.output
             assert "completed" in result.output
+
+    def test_poll_research_in_progress(self) -> None:
+        """Poll research shows in_progress status."""
+        from pynotebooklm.research import ResearchSession, ResearchStatus
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.ResearchDiscovery") as mock_rd_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session_cls.return_value = mock_session
+
+            mock_rd = MagicMock()
+            mock_rd.poll_research = AsyncMock(
+                return_value=ResearchSession(
+                    task_id="t1",
+                    notebook_id="nb1",
+                    query="q",
+                    status=ResearchStatus.IN_PROGRESS,
+                )
+            )
+            mock_rd_cls.return_value = mock_rd
+
+            result = runner.invoke(app, ["research", "poll", "nb_123"])
+            assert "in_progress" in result.output
+
+
+class TestStudioCommand:
+    """Tests for studio commands."""
+
+    def test_studio_list_success(self) -> None:
+        """Studio list command shows artifacts."""
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.ChatSession") as mock_chat_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session_cls.return_value = mock_session
+
+            mock_chat = MagicMock()
+            mock_chat.list_artifacts = AsyncMock(
+                return_value=[
+                    {
+                        "id": "a1",
+                        "title": "Art 1",
+                        "type": "Report",
+                        "status": "completed",
+                    }
+                ]
+            )
+            mock_chat_cls.return_value = mock_chat
+
+            result = runner.invoke(app, ["studio", "list", "nb_123"])
+
+            assert result.exit_code == 0
+            assert "Art 1" in result.output
+            assert "Report" in result.output
+
+    def test_studio_list_empty(self) -> None:
+        """Studio list handles empty response."""
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.ChatSession") as mock_chat_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session_cls.return_value = mock_session
+
+            mock_chat = MagicMock()
+            mock_chat.list_artifacts = AsyncMock(return_value=[])
+            mock_chat_cls.return_value = mock_chat
+
+            result = runner.invoke(app, ["studio", "list", "nb_123"])
+
+            assert result.exit_code == 0
+            assert "No studio artifacts found" in result.output

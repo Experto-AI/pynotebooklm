@@ -2,7 +2,7 @@
 Unit tests for ChatSession logic.
 """
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -159,3 +159,79 @@ class TestChatSession:
 
         chat.create_report.assert_called_once()
         assert chat.create_report.call_args[1]["title"] == "Briefing Doc"
+
+    async def test_query_all_sources(self, chat):
+        """Test query fetch all sources if none provided."""
+        chat._api.get_notebook = AsyncMock(
+            return_value=["Test", [["s1", "S1", 1, "url", 1]], "nb123"]
+        )
+        chat._api.query_notebook = AsyncMock(return_value={"raw_response": ""})
+
+        await chat.query("nb_id", "question")
+
+        chat._api.get_notebook.assert_called_once()
+        chat._api.query_notebook.assert_called_once()
+        args = chat._api.query_notebook.call_args[1]
+        assert args["source_ids"] == ["s1"]
+
+    async def test_get_all_source_ids_exception(self, chat):
+        """Test helper handles API errors gracefully."""
+        chat._api.get_notebook = AsyncMock(side_effect=Exception("API Down"))
+        res = await chat._get_all_source_ids("nb_id")
+        assert res == []
+
+    async def test_create_report_all_sources(self, chat):
+        """Test create_report fetches sources if not provided."""
+        chat._api.get_notebook = AsyncMock(
+            return_value=["Test", [["s1", "S1", 1, "url", 1]], "nb123"]
+        )
+        chat._api.create_studio_artifact = AsyncMock(return_value=[[["art_123"]]])
+
+        await chat.create_report("nb_id", "Title", "Desc", "Prompt")
+
+        chat._api.get_notebook.assert_called_once()
+        args = chat._api.create_studio_artifact.call_args[0][2]
+        # source_ids should be at index 3 in content
+        assert args[3] == [[["s1"]]]
+
+    async def test_list_artifacts_with_mindmaps(self, chat, mock_session):
+        """Test artifact list includes mind maps and handles errors."""
+        chat._api.list_studio_artifacts = AsyncMock(
+            return_value=[{"id": "a1", "status": "completed"}]
+        )
+
+        # Mock MindMapGenerator
+        with patch("pynotebooklm.chat.MindMapGenerator") as mock_mm_gen_cls:
+            mock_mm_gen = MagicMock()
+            mm_mock = MagicMock()
+            mm_mock.id = "mm1"
+            mm_mock.title = "Map 1"
+            mm_mock.created_at = None
+            mock_mm_gen.list = AsyncMock(return_value=[mm_mock])
+            mock_mm_gen_cls.return_value = mock_mm_gen
+
+            res = await chat.list_artifacts("nb_id")
+            assert len(res) == 2
+            assert res[1]["id"] == "mm1"
+            assert res[1]["type"] == "Mind Map"
+
+    async def test_parse_query_response_thinking(self, chat):
+        """Test parsing of thinking process."""
+        # Type 2 is thinking
+        inner_data = [["Thinking...", None, None, None, [None, 2]]]
+        import json
+
+        inner_json = json.dumps(inner_data)
+        outer_json = json.dumps([["wrb.fr", "id", inner_json]])
+
+        answer = chat._parse_query_response(outer_json)
+        assert answer == "Thinking..."
+
+    async def test_extract_answer_case_b(self, chat):
+        """Test Case B: direct string fallback in query chunk."""
+        import json
+
+        chunk = json.dumps([["wrb.fr", "id", json.dumps(["Direct String"])]])
+        text, is_answer = chat._extract_answer_from_chunk(chunk)
+        assert text == "Direct String"
+        assert is_answer is False
