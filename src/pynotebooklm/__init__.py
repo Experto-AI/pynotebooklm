@@ -19,6 +19,15 @@ from .exceptions import (
     SessionError,
     SourceError,
 )
+from .mindmaps import (
+    MindMap,
+    MindMapGenerateResult,
+    MindMapGenerator,
+    MindMapNode,
+    export_to_freemind,
+    export_to_json,
+    export_to_opml,
+)
 from .models import (
     Artifact,
     ArtifactStatus,
@@ -42,7 +51,7 @@ from .research import (
 from .session import BrowserSession
 from .sources import SourceManager
 
-__version__ = "0.12.0"
+__version__ = "0.14.0"
 
 __all__ = [
     # Version
@@ -54,6 +63,7 @@ __all__ = [
     "NotebookManager",
     "ResearchDiscovery",
     "SourceManager",
+    "MindMapGenerator",
     # Models
     "Notebook",
     "Source",
@@ -69,6 +79,13 @@ __all__ = [
     "ResearchType",
     "ImportedSource",
     "ResearchSource",
+    "MindMap",
+    "MindMapNode",
+    "MindMapGenerateResult",
+    # Export functions
+    "export_to_opml",
+    "export_to_freemind",
+    "export_to_json",
     # Exceptions
     "PyNotebookLMError",
     "AuthenticationError",

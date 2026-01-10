@@ -1,10 +1,17 @@
 import asyncio
+from pathlib import Path
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from pynotebooklm.auth import AuthManager
+from pynotebooklm.mindmaps import (
+    MindMapGenerator,
+    export_to_freemind,
+    export_to_json,
+    export_to_opml,
+)
 from pynotebooklm.notebooks import NotebookManager
 from pynotebooklm.research import ResearchDiscovery
 from pynotebooklm.session import BrowserSession
@@ -15,11 +22,13 @@ auth_app = typer.Typer(help="Authentication management")
 notebooks_app = typer.Typer(help="Notebook management")
 sources_app = typer.Typer(help="Source management")
 research_app = typer.Typer(help="Research discovery")
+mindmap_app = typer.Typer(help="Mind map generation and export")
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
 app.add_typer(sources_app, name="sources")
 app.add_typer(research_app, name="research")
+app.add_typer(mindmap_app, name="mindmap")
 
 console = Console()
 
@@ -373,6 +382,182 @@ def poll_research(
 
                 if len(result.results) > 10:
                     console.print(f"  ... and {len(result.results) - 10} more")
+
+    asyncio.run(_run())
+
+
+# =============================================================================
+# Mind Map Commands
+# =============================================================================
+
+
+@mindmap_app.command("create")
+def create_mindmap(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    title: str = typer.Option("Mind Map", "--title", "-t", help="Mind map title"),
+) -> None:
+    """Create a mind map from all sources in a notebook.
+
+    Generates a hierarchical mind map visualization of the notebook's
+    content. The mind map is saved to the notebook and can be viewed
+    in the NotebookLM web interface.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            generator = MindMapGenerator(session)
+
+            console.print(
+                f"[dim]Generating mind map for notebook {notebook_id}...[/dim]"
+            )
+
+            try:
+                mindmap = await generator.create(notebook_id, title=title)
+                console.print("[green]✓ Created mind map successfully![/green]")
+                console.print(f"  ID: [cyan]{mindmap.id}[/cyan]")
+                console.print(f"  Title: [bold]{mindmap.title}[/bold]")
+                console.print(f"  Sources: {len(mindmap.source_ids)}")
+
+                # Show root structure if available
+                root = mindmap.get_root_node()
+                if root:
+                    console.print(f"  Root: [magenta]{root.name}[/magenta]")
+                    console.print(f"  Top-level topics: {len(root.children)}")
+
+            except ValueError as e:
+                console.print(f"[red]Error: {e}[/red]")
+                raise typer.Exit(1) from e
+            except Exception as e:
+                console.print(f"[red]Failed to create mind map: {e}[/red]")
+                raise typer.Exit(1) from e
+
+    asyncio.run(_run())
+
+
+@mindmap_app.command("list")
+def list_mindmaps(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+) -> None:
+    """List all mind maps in a notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            generator = MindMapGenerator(session)
+            mindmaps = await generator.list(notebook_id)
+
+            if not mindmaps:
+                console.print(f"No mind maps found in notebook {notebook_id}.")
+                return
+
+            table = Table(
+                title=f"Mind Maps in {notebook_id[:8]}...",
+                show_header=True,
+                header_style="bold magenta",
+            )
+            table.add_column("#", style="dim", justify="right")
+            table.add_column("ID", style="cyan", no_wrap=True)
+            table.add_column("Title", style="white")
+            table.add_column("Sources", style="green", justify="right")
+            table.add_column("Created", style="blue")
+
+            for i, mm in enumerate(mindmaps, 1):
+                created = (
+                    mm.created_at.strftime("%Y-%m-%d %H:%M") if mm.created_at else "—"
+                )
+                table.add_row(
+                    str(i),
+                    mm.id,
+                    mm.title,
+                    str(len(mm.source_ids)),
+                    created,
+                )
+
+            console.print(table)
+
+    asyncio.run(_run())
+
+
+@mindmap_app.command("export")
+def export_mindmap(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    mindmap_id: str = typer.Argument(..., help="Mind map ID"),
+    format: str = typer.Option(
+        "json", "--format", "-f", help="Export format: json, opml, or freemind"
+    ),
+    output: str = typer.Option(
+        None, "--output", "-o", help="Output file path (default: mindmap.<format>)"
+    ),
+) -> None:
+    """Export a mind map to JSON, OPML, or FreeMind format.
+
+    Supported formats:
+    - json: Standard JSON with name/children structure
+    - opml: OPML 2.0 (importable by most outliners)
+    - freemind: FreeMind .mm format (compatible with Freeplane)
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            generator = MindMapGenerator(session)
+
+            console.print(f"[dim]Fetching mind map {mindmap_id}...[/dim]")
+
+            mindmap = await generator.get(notebook_id, mindmap_id)
+            if not mindmap:
+                console.print(f"[red]Mind map not found: {mindmap_id}[/red]")
+                raise typer.Exit(1)
+
+            if not mindmap.mind_map_json:
+                console.print("[red]Mind map has no content[/red]")
+                raise typer.Exit(1)
+
+            # Determine output format and filename
+            format_lower = format.lower()
+            extensions = {"json": ".json", "opml": ".opml", "freemind": ".mm"}
+            if format_lower not in extensions:
+                console.print(
+                    f"[red]Invalid format: {format}. Use json, opml, or freemind[/red]"
+                )
+                raise typer.Exit(1)
+
+            output_path = (
+                Path(output) if output else Path(f"mindmap{extensions[format_lower]}")
+            )
+
+            # Export to selected format
+            try:
+                if format_lower == "json":
+                    content = export_to_json(mindmap.mind_map_json, pretty=True)
+                elif format_lower == "opml":
+                    content = export_to_opml(mindmap.mind_map_json, title=mindmap.title)
+                else:  # freemind
+                    content = export_to_freemind(
+                        mindmap.mind_map_json, title=mindmap.title
+                    )
+
+                output_path.write_text(content, encoding="utf-8")
+                console.print(f"[green]✓ Exported to: {output_path}[/green]")
+                console.print(f"  Format: {format_lower}")
+                console.print(f"  Size: {len(content)} bytes")
+
+            except ValueError as e:
+                console.print(f"[red]Export failed: {e}[/red]")
+                raise typer.Exit(1) from e
 
     asyncio.run(_run())
 

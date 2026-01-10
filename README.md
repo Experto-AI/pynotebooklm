@@ -14,17 +14,17 @@ DO NOT include here: Detailed implementation plans, architectural decisions, or 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Production-grade Python library for **Google NotebookLM** automation with 31 tools.
+Production-grade Python library for **Google NotebookLM** automation.
 
 ## Features
 
 - 🔐 **Secure Authentication** - Browser-based Google login with cookie persistence
 - 📓 **Notebook Management** - Create, list, rename, and delete notebooks
 - 📰 **Source Management** - Add URLs, YouTube videos, Google Drive docs, and text
-- 🎙️ **Content Generation** - Create podcasts, videos, infographics, and slides
 - 🔍 **Research & Analysis** - Query notebooks and discover related sources
-- 🧠 **Mind Maps** - Generate and export mind maps
-- 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents
+- 🧠 **Mind Maps** - Generate, save, list, and export mind maps (JSON/OPML/FreeMind)
+- 🎙️ **Content Generation** - Create podcasts, videos, infographics, and slides (coming soon)
+- 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents (coming soon)
 
 ## Installation
 
@@ -108,6 +108,14 @@ pynotebooklm research start <notebook_id> "topic"           # Fast research
 pynotebooklm research start <notebook_id> "topic" --deep    # Deep research
 pynotebooklm research start <notebook_id> "topic" --source drive  # Search Drive
 pynotebooklm research poll <notebook_id>                    # Check status/get results
+
+# Mind Maps
+pynotebooklm mindmap create <notebook_id>                   # Create from all sources
+pynotebooklm mindmap create <notebook_id> --title "My Map"  # With custom title
+pynotebooklm mindmap list <notebook_id>                     # List existing maps
+pynotebooklm mindmap export <notebook_id> <map_id> -f json  # Export to JSON
+pynotebooklm mindmap export <notebook_id> <map_id> -f opml  # Export to OPML
+pynotebooklm mindmap export <notebook_id> <map_id> -f freemind  # Export to FreeMind
 ```
 
 ## Development
@@ -195,7 +203,7 @@ This approach provides:
 - [x] **Phase 1**: Foundation & Authentication
 - [x] **Phase 2**: Notebook & Source Management
 - [x] **Phase 3**: Research Discovery
-- [ ] **Phase 4**: Mind Maps
+- [x] **Phase 4**: Mind Maps
 - [ ] **Phase 5**: Chat, Writing & Tone
 - [ ] **Phase 6**: Content Generation (Podcasts, Videos)
 - [ ] **Phase 7**: Study Tools

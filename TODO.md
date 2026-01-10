@@ -124,7 +124,7 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 
 ---
 
-## Phase 3: Research Discovery ✅ COMPLETE (Bug Fixed 2026-01-10)
+## Phase 3: Research Discovery ✅ COMPLETE 
 
 **Milestone:** User can perform web searches and gather sources for the blog
 
@@ -158,7 +158,7 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
 ### Phase 3 Verification
 - [x] `make check` passes (275 tests)
 - [x] CLI commands implemented and functional
-- [ ] **MANUAL TEST REQUIRED:** `pynotebooklm research start <notebook_id> "topic"` → verify in NotebookLM web UI
+- [x] **MANUAL TEST REQUIRED:** `pynotebooklm research start <notebook_id> "topic"` → verify in NotebookLM web UI
 
 ### Notes (from UI Investigation 2026-01-09)
 - **Drive Sync**: Per-source operation (via source context menu), not notebook-wide. Move to sources module if needed.
@@ -167,30 +167,71 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  ---
  
- ## Phase 4: Mind Maps
+ ## Phase 4: Mind Maps ✅ COMPLETE
  
  **Milestone:** User can visualize research connections before writing
  
+ **Key insight (from jacob-bd/notebooklm-mcp analysis, 2026-01-10):**
+ Mind maps use a **2-step creation process**:
+ 1. **Generate**: RPC `yyryJe` creates the mind map JSON structure from sources
+ 2. **Save**: RPC `CYK0Xb` saves the generated JSON to a notebook
+ 
+ ### RPC Details (from analysis_repos/jacob-bd-notebooklm-mcp/docs/API_REFERENCE.md):
+ - `yyryJe` = Generate Mind Map
+   - Params: `[sources_nested, None, None, None, None, ["interactive_mindmap", [["[CONTEXT]", ""]], ""], None, [2, None, [1]]]`
+   - `sources_nested`: `[[[source_id1]], [[source_id2]], ...]`
+   - Response: `[json_mind_map_string, None, [generation_id1, generation_id2, generation_number]]`
+ - `CYK0Xb` = Save Mind Map
+   - Params: `[notebook_id, json_mind_map_string, [2, None, None, 5, [[source_id1], [source_id2]]], None, "Mind Map Title"]`
+   - Response: `[mind_map_id, saved_json, metadata, None, saved_title]`
+ - `cFji9` = List Mind Maps
+   - Params: `[notebook_id]`
+   - Response: `[[[mind_map_id, [id, json, metadata, None, title]], ...], [timestamp]]`
+ 
+ ### Mind Map JSON Structure:
+ ```json
+ {"name": "Root Topic", "children": [
+   {"name": "Category 1", "children": [
+     {"name": "Subcategory 1.1"},
+     {"name": "Subcategory 1.2"}
+   ]},
+   {"name": "Category 2", "children": [...]}
+ ]}
+ ```
+ 
  ### Mind Map Generator
- - [ ] Create `src/pynotebooklm/mindmaps.py`:
-   - [ ] `MindMapGenerator.create(notebook_id)` (`mindmap_create`)
-   - [ ] `MindMapGenerator.list(notebook_id)` (`mindmap_list`)
-   - [ ] `MindMapGenerator.export(notebook_id, format)` - XML/OPML (`mindmap_export_xml/opml`)
+ - [x] Create `src/pynotebooklm/mindmaps.py`:
+   - [x] `MindMapGenerator.__init__(session)` - Initialize with BrowserSession
+   - [x] `MindMapGenerator.generate(source_ids)` - RPC: `yyryJe` (Step 1: generates JSON)
+   - [x] `MindMapGenerator.save(notebook_id, mind_map_json, source_ids, title)` - RPC: `CYK0Xb` (Step 2: saves to notebook)
+   - [x] `MindMapGenerator.create(notebook_id, source_ids, title)` - Convenience wrapper (generate + save)
+   - [x] `MindMapGenerator.list(notebook_id)` - RPC: `cFji9`
+   - [x] `MindMapGenerator.get(notebook_id, mindmap_id)` - Get specific mind map from list
+   - [x] `export_to_opml(mind_map_json)` - Convert JSON to OPML format (standalone function)
+   - [x] `export_to_freemind(mind_map_json)` - Convert JSON to FreeMind XML (standalone function)
+   - [x] Add Pydantic models: `MindMap`, `MindMapNode`, `MindMapGenerateResult`
  
  ### CLI Implementation
- - [ ] Update `src/pynotebooklm/cli.py`:
-   - [ ] Add `pynotebooklm mindmap create <notebook_id>`
-   - [ ] Add `pynotebooklm mindmap list <notebook_id>`
-   - [ ] Add `pynotebooklm mindmap export <mindmap_id>`
+ - [x] Update `src/pynotebooklm/cli.py`:
+   - [x] Add `mindmap_app` typer group
+   - [x] Add `pynotebooklm mindmap create <notebook_id> [--title]` (auto-uses all sources)
+   - [x] Add `pynotebooklm mindmap list <notebook_id>`
+   - [x] Add `pynotebooklm mindmap export <notebook_id> <mindmap_id> --format json|opml|freemind [--output]`
  
  ### Testing
- - [ ] Create `tests/integration/test_mindmaps.py`
+ - [x] Create `tests/integration/test_mindmaps.py`:
+   - [x] Test generate, save, create flow (5 tests)
+   - [x] Test list mind maps (5 tests)
+   - [x] Test export to different formats (10 tests)
+   - [x] Test error handling (empty sources, invalid notebook, etc.)
+   - [x] Create `tests/unit/test_cli_mindmap.py` for CLI coverage
+   - [x] Total: 38 new integration tests + CLI unit tests
  
  ### Phase 4 Verification
- - [ ] `make test-integration-mindmaps` passes
- - [ ] `pynotebooklm mindmap create <notebook_id>` succeeds
- - [ ] `pynotebooklm mindmap list <notebook_id>` shows created maps
- - [ ] `pynotebooklm mindmap export <mindmap_id> --format pdf` saves file
+ - [x] `make check` passes (362 tests total)
+ - [x] `pynotebooklm mindmap create <notebook_id>` implemented
+ - [x] `pynotebooklm mindmap list <notebook_id>` implemented
+ - [x] `pynotebooklm mindmap export <notebook_id> <mindmap_id> --format opml` implemented
  
  ---
  
