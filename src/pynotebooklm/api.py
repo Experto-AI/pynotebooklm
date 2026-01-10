@@ -149,10 +149,6 @@ class NotebookLMAPI:
                 RPC_GET_NOTEBOOK,
                 [notebook_id, None, [2], None, 0],
             )
-            # DEBUG: Print notebook structure to find artifacts
-            import json
-
-            print(f"DEBUG: Notebook dump: {json.dumps(result)}")
             return result  # type: ignore[no-any-return]
         except APIError as e:
             # Check if it's a not found error
