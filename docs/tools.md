@@ -66,17 +66,17 @@ Tests: `tests/integration/test_chat.py`
 | `chat_configure` | Set chat style, response length, goals |
 | `briefing_create` | Generate briefing document |
 
-## Content Generation (Phase 6)
-Tests: `tests/integration/test_content.py`
+## Content Generation (Phase 6) ✅
+Tests: `tests/unit/test_content.py`
 
 | Tool | ID | Description |
 |------|----|-------------|
-| `audio_overview_create` | `R7cb6c` | Generate podcast (deep dive, briefing) |
-| `video_overview_create` | N/A | Generate video explainer |
-| `infographic_create` | N/A | Generate infographic image |
-| `slide_deck_create` | N/A | Generate presentation slides |
+| `audio_overview_create` | `R7cb6c` | Generate podcast (deep dive, brief, critique, debate) |
+| `video_overview_create` | `R7cb6c` | Generate video explainer (type=3) |
+| `infographic_create` | `R7cb6c` | Generate infographic image (type=7) |
+| `slide_deck_create` | `R7cb6c` | Generate presentation slides (type=8) |
 | `studio_status` | `gArtLc` | Check generation progress |
-| `studio_delete` | N/A | Delete generated artifact |
+| `studio_delete` | `V5N4be` | Delete generated artifact |
 
 ## Study Tools (Phase 7)
 Tests: `tests/integration/test_study.py`

@@ -7,6 +7,21 @@ including notebook management, source handling, and content generation.
 
 from .api import NotebookLMAPI
 from .auth import AuthManager
+from .content import (
+    AudioFormat,
+    AudioLength,
+    ContentGenerator,
+    CreateContentResult,
+    InfographicDetailLevel,
+    InfographicOrientation,
+    SlideDeckFormat,
+    SlideDeckLength,
+    StudioArtifact,
+    StudioArtifactStatus,
+    StudioArtifactType,
+    VideoFormat,
+    VideoStyle,
+)
 from .exceptions import (
     APIError,
     AuthenticationError,
@@ -51,7 +66,7 @@ from .research import (
 from .session import BrowserSession
 from .sources import SourceManager
 
-__version__ = "0.14.0"
+__version__ = "0.16.0"
 
 __all__ = [
     # Version
@@ -64,6 +79,7 @@ __all__ = [
     "ResearchDiscovery",
     "SourceManager",
     "MindMapGenerator",
+    "ContentGenerator",
     # Models
     "Notebook",
     "Source",
@@ -82,6 +98,19 @@ __all__ = [
     "MindMap",
     "MindMapNode",
     "MindMapGenerateResult",
+    # Content generation types
+    "StudioArtifact",
+    "StudioArtifactType",
+    "StudioArtifactStatus",
+    "CreateContentResult",
+    "AudioFormat",
+    "AudioLength",
+    "VideoFormat",
+    "VideoStyle",
+    "InfographicOrientation",
+    "InfographicDetailLevel",
+    "SlideDeckFormat",
+    "SlideDeckLength",
     # Export functions
     "export_to_opml",
     "export_to_freemind",

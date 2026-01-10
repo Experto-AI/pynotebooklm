@@ -273,29 +273,94 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  **Milestone:** User can generate Audio, Video, Slides, and Infographics (Optional for Blog)
  
+ **Key insight (from jacob-bd/notebooklm-mcp analysis, 2026-01-10):**
+ All studio content uses the same RPC `R7cb6c` with different type codes:
+ - `STUDIO_TYPE_AUDIO = 1` - Audio Overviews (podcasts)
+ - `STUDIO_TYPE_VIDEO = 3` - Video Overviews
+ - `STUDIO_TYPE_INFOGRAPHIC = 7` - Infographics
+ - `STUDIO_TYPE_SLIDE_DECK = 8` - Slide Decks
+ 
+ ### RPC Details (from analysis_repos/jacob-bd-notebooklm-mcp):
+ - `R7cb6c` = Create Studio Content
+   - Audio params: `[[2], notebook_id, [None, None, 1, sources_nested, None, None, [None, [focus, length, None, sources_simple, lang, None, format]]]]`
+   - Video params: `[[2], notebook_id, [None, None, 3, sources_nested, None, None, None, None, [None, None, [sources_simple, lang, focus, None, format, style]]]]`
+   - Infographic params: `[[2], notebook_id, [None, None, 7, sources_nested, ...10 nulls..., [[focus, lang, None, orientation, detail_level]]]]`
+   - Slide deck params: `[[2], notebook_id, [None, None, 8, sources_nested, ...12 nulls..., [[focus, lang, format, length]]]]`
+ - `gArtLc` = Poll Studio Status
+   - Params: `[[2], notebook_id, 'NOT artifact.status = "ARTIFACT_STATUS_SUGGESTED"']`
+   - Status codes: 1=in_progress, 3=completed
+ - `V5N4be` = Delete Studio Artifact
+   - Params: `[[2], artifact_id]`
+ 
+ ### Audio Options:
+ | Option | Values |
+ |--------|--------|
+ | **Formats** | 1=Deep Dive (conversation), 2=Brief, 3=Critique, 4=Debate |
+ | **Lengths** | 1=Short, 2=Default, 3=Long |
+ | **Languages** | BCP-47 codes: "en", "es", "fr", "de", "ja", etc. |
+ 
+ ### Video Options:
+ | Option | Values |
+ |--------|--------|
+ | **Formats** | 1=Explainer, 2=Brief |
+ | **Visual Styles** | 1=Auto-select, 2=Custom, 3=Classic, 4=Whiteboard, 5=Kawaii, 6=Anime, 7=Watercolor, 8=Retro print, 9=Heritage, 10=Paper-craft |
+ | **Languages** | BCP-47 codes |
+ 
+ ### Infographic Options:
+ | Option | Values |
+ |--------|--------|
+ | **Orientations** | 1=Landscape (16:9), 2=Portrait (9:16), 3=Square (1:1) |
+ | **Detail Levels** | 1=Concise, 2=Standard, 3=Detailed |
+ | **Languages** | BCP-47 codes |
+ 
+ ### Slide Deck Options:
+ | Option | Values |
+ |--------|--------|
+ | **Formats** | 1=Detailed Deck, 2=Presenter Slides |
+ | **Lengths** | 1=Short, 3=Default |
+ | **Languages** | BCP-47 codes |
+ 
  ### Content Generator
- - [ ] Create `src/pynotebooklm/content.py`:
-   - [ ] `ContentGenerator.generate_audio(notebook_id)` - Podcast (`audio_overview_create`)
-   - [ ] `ContentGenerator.generate_video(notebook_id)` - (`video_overview_create`)
-   - [ ] `ContentGenerator.generate_infographic(notebook_id)` - (`infographic_create`)
-   - [ ] `ContentGenerator.generate_slides(notebook_id)` - (`slide_deck_create`)
-   - [ ] `ContentGenerator.get_status(notebook_id)` - (`studio_status`)
-   - [ ] `ContentGenerator.get_download_url(notebook_id)`
-   - [ ] `ContentGenerator.delete(artifact_id)` - (`studio_delete`)
-   - [ ] Implement exponential backoff polling
+ - [x] Create `src/pynotebooklm/content.py`:
+   - [x] `ContentGenerator.__init__(session)` - Initialize with BrowserSession
+   - [x] `ContentGenerator.create_audio(notebook_id, source_ids, format, length, language, focus)` - RPC: `R7cb6c` type=1
+   - [x] `ContentGenerator.create_video(notebook_id, source_ids, format, style, language, focus)` - RPC: `R7cb6c` type=3
+   - [x] `ContentGenerator.create_infographic(notebook_id, source_ids, orientation, detail, language, focus)` - RPC: `R7cb6c` type=7
+   - [x] `ContentGenerator.create_slides(notebook_id, source_ids, format, length, language, focus)` - RPC: `R7cb6c` type=8
+   - [x] `ContentGenerator.poll_status(notebook_id)` - RPC: `gArtLc`
+   - [x] `ContentGenerator.delete(artifact_id)` - RPC: `V5N4be`
+   - [x] Add Pydantic models: `AudioFormat`, `VideoFormat`, `VideoStyle`, `InfographicOrientation`, `SlideDeckFormat`
+   - [x] Add `StudioArtifact` result model with type-specific URLs
  
  ### CLI Implementation
- - [ ] Update `src/pynotebooklm/cli.py`:
-   - [ ] Add `pynotebooklm generate audio|video|slides|infographic <notebook_id>`
-   - [ ] Add `pynotebooklm studio status <notebook_id>`
+ - [x] Update `src/pynotebooklm/cli.py`:
+   - [x] Add `generate_app` typer group
+   - [x] Add `pynotebooklm generate audio <notebook_id> [--format] [--length] [--language] [--focus]`
+   - [x] Add `pynotebooklm generate video <notebook_id> [--format] [--style] [--language] [--focus]`
+   - [x] Add `pynotebooklm generate infographic <notebook_id> [--orientation] [--detail] [--language] [--focus]`
+   - [x] Add `pynotebooklm generate slides <notebook_id> [--format] [--length] [--language] [--focus]`
+   - [x] Add `pynotebooklm studio status <notebook_id>` - Show all artifacts with status
+   - [x] Add `pynotebooklm studio delete <artifact_id>` - Delete artifact (with confirmation)
  
  ### Testing
- - [ ] Create `tests/integration/test_content.py`
+ - [x] Create `tests/unit/test_content.py`:
+   - [x] Test audio creation with all format/length combinations (12 tests)
+   - [x] Test video creation with format/style combinations (16 tests)
+   - [x] Test infographic creation (9 tests)
+   - [x] Test slide deck creation (4 tests)
+   - [x] Test poll_status parsing (5 tests)
+   - [x] Test delete artifact (3 tests)
+   - [x] Test error handling (5 tests)
+   - [x] Total: ~54 new unit tests
+ - [x] Create `tests/unit/test_cli_content.py`:
+   - [x] Test CLI commands for all content types (8 tests)
  
  ### Phase 6 Verification
- - [ ] `make test-integration-content` passes
- - [ ] `pynotebooklm generate audio <notebook_id>` triggers generation
- - [ ] `pynotebooklm studio status <notebook_id>` shows progress
+ - [x] `make check` passes
+ - [x] `pynotebooklm generate audio <notebook_id>` triggers generation
+ - [x] `pynotebooklm generate video <notebook_id>` triggers generation
+ - [x] `pynotebooklm studio status <notebook_id>` shows progress
+ - [x] `pynotebooklm studio delete <artifact_id>` deletes artifact
  
  ---
  

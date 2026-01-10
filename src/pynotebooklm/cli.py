@@ -7,6 +7,17 @@ from rich.table import Table
 
 from pynotebooklm.auth import AuthManager
 from pynotebooklm.chat import ChatSession
+from pynotebooklm.content import (
+    AudioFormat,
+    AudioLength,
+    ContentGenerator,
+    InfographicDetailLevel,
+    InfographicOrientation,
+    SlideDeckFormat,
+    SlideDeckLength,
+    VideoFormat,
+    VideoStyle,
+)
 from pynotebooklm.mindmaps import (
     MindMapGenerator,
     export_to_freemind,
@@ -25,6 +36,9 @@ sources_app = typer.Typer(help="Source management")
 research_app = typer.Typer(help="Research discovery")
 mindmap_app = typer.Typer(help="Mind map generation and export")
 query_app = typer.Typer(help="Chat and query tools")
+generate_app = typer.Typer(
+    help="Content generation (audio, video, infographic, slides)"
+)
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
@@ -32,6 +46,7 @@ app.add_typer(sources_app, name="sources")
 app.add_typer(research_app, name="research")
 app.add_typer(mindmap_app, name="mindmap")
 app.add_typer(query_app, name="query")
+app.add_typer(generate_app, name="generate")
 
 console = Console()
 
@@ -754,6 +769,453 @@ def list_studio(
                 )
 
             console.print(table)
+
+    asyncio.run(_run())
+
+
+@studio_app.command("status")
+def studio_status(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+) -> None:
+    """Show detailed status of all studio artifacts with download URLs."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            generator = ContentGenerator(session)
+            console.print(f"[dim]Fetching studio status for {notebook_id}...[/dim]")
+
+            artifacts = await generator.poll_status(notebook_id)
+
+            if not artifacts:
+                console.print("[yellow]No studio artifacts found.[/yellow]")
+                return
+
+            table = Table(title=f"Studio Artifacts in {notebook_id}")
+            table.add_column("Type", style="cyan")
+            table.add_column("ID", style="dim", no_wrap=True)
+            table.add_column("Title", style="white", max_width=30)
+            table.add_column("Status", style="green")
+            table.add_column("URL/Info", style="blue", max_width=40)
+
+            for artifact in artifacts:
+                status_color = (
+                    "green" if artifact.status.value == "completed" else "yellow"
+                )
+                if artifact.status.value == "unknown":
+                    status_color = "dim"
+
+                status_display = f"[{status_color}]{artifact.status.value}[/]"
+
+                # Determine URL or info to show
+                url_info = ""
+                if artifact.audio_url:
+                    url_info = artifact.audio_url[:40] + "..."
+                elif artifact.video_url:
+                    url_info = artifact.video_url[:40] + "..."
+                elif artifact.infographic_url:
+                    url_info = artifact.infographic_url[:40] + "..."
+                elif artifact.slide_deck_url:
+                    url_info = artifact.slide_deck_url[:40] + "..."
+                elif artifact.duration_seconds:
+                    url_info = f"{artifact.duration_seconds//60}m {artifact.duration_seconds%60}s"
+
+                table.add_row(
+                    artifact.artifact_type.value,
+                    artifact.artifact_id,
+                    artifact.title[:30] if artifact.title else "—",
+                    status_display,
+                    url_info,
+                )
+
+            console.print(table)
+
+    asyncio.run(_run())
+
+
+@studio_app.command("delete")
+def studio_delete(
+    artifact_id: str = typer.Argument(..., help="Artifact ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Delete a studio artifact. WARNING: This is irreversible."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        if not force:
+            confirm = typer.confirm(
+                f"Are you sure you want to delete artifact {artifact_id}? This cannot be undone."
+            )
+            if not confirm:
+                console.print("Aborted.")
+                return
+
+        async with BrowserSession(auth) as session:
+            generator = ContentGenerator(session)
+            console.print(f"[dim]Deleting artifact {artifact_id}...[/dim]")
+
+            success = await generator.delete(artifact_id)
+
+            if success:
+                console.print(f"[green]✓ Deleted artifact: {artifact_id}[/green]")
+            else:
+                console.print(f"[red]Failed to delete artifact: {artifact_id}[/red]")
+                raise typer.Exit(1)
+
+    asyncio.run(_run())
+
+
+# =============================================================================
+# Generate Commands
+# =============================================================================
+
+
+@generate_app.command("audio")
+def generate_audio(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    format: str = typer.Option(
+        "deep_dive",
+        "--format",
+        "-f",
+        help="Audio format: deep_dive, brief, critique, debate",
+    ),
+    length: str = typer.Option(
+        "default", "--length", "-l", help="Audio length: short, default, long"
+    ),
+    language: str = typer.Option(
+        "en", "--language", help="Language code (e.g., en, es)"
+    ),
+    focus: str = typer.Option("", "--focus", help="Focus prompt for the AI"),
+) -> None:
+    """Generate an audio overview (podcast) from notebook sources."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        # Map format string to enum
+        format_map = {
+            "deep_dive": AudioFormat.DEEP_DIVE,
+            "brief": AudioFormat.BRIEF,
+            "critique": AudioFormat.CRITIQUE,
+            "debate": AudioFormat.DEBATE,
+        }
+        length_map = {
+            "short": AudioLength.SHORT,
+            "default": AudioLength.DEFAULT,
+            "long": AudioLength.LONG,
+        }
+
+        if format not in format_map:
+            console.print(
+                f"[red]Invalid format: {format}. Use: deep_dive, brief, critique, debate[/red]"
+            )
+            raise typer.Exit(1)
+        if length not in length_map:
+            console.print(
+                f"[red]Invalid length: {length}. Use: short, default, long[/red]"
+            )
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            # First get sources from the notebook
+            source_manager = SourceManager(session)
+            sources = await source_manager.list_sources(notebook_id)
+
+            if not sources:
+                console.print(
+                    "[red]No sources found in notebook. Add sources first.[/red]"
+                )
+                raise typer.Exit(1)
+
+            source_ids = [s.id for s in sources]
+            console.print(
+                f"[dim]Generating audio from {len(source_ids)} sources...[/dim]"
+            )
+
+            generator = ContentGenerator(session)
+            result = await generator.create_audio(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                format=format_map[format],
+                length=length_map[length],
+                language=language,
+                focus_prompt=focus,
+            )
+
+            console.print("[green]✓ Audio generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Format: {result.format}")
+            console.print(f"  Length: {result.length}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+@generate_app.command("video")
+def generate_video(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    format: str = typer.Option(
+        "explainer", "--format", "-f", help="Video format: explainer, brief"
+    ),
+    style: str = typer.Option(
+        "auto_select",
+        "--style",
+        "-s",
+        help="Visual style: auto_select, classic, whiteboard, kawaii, anime, watercolor, retro_print, heritage, paper_craft",
+    ),
+    language: str = typer.Option(
+        "en", "--language", help="Language code (e.g., en, es)"
+    ),
+    focus: str = typer.Option("", "--focus", help="Focus prompt for the AI"),
+) -> None:
+    """Generate a video overview from notebook sources."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        format_map = {
+            "explainer": VideoFormat.EXPLAINER,
+            "brief": VideoFormat.BRIEF,
+        }
+        style_map = {
+            "auto_select": VideoStyle.AUTO_SELECT,
+            "classic": VideoStyle.CLASSIC,
+            "whiteboard": VideoStyle.WHITEBOARD,
+            "kawaii": VideoStyle.KAWAII,
+            "anime": VideoStyle.ANIME,
+            "watercolor": VideoStyle.WATERCOLOR,
+            "retro_print": VideoStyle.RETRO_PRINT,
+            "heritage": VideoStyle.HERITAGE,
+            "paper_craft": VideoStyle.PAPER_CRAFT,
+        }
+
+        if format not in format_map:
+            console.print(f"[red]Invalid format: {format}. Use: explainer, brief[/red]")
+            raise typer.Exit(1)
+        if style not in style_map:
+            console.print(
+                f"[red]Invalid style: {style}. Use: auto_select, classic, whiteboard, etc.[/red]"
+            )
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            source_manager = SourceManager(session)
+            sources = await source_manager.list_sources(notebook_id)
+
+            if not sources:
+                console.print(
+                    "[red]No sources found in notebook. Add sources first.[/red]"
+                )
+                raise typer.Exit(1)
+
+            source_ids = [s.id for s in sources]
+            console.print(
+                f"[dim]Generating video from {len(source_ids)} sources...[/dim]"
+            )
+
+            generator = ContentGenerator(session)
+            result = await generator.create_video(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                format=format_map[format],
+                style=style_map[style],
+                language=language,
+                focus_prompt=focus,
+            )
+
+            console.print("[green]✓ Video generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Format: {result.format}")
+            console.print(f"  Style: {result.style}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+@generate_app.command("infographic")
+def generate_infographic(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    orientation: str = typer.Option(
+        "landscape",
+        "--orientation",
+        "-o",
+        help="Orientation: landscape, portrait, square",
+    ),
+    detail: str = typer.Option(
+        "standard", "--detail", "-d", help="Detail level: concise, standard, detailed"
+    ),
+    language: str = typer.Option(
+        "en", "--language", help="Language code (e.g., en, es)"
+    ),
+    focus: str = typer.Option("", "--focus", help="Focus prompt for the AI"),
+) -> None:
+    """Generate an infographic from notebook sources."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        orientation_map = {
+            "landscape": InfographicOrientation.LANDSCAPE,
+            "portrait": InfographicOrientation.PORTRAIT,
+            "square": InfographicOrientation.SQUARE,
+        }
+        detail_map = {
+            "concise": InfographicDetailLevel.CONCISE,
+            "standard": InfographicDetailLevel.STANDARD,
+            "detailed": InfographicDetailLevel.DETAILED,
+        }
+
+        if orientation not in orientation_map:
+            console.print(
+                f"[red]Invalid orientation: {orientation}. Use: landscape, portrait, square[/red]"
+            )
+            raise typer.Exit(1)
+        if detail not in detail_map:
+            console.print(
+                f"[red]Invalid detail: {detail}. Use: concise, standard, detailed[/red]"
+            )
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            source_manager = SourceManager(session)
+            sources = await source_manager.list_sources(notebook_id)
+
+            if not sources:
+                console.print(
+                    "[red]No sources found in notebook. Add sources first.[/red]"
+                )
+                raise typer.Exit(1)
+
+            source_ids = [s.id for s in sources]
+            console.print(
+                f"[dim]Generating infographic from {len(source_ids)} sources...[/dim]"
+            )
+
+            generator = ContentGenerator(session)
+            result = await generator.create_infographic(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                orientation=orientation_map[orientation],
+                detail_level=detail_map[detail],
+                language=language,
+                focus_prompt=focus,
+            )
+
+            console.print("[green]✓ Infographic generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Orientation: {result.orientation}")
+            console.print(f"  Detail Level: {result.detail_level}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
+@generate_app.command("slides")
+def generate_slides(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    format: str = typer.Option(
+        "detailed_deck",
+        "--format",
+        "-f",
+        help="Slide format: detailed_deck, presenter_slides",
+    ),
+    length: str = typer.Option(
+        "default", "--length", "-l", help="Slide deck length: short, default"
+    ),
+    language: str = typer.Option(
+        "en", "--language", help="Language code (e.g., en, es)"
+    ),
+    focus: str = typer.Option("", "--focus", help="Focus prompt for the AI"),
+) -> None:
+    """Generate a slide deck from notebook sources."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        format_map = {
+            "detailed_deck": SlideDeckFormat.DETAILED_DECK,
+            "presenter_slides": SlideDeckFormat.PRESENTER_SLIDES,
+        }
+        length_map = {
+            "short": SlideDeckLength.SHORT,
+            "default": SlideDeckLength.DEFAULT,
+        }
+
+        if format not in format_map:
+            console.print(
+                f"[red]Invalid format: {format}. Use: detailed_deck, presenter_slides[/red]"
+            )
+            raise typer.Exit(1)
+        if length not in length_map:
+            console.print(f"[red]Invalid length: {length}. Use: short, default[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            source_manager = SourceManager(session)
+            sources = await source_manager.list_sources(notebook_id)
+
+            if not sources:
+                console.print(
+                    "[red]No sources found in notebook. Add sources first.[/red]"
+                )
+                raise typer.Exit(1)
+
+            source_ids = [s.id for s in sources]
+            console.print(
+                f"[dim]Generating slide deck from {len(source_ids)} sources...[/dim]"
+            )
+
+            generator = ContentGenerator(session)
+            result = await generator.create_slides(
+                notebook_id=notebook_id,
+                source_ids=source_ids,
+                format=format_map[format],
+                length=length_map[length],
+                language=language,
+                focus_prompt=focus,
+            )
+
+            console.print("[green]✓ Slide deck generation started![/green]")
+            console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
+            console.print(f"  Format: {result.format}")
+            console.print(f"  Length: {result.length}")
+            console.print(f"  Status: {result.status}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm studio status <notebook_id>' to check progress[/dim]"
+            )
 
     asyncio.run(_run())
 

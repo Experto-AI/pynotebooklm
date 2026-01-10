@@ -23,7 +23,7 @@ Production-grade Python library for **Google NotebookLM** automation.
 - 📰 **Source Management** - Add URLs, YouTube videos, Google Drive docs, and text
 - 🔍 **Research & Analysis** - Query notebooks and discover related sources
 - 🧠 **Mind Maps** - Generate, save, list, and export mind maps (JSON/OPML/FreeMind)
-- 🎙️ **Content Generation** - Create podcasts, videos, infographics, and slides (coming soon)
+- 🎙️ **Content Generation** - Create audio overviews (podcasts), videos, infographics, and slides
 - 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents (coming soon)
 
 ## Installation
@@ -87,45 +87,98 @@ asyncio.run(main())
 
 ## CLI Commands
 
+### Authentication
+
 ```bash
-# Authentication
-pynotebooklm auth login    # Login with Google account
-pynotebooklm auth check    # Check authentication status
-pynotebooklm auth logout   # Clear saved authentication
-
-# Notebooks
-pynotebooklm notebooks list
-pynotebooklm notebooks create "My Notebook"
-pynotebooklm notebooks delete <notebook_id>
-
-# Sources
-pynotebooklm sources list <notebook_id>
-pynotebooklm sources add <notebook_id> <url>
-pynotebooklm sources delete <notebook_id> <source_id>
-
-# Research (async - returns task_id)
-pynotebooklm research start <notebook_id> "topic"           # Fast research
-pynotebooklm research start <notebook_id> "topic" --deep    # Deep research
-pynotebooklm research start <notebook_id> "topic" --source drive  # Search Drive
-pynotebooklm research poll <notebook_id>                    # Check status/get results
-
-# Mind Maps
-pynotebooklm mindmap create <notebook_id>                   # Create from all sources
-pynotebooklm mindmap create <notebook_id> --title "My Map"  # With custom title
-pynotebooklm mindmap list <notebook_id>                     # List existing maps
-pynotebooklm mindmap export <notebook_id> <map_id> -f json  # Export to JSON
-pynotebooklm mindmap export <notebook_id> <map_id> -f opml  # Export to OPML
-pynotebooklm mindmap export <notebook_id> <map_id> -f freemind  # Export to FreeMind
-
-# Chat & Writing
-pynotebooklm query ask <notebook_id> "question"             # Ask a question
-pynotebooklm query configure <notebook_id> [--goal default/learning/custom] [--prompt None or required for custom goal] [--length default/longer/shorter] # Set goal and response length
-pynotebooklm query summary <notebook_id>                    # Get summary
-pynotebooklm query briefing <notebook_id>                   # Create briefing doc
-
-# Studio (Artifacts)
-pynotebooklm studio list <notebook_id>                      # List artifacts (Briefings, Audio, etc.)
+pynotebooklm auth login              # Login with Google account (opens browser)
+pynotebooklm auth check              # Check authentication status
+pynotebooklm auth logout             # Clear saved authentication
 ```
+
+### Notebooks
+
+```bash
+pynotebooklm notebooks list                        # List all notebooks
+pynotebooklm notebooks list --detailed             # With source count and dates
+pynotebooklm notebooks create "My Notebook"        # Create a new notebook
+pynotebooklm notebooks delete <notebook_id>        # Delete a notebook
+pynotebooklm notebooks delete <notebook_id> -f     # Delete without confirmation
+```
+
+### Sources
+
+```bash
+pynotebooklm sources list <notebook_id>                    # List sources in notebook
+pynotebooklm sources add <notebook_id> <url>               # Add URL source
+pynotebooklm sources delete <notebook_id> <source_id>      # Delete a source
+pynotebooklm sources delete <notebook_id> <source_id> -f   # Delete without confirmation
+```
+
+### Research Discovery
+
+```bash
+pynotebooklm research start <notebook_id> "topic"              # Fast web research
+pynotebooklm research start <notebook_id> "topic" --deep       # Deep research (more comprehensive)
+pynotebooklm research start <notebook_id> "topic" --source drive   # Search Google Drive
+pynotebooklm research poll <notebook_id>                       # Check status and get results
+```
+
+### Mind Maps
+
+```bash
+pynotebooklm mindmap create <notebook_id>                      # Create from all sources
+pynotebooklm mindmap create <notebook_id> --title "My Map"     # With custom title
+pynotebooklm mindmap list <notebook_id>                        # List existing maps
+pynotebooklm mindmap export <notebook_id> <map_id> -f json     # Export to JSON
+pynotebooklm mindmap export <notebook_id> <map_id> -f opml     # Export to OPML
+pynotebooklm mindmap export <notebook_id> <map_id> -f freemind # Export to FreeMind (.mm)
+```
+
+### Chat & Query
+
+```bash
+pynotebooklm query ask <notebook_id> "question"                # Ask a question
+pynotebooklm query summary <notebook_id>                       # Get AI summary
+pynotebooklm query briefing <notebook_id>                      # Create briefing document
+pynotebooklm query configure <notebook_id> --goal learning     # Set conversation goal
+pynotebooklm query configure <notebook_id> --length longer     # Set response length
+```
+
+### Content Generation
+
+```bash
+# Audio Overview (Podcast)
+pynotebooklm generate audio <notebook_id>                      # Generate with defaults
+pynotebooklm generate audio <notebook_id> --format deep_dive   # Format: deep_dive, brief, critique, debate
+pynotebooklm generate audio <notebook_id> --length short       # Length: short, default, long
+pynotebooklm generate audio <notebook_id> --language es        # Language: en, es, fr, de, ja, etc.
+pynotebooklm generate audio <notebook_id> --focus "key topics" # Focus prompt for AI
+
+# Video Overview
+pynotebooklm generate video <notebook_id>                      # Generate with defaults
+pynotebooklm generate video <notebook_id> --format explainer   # Format: explainer, brief
+pynotebooklm generate video <notebook_id> --style anime        # Style: auto_select, classic, whiteboard, kawaii, anime, watercolor, retro_print, heritage, paper_craft
+
+# Infographic
+pynotebooklm generate infographic <notebook_id>                    # Generate with defaults
+pynotebooklm generate infographic <notebook_id> --orientation portrait  # Orientation: landscape, portrait, square
+pynotebooklm generate infographic <notebook_id> --detail detailed  # Detail: concise, standard, detailed
+
+# Slide Deck
+pynotebooklm generate slides <notebook_id>                         # Generate with defaults
+pynotebooklm generate slides <notebook_id> --format presenter_slides  # Format: detailed_deck, presenter_slides
+pynotebooklm generate slides <notebook_id> --length short          # Length: short, default
+```
+
+### Studio (Artifact Management)
+
+```bash
+pynotebooklm studio list <notebook_id>             # List all artifacts (Briefings, Audio, Video, etc.)
+pynotebooklm studio status <notebook_id>           # Detailed status with download URLs
+pynotebooklm studio delete <artifact_id>           # Delete an artifact (with confirmation)
+pynotebooklm studio delete <artifact_id> --force   # Delete without confirmation
+```
+
 
 ## Development
 
@@ -181,11 +234,14 @@ pynotebooklm/
 │   ├── notebooks.py       # Notebook management
 │   ├── sources.py         # Source management
 │   ├── research.py        # Research discovery
+│   ├── mindmaps.py        # Mind map generation
+│   ├── content.py         # Content generation (audio, video, etc.)
+│   ├── chat.py            # Chat and query functionality
 │   ├── models.py          # Pydantic data models
 │   ├── exceptions.py      # Custom exceptions
 │   └── cli.py             # CLI interface
 ├── tests/
-│   ├── unit/              # Unit tests (85)
+│   ├── unit/              # Unit tests (457)
 │   ├── integration/       # Integration tests (192)
 │   └── fixtures/          # Mock responses
 └── docs/                  # Documentation
@@ -214,7 +270,7 @@ This approach provides:
 - [x] **Phase 3**: Research Discovery
 - [x] **Phase 4**: Mind Maps
 - [x] **Phase 5**: Chat, Writing & Tone
-- [ ] **Phase 6**: Content Generation (Podcasts, Videos)
+- [x] **Phase 6**: Content Generation (Audio, Video, Infographics, Slides)
 - [ ] **Phase 7**: Study Tools
 - [ ] **Phase 8**: Production Readiness
 

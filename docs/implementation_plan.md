@@ -82,14 +82,18 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 
 ## Phase 6: Multi-modal Content Generation
 **Goal:** Generate Audio, Video, Slides, Infographics.
-**Status:** 🚧 Planned
+**Status:** ✅ Complete
 
 ### Key Components
-- `ContentGenerator` class.
-- Async polling for long-running tasks.
+- `ContentGenerator` class for all content types.
+- Async polling for long-running tasks with `poll_status()`.
+- Studio artifact management with `delete()`.
+- CLI commands: `generate audio`, `generate video`, `generate infographic`, `generate slides`.
+- Studio management: `studio status`, `studio delete`, `studio list`.
 
 ### Verification
-- `pytest tests/integration/test_content.py`
+- `pytest tests/unit/test_content.py` (54 tests)
+- CLI commands documented in README.md
 
 ## Phase 7: Study Tools
 **Goal:** Generate flashcards, quizzes, and data tables.
