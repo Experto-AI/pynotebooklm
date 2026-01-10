@@ -116,6 +116,12 @@ pynotebooklm mindmap list <notebook_id>                     # List existing maps
 pynotebooklm mindmap export <notebook_id> <map_id> -f json  # Export to JSON
 pynotebooklm mindmap export <notebook_id> <map_id> -f opml  # Export to OPML
 pynotebooklm mindmap export <notebook_id> <map_id> -f freemind  # Export to FreeMind
+
+# Chat & Writing
+pynotebooklm query ask <notebook_id> "question"             # Ask a question
+pynotebooklm query configure <notebook_id> --goal learning  # Set tone/style
+pynotebooklm query summary <notebook_id>                    # Get summary
+pynotebooklm query briefing <notebook_id>                   # Create briefing doc
 ```
 
 ## Development
@@ -204,7 +210,7 @@ This approach provides:
 - [x] **Phase 2**: Notebook & Source Management
 - [x] **Phase 3**: Research Discovery
 - [x] **Phase 4**: Mind Maps
-- [ ] **Phase 5**: Chat, Writing & Tone
+- [x] **Phase 5**: Chat, Writing & Tone
 - [ ] **Phase 6**: Content Generation (Podcasts, Videos)
 - [ ] **Phase 7**: Study Tools
 - [ ] **Phase 8**: Production Readiness

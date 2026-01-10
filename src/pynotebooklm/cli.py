@@ -6,6 +6,7 @@ from rich.console import Console
 from rich.table import Table
 
 from pynotebooklm.auth import AuthManager
+from pynotebooklm.chat import ChatSession
 from pynotebooklm.mindmaps import (
     MindMapGenerator,
     export_to_freemind,
@@ -23,12 +24,14 @@ notebooks_app = typer.Typer(help="Notebook management")
 sources_app = typer.Typer(help="Source management")
 research_app = typer.Typer(help="Research discovery")
 mindmap_app = typer.Typer(help="Mind map generation and export")
+query_app = typer.Typer(help="Chat and query tools")
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
 app.add_typer(sources_app, name="sources")
 app.add_typer(research_app, name="research")
 app.add_typer(mindmap_app, name="mindmap")
+app.add_typer(query_app, name="query")
 
 console = Console()
 
@@ -558,6 +561,118 @@ def export_mindmap(
             except ValueError as e:
                 console.print(f"[red]Export failed: {e}[/red]")
                 raise typer.Exit(1) from e
+
+    asyncio.run(_run())
+
+
+# =============================================================================
+# Query Commands
+# =============================================================================
+
+
+@query_app.command("ask")
+def query_ask(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    question: str = typer.Argument(..., help="Question to ask"),
+) -> None:
+    """Ask a question to the notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            chat = ChatSession(session)
+            console.print(f"[dim]Asking notebook {notebook_id}...[/dim]")
+
+            answer = await chat.query(notebook_id, question)
+
+            console.print("\n[bold]Answer:[/bold]")
+            console.print(answer)
+
+    asyncio.run(_run())
+
+
+@query_app.command("configure")
+def query_configure(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    goal: str = typer.Option("default", help="Goal: default, learning, custom"),
+    prompt: str = typer.Option(
+        None, help="Custom system prompt (required for custom goal)"
+    ),
+    length: str = typer.Option(
+        "default", help="Response length: default, longer, shorter"
+    ),
+) -> None:
+    """Configure chat settings (tone, style, length)."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            chat = ChatSession(session)
+            await chat.configure(
+                notebook_id, goal=goal, custom_prompt=prompt, length=length
+            )
+            console.print(
+                f"[green]✓ Configured chat settings for {notebook_id}[/green]"
+            )
+
+    asyncio.run(_run())
+
+
+@query_app.command("summary")
+def query_summary(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+) -> None:
+    """Get AI summary of the notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            chat = ChatSession(session)
+            result = await chat.get_notebook_summary(notebook_id)
+
+            console.print("\n[bold]Summary:[/bold]")
+            console.print(result["summary"])
+
+            if result["suggested_topics"]:
+                console.print("\n[bold]Suggested Topics:[/bold]")
+                for topic in result["suggested_topics"]:
+                    console.print(f"- {topic['question']}")
+
+    asyncio.run(_run())
+
+
+@query_app.command("briefing")
+def query_briefing(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+) -> None:
+    """Create a Briefing Doc from the notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            chat = ChatSession(session)
+            console.print("[dim]Creating briefing doc...[/dim]")
+            result = await chat.create_briefing(notebook_id)
+
+            console.print("[green]✓ Briefing generation started[/green]")
+            if result.get("artifact_id"):
+                console.print(f"  Artifact ID: {result['artifact_id']}")
 
     asyncio.run(_run())
 

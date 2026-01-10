@@ -47,7 +47,7 @@ Tests: `tests/integration/test_research.py`
 - **Drive Sync**: Per-source operation, accessed via individual source context menu (not notebook-wide)
 - **Topic Suggestions**: Appear as follow-up chips after chat responses; generated as part of chat, not a separate RPC
 
-## Mind Maps (Phase 4)
+## Mind Maps (Phase 4) ✅
 Tests: `tests/integration/test_mindmaps.py`
 
 | Tool | Description |
@@ -57,7 +57,7 @@ Tests: `tests/integration/test_mindmaps.py`
 | `mindmap_export_xml` | Export to FreeMind format |
 | `mindmap_export_opml` | Export to OPML format |
 
-## Query & Chat (Phase 5)
+## Query & Chat (Phase 5) ✅
 Tests: `tests/integration/test_chat.py`
 
 | Tool | Description |

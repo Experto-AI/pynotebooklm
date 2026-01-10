@@ -398,6 +398,78 @@ class BrowserSession:
             logger.error("Failed to parse response: %s", e)
             raise APIError(f"Failed to parse response: {e}") from e
 
+    async def call_api_raw(
+        self,
+        endpoint: str,
+        method: str = "GET",
+        body: str | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> str:
+        """
+        Make a raw API call via the browser context.
+
+        Args:
+            endpoint: API endpoint URL.
+            method: HTTP method.
+            body: Request body string.
+            headers: Additional headers.
+
+        Returns:
+            Raw response text.
+
+        Raises:
+            SessionError: If session not active.
+            APIError: If request fails.
+        """
+        if self._page is None:
+            raise SessionError("Browser session not active")
+
+        try:
+            response = await self._page.evaluate(
+                """
+                async (args) => {
+                    const options = {
+                        method: args.method,
+                        headers: args.headers || {},
+                        credentials: 'include',
+                    };
+
+                    if (args.body) {
+                        options.body = args.body;
+                    }
+
+                    const response = await fetch(args.endpoint, options);
+
+                    return {
+                        ok: response.ok,
+                        status: response.status,
+                        statusText: response.statusText,
+                        text: await response.text().catch(() => ''),
+                    };
+                }
+                """,
+                {
+                    "endpoint": endpoint,
+                    "method": method,
+                    "body": body,
+                    "headers": headers or {},
+                },
+            )
+
+            if not response.get("ok"):
+                raise APIError(
+                    f"API request failed: {response.get('statusText')}",
+                    status_code=response.get("status"),
+                    response_body=response.get("text"),
+                )
+
+            return str(response.get("text", ""))
+
+        except APIError:
+            raise
+        except Exception as e:
+            raise APIError(f"API call failed: {e}") from e
+
     async def call_api(
         self,
         endpoint: str,

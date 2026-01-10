@@ -59,7 +59,7 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 
 ## Phase 4: Mind Maps
 **Goal:** User can visualize research connections.
-**Status:** 🚧 Planned
+**Status:** ✅ Complete
 
 ### Key Components
 - `MindMapGenerator` class.
@@ -70,7 +70,7 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 
 ## Phase 5: Chat, Writing & Tone
 **Goal:** User can write blog posts with specific tone.
-**Status:** 🚧 Planned
+**Status:** ✅ Complete
 
 ### Key Components
 - `ChatSession` for querying notebooks.

@@ -235,34 +235,35 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  ---
  
- ## Phase 5: Chat, Writing & Tone
+ ## Phase 5: Chat, Writing & Tone ✅ COMPLETE
  
  **Milestone:** User can write the blog post with specific tone handling
  
  ### Query & Writer Engine
- - [ ] Create `src/pynotebooklm/chat.py` (or add to `notebooks.py`):
-   - [ ] `ChatSession.query(notebook_id, question)` - write text (`notebook_query`)
-   - [ ] `ChatSession.configure(notebook_id, config)` - set tone/style (`chat_configure`)
-   - [ ] `ChatSession.get_citation(citation_id)` - retrieve refs
-   - [ ] `ChatSession.get_notebook_summary(notebook_id)` (`notebook_describe`)
-   - [ ] `ChatSession.get_source_summary(notebook_id, source_id)` (`source_describe`)
-   - [ ] `ChatSession.create_briefing(notebook_id)` - generate structured blog/brief (`briefing_create`)
+ - [x] Create `src/pynotebooklm/chat.py` (or add to `notebooks.py`):
+   - [x] `ChatSession.query(notebook_id, question)` - write text (`notebook_query`)
+   - [x] `ChatSession.configure(notebook_id, config)` - set tone/style (`chat_configure`)
+   - [x] `ChatSession.get_citation(citation_id)` - retrieve refs
+   - [x] `ChatSession.get_notebook_summary(notebook_id)` (`notebook_describe`)
+   - [x] `ChatSession.get_source_summary(notebook_id, source_id)` (`source_describe`)
+   - [x] `ChatSession.create_briefing(notebook_id)` - generate structured blog/brief (`briefing_create`)
  
  ### CLI Implementation
- - [ ] Update `src/pynotebooklm/cli.py`:
-   - [ ] Add `pynotebooklm query <notebook_id> <question>`
-   - [ ] Add `pynotebooklm query configure <notebook_id>` (Set tone)
-   - [ ] Add `pynotebooklm query summary <notebook_id>`
-   - [ ] Add `pynotebooklm query briefing <notebook_id>`
+ - [x] Update `src/pynotebooklm/cli.py`:
+   - [x] Add `pynotebooklm query <notebook_id> <question>`
+   - [x] Add `pynotebooklm query configure <notebook_id>` (Set tone)
+   - [x] Add `pynotebooklm query summary <notebook_id>`
+   - [x] Add `pynotebooklm query briefing <notebook_id>`
  
  ### Testing
- - [ ] Create `tests/integration/test_chat.py`
+ - [x] Create `tests/integration/test_chat.py`
  
  ### Phase 5 Verification
- - [ ] `make test-integration-chat` passes
- - [ ] `pynotebooklm query configure <notebook_id> --style "Professional Blog"` updates settings
- - [ ] `pynotebooklm query <notebook_id> "Write a blog post based on the sources"` returns text
- - [ ] `pynotebooklm query briefing <notebook_id>` returns structured document
+ - [x] `make test-integration-chat` passes
+ - [x] `pynotebooklm query configure <notebook_id> --style "Professional Blog"` updates settings
+ - [x] `pynotebooklm query ask <notebook_id> "Write a blog post based on the sources"` returns text
+ - [x] `pynotebooklm query briefing <notebook_id>`
+ - [x] `pynotebooklm query summary <notebook_id>` 
  
  ---
  

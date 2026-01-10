@@ -40,7 +40,20 @@ RPC_LIST_SOURCES = "rLM1Ne"
 
 # Drive operations
 RPC_LIST_DRIVE_DOCS = "KGBelc"
+RPC_LIST_DRIVE_DOCS = "KGBelc"
 RPC_ADD_DRIVE_SOURCE = "izAoDd"
+
+# Phase 5 RPCs
+RPC_CONFIGURE_CHAT = "s0tc2d"  # Also handles rename
+RPC_GET_SUMMARY = "VfAZjd"
+RPC_GET_SOURCE_GUIDE = "tr032e"
+RPC_CREATE_STUDIO = "R7cb6c"
+QUERY_ENDPOINT = "/_/LabsTailwindUi/data/google.internal.labs.tailwind.orchestration.v1.LabsTailwindOrchestrationService/GenerateFreeFormStreamed"
+
+# Studio Types
+STUDIO_TYPE_REPORT = 2
+STUDIO_TYPE_AUDIO = 1
+STUDIO_TYPE_VIDEO = 3
 
 
 class NotebookLMAPI:
@@ -429,6 +442,139 @@ class NotebookLMAPI:
                 return match.group(1)
 
         return None
+
+    # =========================================================================
+    # Phase 5: Chat & Studio Operations
+    # =========================================================================
+
+    async def query_notebook(
+        self,
+        notebook_id: str,
+        query: str,
+        source_ids: list[str] | None = None,
+        conversation_id: str | None = None,
+        history: list[list[Any]] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Query the notebook (ask a question).
+
+        Args:
+            notebook_id: Notebook UUID.
+            query: Question text.
+            source_ids: Optional list of source IDs to use.
+            conversation_id: Optional conversation UUID.
+            history: Optional conversation history for context.
+
+        Returns:
+            Dict with answer, conversation_id, and turn info.
+        """
+        logger.debug("Querying notebook %s: %s", notebook_id, query)
+
+        # Build source IDs structure: [[[sid]]] for each source
+        sources_array = [[[sid]] for sid in source_ids] if source_ids else []
+
+        # Query params structure
+        params = [
+            sources_array,
+            query,
+            history,
+            [2, None, [1]],
+            conversation_id,
+        ]
+
+        # Use call_api for this special endpoint
+        import json
+        import time
+        import urllib.parse
+
+        json_params = json.dumps(params, separators=(",", ":"))
+        f_req = [None, json_params]
+        f_req_json = json.dumps(f_req, separators=(",", ":"))
+
+        # Build body
+        body_parts = [f"f.req={urllib.parse.quote(f_req_json, safe='')}"]
+        csrf_token = self._session.csrf_token
+        if csrf_token:
+            body_parts.append(f"at={urllib.parse.quote(csrf_token, safe='')}")
+        body = "&".join(body_parts) + "&"
+
+        # Build URL with query params
+        url_params = {
+            "bl": "boq_labs-tailwind-frontend_20251221.14_p0",
+            "hl": "en",
+            "_reqid": str(int(time.time() * 1000)),
+            "rt": "c",
+        }
+
+        query_string = urllib.parse.urlencode(url_params)
+        full_endpoint = f"{QUERY_ENDPOINT}?{query_string}"
+
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        }
+
+        # Use call_api_raw with special handling
+        response = await self._session.call_api_raw(
+            endpoint=full_endpoint,
+            method="POST",
+            body=body,
+            headers=headers,
+        )
+
+        # Parse result
+        # Parsing logic...
+        # For now, return the raw response wrapper or parsed text.
+        return {"raw_response": response}
+
+    async def configure_chat(
+        self,
+        notebook_id: str,
+        goal: int = 1,
+        custom_prompt: str | None = None,
+        length: int = 1,
+    ) -> dict[str, Any]:
+        """Configure chat settings."""
+        logger.debug("Configuring chat for %s", notebook_id)
+
+        goal_setting: list[Any] = [goal]
+        if goal == 2 and custom_prompt:
+            goal_setting.append(custom_prompt)
+
+        chat_settings = [goal_setting, [length]]
+        params = [
+            notebook_id,
+            [[None, None, None, None, None, None, None, chat_settings]],
+        ]
+
+        result = await self._session.call_rpc(RPC_CONFIGURE_CHAT, params)
+        return result  # type: ignore[no-any-return]
+
+    async def get_notebook_summary(self, notebook_id: str) -> dict[str, Any]:
+        """Get AI summary of notebook."""
+        logger.debug("Getting summary for %s", notebook_id)
+        result = await self._session.call_rpc(RPC_GET_SUMMARY, [notebook_id, [2]])
+        return result  # type: ignore[no-any-return]
+
+    async def get_source_guide(self, source_id: str) -> dict[str, Any]:
+        """Get source guide/summary."""
+        logger.debug("Getting guide for source %s", source_id)
+        result = await self._session.call_rpc(RPC_GET_SOURCE_GUIDE, [[[[source_id]]]])
+        return result  # type: ignore[no-any-return]
+
+    async def create_studio_artifact(
+        self,
+        notebook_id: str,
+        artifact_type: int,
+        content_params: list[Any],
+    ) -> dict[str, Any]:
+        """Create studio artifact (Report, Audio, etc)."""
+        logger.debug(
+            "Creating studio artifact type %d for %s", artifact_type, notebook_id
+        )
+
+        params = [[2], notebook_id, content_params]
+        result = await self._session.call_rpc(RPC_CREATE_STUDIO, params)
+        return result  # type: ignore[no-any-return]
 
 
 # =============================================================================
