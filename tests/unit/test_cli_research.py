@@ -684,7 +684,9 @@ class TestResearchCommandHelp:
         result = runner.invoke(app, ["research", "poll", "--help"])
 
         assert result.exit_code == 0
-        assert "auto-import" in result.output.lower()
+        # Check for both parts separately - ANSI codes can break up --auto-import
+        output_lower = result.output.lower()
+        assert "auto" in output_lower and "import" in output_lower
 
     def test_import_help(self) -> None:
         """Test import command shows help."""
