@@ -595,6 +595,28 @@ class TestImportDriveSources:
         assert source_array[0][0][0] == "doc123abc"
 
     @pytest.mark.asyncio
+    async def test_import_drive_source_with_d_path(
+        self, research_discovery, mock_session
+    ):
+        """Should extract doc_id from /d/ path."""
+        mock_session.call_rpc.return_value = MOCK_IMPORT_RESPONSE
+
+        sources = [
+            ResearchResult(
+                index=0,
+                url="https://docs.google.com/document/d/doc456xyz/edit",
+                title="Google Doc",
+                result_type=2,  # GOOGLE_DOC
+            ),
+        ]
+
+        await research_discovery.import_research_sources("nb_123", "task_id", sources)
+
+        call_args = mock_session.call_rpc.call_args
+        source_array = call_args[0][1][4]
+        assert source_array[0][0][0] == "doc456xyz"
+
+    @pytest.mark.asyncio
     async def test_import_drive_source_slides(self, research_discovery, mock_session):
         """Should handle Google Slides source."""
         mock_session.call_rpc.return_value = MOCK_IMPORT_RESPONSE

@@ -8,6 +8,7 @@ Based on reverse engineering of jacob-bd/notebooklm-mcp (Jan 2026).
 """
 
 import logging
+import re
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -270,7 +271,7 @@ class ResearchDiscovery:
                 raise NotebookNotFoundError(notebook_id) from e
             raise
 
-    async def poll_research(self, notebook_id: str) -> ResearchSession | None:
+    async def poll_research(self, notebook_id: str) -> ResearchSession:
         """
         Poll for research results.
 
@@ -280,7 +281,8 @@ class ResearchDiscovery:
             notebook_id: The notebook UUID.
 
         Returns:
-            ResearchSession with current status and results, or None if no research found.
+            ResearchSession with current status and results.
+            When no research is found, status will be ResearchStatus.NO_RESEARCH.
 
         Example:
             >>> status = await research.poll_research("notebook123")
@@ -391,6 +393,10 @@ class ResearchDiscovery:
                 doc_id = None
                 if "id=" in src.url:
                     doc_id = src.url.split("id=")[-1].split("&")[0]
+                if not doc_id:
+                    match = re.search(r"/d/([a-zA-Z0-9_-]+)", src.url)
+                    if match:
+                        doc_id = match.group(1)
 
                 if doc_id:
                     mime_types = {

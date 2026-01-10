@@ -47,13 +47,15 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 
 ### Key Components
 - `ResearchDiscovery` class (`src/pynotebooklm/research.py`).
-- `start_web_research()`, `get_status()`, `import_research_results()`.
-- `sync_drive_sources()`, `suggest_topics()`.
-- CLI commands: `research start/status/import/sync`.
+- `start_research()`, `poll_research()`, `import_research_sources()`.
+- Backward-compatible `start_web_research()` wrapper.
+- Research is async; `start_research()` returns a `task_id`, `poll_research()` returns results.
+- CLI commands: `research start`, `research poll`.
 
 ### Verification
-- `pytest tests/integration/test_research.py` (35 tests).
-- CLI: `pynotebooklm research start "topic"` returns research ID.
+- `pytest tests/integration/test_research.py`.
+- CLI: `pynotebooklm research start <notebook_id> "topic"` returns task ID.
+- CLI: `pynotebooklm research poll <notebook_id>` shows status and results.
 
 ## Phase 4: Mind Maps
 **Goal:** User can visualize research connections.
