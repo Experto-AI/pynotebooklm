@@ -44,10 +44,16 @@ if __name__ == "__main__":
     def test_main_module_execution(self) -> None:
         """The __main__ module runs app() when executed."""
         import runpy
+        import sys
 
         with patch("pynotebooklm.cli.app") as mock_app:
             try:
-                runpy.run_module("pynotebooklm.__main__", run_name="__main__")
+                existing = sys.modules.pop("pynotebooklm.__main__", None)
+                try:
+                    runpy.run_module("pynotebooklm.__main__", run_name="__main__")
+                finally:
+                    if existing is not None:
+                        sys.modules["pynotebooklm.__main__"] = existing
             except SystemExit:
                 pass  # app() may exit
             # Verify app was called

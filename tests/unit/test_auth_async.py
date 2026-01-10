@@ -657,55 +657,94 @@ class TestAuthMainBlock:
         """Auth main runs login command."""
         import asyncio
         import runpy
+        import sys
 
-        with patch.object(asyncio, "run") as mock_run:
-            with patch("sys.argv", ["auth", "login"]):
-                try:
-                    runpy.run_module("pynotebooklm.auth", run_name="__main__")
-                except SystemExit:
-                    pass
-                mock_run.assert_called_once()
+        def _close_coro(coro):
+            coro.close()
+
+        existing = sys.modules.pop("pynotebooklm.auth", None)
+        try:
+            with patch.object(asyncio, "run", side_effect=_close_coro) as mock_run:
+                with patch("sys.argv", ["auth", "login"]):
+                    try:
+                        runpy.run_module("pynotebooklm.auth", run_name="__main__")
+                    except SystemExit:
+                        pass
+                    mock_run.assert_called_once()
+        finally:
+            if existing is not None:
+                sys.modules["pynotebooklm.auth"] = existing
 
     def test_auth_main_check_command(self) -> None:
         """Auth main runs check command."""
         import asyncio
         import runpy
+        import sys
 
-        with patch.object(asyncio, "run") as mock_run:
-            with patch("sys.argv", ["auth", "check"]):
-                try:
-                    runpy.run_module("pynotebooklm.auth", run_name="__main__")
-                except SystemExit:
-                    pass
-                mock_run.assert_called_once()
+        def _close_coro(coro):
+            coro.close()
+
+        existing = sys.modules.pop("pynotebooklm.auth", None)
+        try:
+            with patch.object(asyncio, "run", side_effect=_close_coro) as mock_run:
+                with patch("sys.argv", ["auth", "check"]):
+                    try:
+                        runpy.run_module("pynotebooklm.auth", run_name="__main__")
+                    except SystemExit:
+                        pass
+                    mock_run.assert_called_once()
+        finally:
+            if existing is not None:
+                sys.modules["pynotebooklm.auth"] = existing
 
     def test_auth_main_logout_command(self) -> None:
         """Auth main runs logout command."""
         import asyncio
         import runpy
+        import sys
 
-        with patch.object(asyncio, "run") as mock_run:
-            with patch("sys.argv", ["auth", "logout"]):
-                try:
-                    runpy.run_module("pynotebooklm.auth", run_name="__main__")
-                except SystemExit:
-                    pass
-                mock_run.assert_called_once()
+        def _close_coro(coro):
+            coro.close()
+
+        existing = sys.modules.pop("pynotebooklm.auth", None)
+        try:
+            with patch.object(asyncio, "run", side_effect=_close_coro) as mock_run:
+                with patch("sys.argv", ["auth", "logout"]):
+                    try:
+                        runpy.run_module("pynotebooklm.auth", run_name="__main__")
+                    except SystemExit:
+                        pass
+                    mock_run.assert_called_once()
+        finally:
+            if existing is not None:
+                sys.modules["pynotebooklm.auth"] = existing
 
     def test_auth_main_no_args(self) -> None:
         """Auth main prints usage when no args."""
         import runpy
+        import sys
 
-        with patch("sys.argv", ["auth"]):
-            with pytest.raises(SystemExit) as exc_info:
-                runpy.run_module("pynotebooklm.auth", run_name="__main__")
-            assert exc_info.value.code == 1
+        existing = sys.modules.pop("pynotebooklm.auth", None)
+        try:
+            with patch("sys.argv", ["auth"]):
+                with pytest.raises(SystemExit) as exc_info:
+                    runpy.run_module("pynotebooklm.auth", run_name="__main__")
+                assert exc_info.value.code == 1
+        finally:
+            if existing is not None:
+                sys.modules["pynotebooklm.auth"] = existing
 
     def test_auth_main_unknown_command(self) -> None:
         """Auth main prints error for unknown command."""
         import runpy
+        import sys
 
-        with patch("sys.argv", ["auth", "unknown"]):
-            with pytest.raises(SystemExit) as exc_info:
-                runpy.run_module("pynotebooklm.auth", run_name="__main__")
-            assert exc_info.value.code == 1
+        existing = sys.modules.pop("pynotebooklm.auth", None)
+        try:
+            with patch("sys.argv", ["auth", "unknown"]):
+                with pytest.raises(SystemExit) as exc_info:
+                    runpy.run_module("pynotebooklm.auth", run_name="__main__")
+                assert exc_info.value.code == 1
+        finally:
+            if existing is not None:
+                sys.modules["pynotebooklm.auth"] = existing
