@@ -350,11 +350,20 @@ def start_research(
 @research_app.command("poll")
 def poll_research(
     notebook_id: str = typer.Argument(..., help="Notebook ID to poll research for"),
+    auto_import: bool = typer.Option(
+        False,
+        "--auto-import",
+        "-a",
+        help="Automatically import all discovered sources when research is completed",
+    ),
 ) -> None:
     """Poll for research results.
 
     Check the status of an ongoing research session and get results.
     Call this after 'research start' to see discovered sources.
+
+    Use --auto-import to automatically add discovered sources to the notebook
+    when research is completed. This saves a separate 'research import' step.
     """
 
     async def _run() -> None:
@@ -413,6 +422,182 @@ def poll_research(
 
                 if len(result.results) > 10:
                     console.print(f"  ... and {len(result.results) - 10} more")
+
+            # Auto-import if requested and research is completed
+            if auto_import and result.status.value == "completed" and result.results:
+                console.print("\n[bold green]Auto-importing sources...[/bold green]")
+                with console.status("[bold green]Importing sources to notebook..."):
+                    imported = await research.import_research_sources(
+                        notebook_id=notebook_id,
+                        task_id=result.task_id,
+                        sources=result.results,
+                    )
+                console.print(
+                    f"[green]✓ Imported {len(imported)} sources to notebook[/green]"
+                )
+                if imported:
+                    for imp_src in imported[:5]:
+                        console.print(f"  - {imp_src.title} ({imp_src.id[:8]}...)")
+                    if len(imported) > 5:
+                        console.print(f"  ... and {len(imported) - 5} more")
+
+            elif auto_import and result.status.value != "completed":
+                console.print(
+                    "\n[yellow]Note: --auto-import skipped (research not completed yet)[/yellow]"
+                )
+                console.print(
+                    "[dim]Poll again when status is 'completed' to auto-import sources[/dim]"
+                )
+
+    asyncio.run(_run())
+
+
+@research_app.command("import")
+def import_research(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to import sources into"),
+    indices: str = typer.Option(
+        None,
+        "--indices",
+        "-i",
+        help="Comma-separated indices of sources to import (e.g., '0,1,2'). Imports all if not specified.",
+    ),
+    include_report: bool = typer.Option(
+        True,
+        "--include-report/--no-report",
+        help="For deep research, also import the AI report as a text source",
+    ),
+) -> None:
+    """Import discovered research sources into the notebook.
+
+    This command imports sources that were discovered during research.
+    Call this after 'research poll' shows status='completed'.
+
+    By default, imports all discovered sources. Use --indices to import
+    specific sources only (e.g., --indices 0,2,5 to import sources at
+    those positions in the results list).
+
+    For deep research, the AI-generated report is also added as a text
+    source by default. Use --no-report to skip this.
+    """
+    from pynotebooklm.sources import SourceManager
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            research = ResearchDiscovery(session)
+
+            # First poll to get current research status
+            with console.status(
+                f"[bold green]Checking research status for {notebook_id}..."
+            ):
+                result = await research.poll_research(notebook_id)
+
+            if not result or result.status.value == "no_research":
+                console.print(
+                    "[red]No research found for this notebook.[/red]\n"
+                    "[dim]Run 'pynotebooklm research start' first.[/dim]"
+                )
+                raise typer.Exit(1)
+
+            if result.status.value != "completed":
+                console.print(
+                    f"[yellow]Research is still in progress (status: {result.status.value})[/yellow]\n"
+                    "[dim]Wait for completion, then run this command again.[/dim]"
+                )
+                raise typer.Exit(1)
+
+            if not result.results:
+                console.print("[yellow]No sources found in research results.[/yellow]")
+                return
+
+            # Parse indices if provided
+            sources_to_import = result.results
+            if indices:
+                try:
+                    index_list = [int(i.strip()) for i in indices.split(",")]
+                    invalid_indices = [
+                        i for i in index_list if i < 0 or i >= len(result.results)
+                    ]
+                    if invalid_indices:
+                        console.print(
+                            f"[red]Invalid indices: {invalid_indices}. "
+                            f"Valid range is 0-{len(result.results) - 1}.[/red]"
+                        )
+                        raise typer.Exit(1)
+                    sources_to_import = [result.results[i] for i in index_list]
+                except ValueError:
+                    console.print(
+                        "[red]Invalid indices format. Use comma-separated numbers (e.g., '0,1,2')[/red]"
+                    )
+                    raise typer.Exit(1) from None
+
+            console.print(
+                f"[bold]Importing {len(sources_to_import)} sources to notebook...[/bold]"
+            )
+
+            # Import the sources
+            with console.status("[bold green]Importing sources..."):
+                imported = await research.import_research_sources(
+                    notebook_id=notebook_id,
+                    task_id=result.task_id,
+                    sources=sources_to_import,
+                )
+
+            # Handle deep research report
+            report_imported = False
+            if include_report and result.mode == "deep" and result.report:
+                console.print(
+                    "[dim]Deep research detected - importing AI report as text source...[/dim]"
+                )
+                source_manager = SourceManager(session)
+                try:
+                    report_title = f"Deep Research Report: {result.query[:50]}"
+                    await source_manager.add_text(
+                        notebook_id=notebook_id,
+                        content=result.report,
+                        title=report_title,
+                    )
+                    report_imported = True
+                except Exception as e:
+                    console.print(
+                        f"[yellow]Warning: Could not import report as text source: {e}[/yellow]"
+                    )
+
+            # Display results
+            console.print(
+                f"[green]✓ Successfully imported {len(imported)} sources[/green]"
+            )
+            if report_imported:
+                console.print(
+                    "[green]✓ Imported deep research report as text source[/green]"
+                )
+
+            if imported:
+                table = Table(
+                    title="Imported Sources",
+                    show_header=True,
+                    header_style="bold green",
+                )
+                table.add_column("#", style="dim", justify="right")
+                table.add_column("ID", style="cyan", max_width=20)
+                table.add_column("Title", style="white", max_width=50)
+
+                for i, src in enumerate(imported):
+                    table.add_row(
+                        str(i),
+                        f"{src.id[:16]}..." if len(src.id) > 16 else src.id,
+                        src.title[:50] if len(src.title) > 50 else src.title,
+                    )
+
+                console.print(table)
+
+            console.print(
+                f"\n[dim]View sources: https://notebooklm.google.com/notebook/{notebook_id}[/dim]"
+            )
 
     asyncio.run(_run())
 

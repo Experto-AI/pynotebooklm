@@ -116,6 +116,9 @@ pynotebooklm research start <notebook_id> "topic"              # Fast web resear
 pynotebooklm research start <notebook_id> "topic" --deep       # Deep research (more comprehensive)
 pynotebooklm research start <notebook_id> "topic" --source drive   # Search Google Drive
 pynotebooklm research poll <notebook_id>                       # Check status and get results
+pynotebooklm research poll <notebook_id> --auto-import         # Poll & auto-import when done
+pynotebooklm research import <notebook_id>                     # Import all discovered sources
+pynotebooklm research import <notebook_id> --indices 0,1,2     # Import specific sources
 ```
 
 ### Mind Maps
@@ -290,6 +293,7 @@ This approach provides:
 - [x] **Phase 6**: Content Generation (Audio, Video, Infographics, Slides)
 - [x] **Phase 7**: Study Tools
 - [x] **Phase 8**: Production Readiness
+- [x] **Phase 9**: Research Import (auto-add discovered sources)
 
 ## License
 

@@ -56,6 +56,7 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 - `pytest tests/integration/test_research.py`.
 - CLI: `pynotebooklm research start <notebook_id> "topic"` returns task ID.
 - CLI: `pynotebooklm research poll <notebook_id>` shows status and results.
+- CLI: `pynotebooklm research import <notebook_id>` imports discovered sources to notebook.
 
 ## Phase 4: Mind Maps
 **Goal:** User can visualize research connections.
@@ -118,3 +119,18 @@ This document outlines the phased implementation plan for the `pynotebooklm` lib
 ### Verification
 - `pip install .` works.
 - Docker container runs.
+
+## Phase 9: Research Import Feature
+**Goal:** User can automatically import discovered research sources into notebook.
+**Status:** ✅ Complete
+
+### Key Components
+- `research import` CLI command for explicit source import.
+- `--auto-import` flag for `research poll` command.
+- Deep research report import as text source.
+- Support for `--indices` to import specific sources.
+
+### Verification
+- `pytest tests/unit/test_cli_research.py` (20 tests)
+- CLI: `pynotebooklm research import <notebook_id>` imports sources.
+- CLI: `pynotebooklm research poll <notebook_id> --auto-import` polls and imports.

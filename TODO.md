@@ -472,7 +472,61 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  ---
  
- ## Phase 9: Stabilization & Optimization
+ ## Phase 9: Research Import Feature
+ 
+ **Milestone:** User can automatically import discovered research sources into notebook
+ 
+ **Problem:** When creating research (deep or standard), the discovered sources are not 
+ automatically joined to the notebook. In the web UI, users must "click a button" to import 
+ them. This phase adds a CLI command and enhanced workflow to automate this.
+ 
+ ### Key insight (from jacob-bd/notebooklm-mcp analysis, 2026-01-10):
+ Research in NotebookLM is a 3-step process:
+ 1. **Start Research** - `Ljjv0c` (fast) or `QA9ei` (deep) - discovers web/drive sources
+ 2. **Poll Results** - `e3bVqc` - wait until status=completed, get discovered sources
+ 3. **Import Sources** - `LBwxtb` - explicitly adds sources to the notebook
+ 
+ The `import_research_sources()` method exists in `research.py` but has no CLI command.
+ 
+ ### RPC Details (from API_REFERENCE.md):
+ - `LBwxtb` = Import Research Sources
+   - Params: `[null, [1], task_id, notebook_id, [sources]]`
+   - Each web source: `[null, null, ["url", "title"], null x8, 2]`
+   - Each drive source: `[[doc_id, mime_type, 1, title], null x9, 2]`
+   - Response: Array of created sources with source_id, title
+ 
+ ### Research Import CLI
+ - [x] Add `pynotebooklm research import <notebook_id>` command:
+   - [x] Poll research, verify completed
+   - [x] Import all discovered sources (or specific ones with `--indices`)
+   - [x] For deep research, optionally import report as text source
+   - [x] Show import summary with count and URLs
+ 
+ ### Enhanced Workflow (Optional)
+ - [x] Add `--auto-import` flag to `research poll`:
+   - [x] If research completed, automatically imports sources
+   - [x] Shows combined status + import result
+ 
+ ### Testing
+ - [x] Create `tests/unit/test_cli_research.py`:
+   - [x] Test research import command with all inputs
+   - [x] Test import with specific indices
+   - [x] Test import of deep research with report
+   - [x] Test error handling (not completed, no research)
+ - [x] Add to `tests/unit/test_research.py`:
+   - [x] Test import_research_sources method
+ - [x] Verify coverage > 90%
+ 
+ ### Phase 9 Verification
+ - [x] `make check` passes
+ - [x] `pynotebooklm research import <notebook_id>` imports all sources
+ - [x] `pynotebooklm research import <notebook_id> --indices 0,1,2` imports specific sources
+ - [x] `pynotebooklm research poll <notebook_id> --auto-import` polls and auto-imports
+ - [x] Sources appear in notebook after import
+ 
+ ---
+ 
+ ## Phase 10: Stabilization & Optimization
  
  **Milestone:** High reliability, improved performance, and ecosystem integration
  
