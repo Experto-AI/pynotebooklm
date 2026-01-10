@@ -437,6 +437,71 @@ async def _main_login() -> None:
     sys.exit(0)
 
 
+def save_auth_tokens(
+    cookies: str | list[dict[str, Any]],
+    csrf_token: str | None = None,
+    auth_path: Path | str | None = None,
+) -> None:
+    """
+    Manually save authentication tokens/cookies.
+
+    Args:
+        cookies: Either a cookie header string ("SID=abc; HSID=def")
+                or a list of cookie dictionaries (Playwright/Chrome format).
+        csrf_token: Optional CSRF token (SNlM0e).
+        auth_path: Optional path to save the auth state.
+    """
+    auth = AuthManager(auth_path=auth_path)
+    cookie_models = []
+
+    if isinstance(cookies, str):
+        # Parse cookie header string
+        # format: name1=value1; name2=value2
+        pairs = cookies.split(";")
+        for pair in pairs:
+            if "=" not in pair:
+                continue
+            name, value = pair.strip().split("=", 1)
+            cookie_models.append(
+                Cookie(
+                    name=name,
+                    value=value,
+                    domain=".google.com",
+                    path="/",
+                    secure=True,
+                    http_only=True,
+                )
+            )
+    elif isinstance(cookies, list):
+        # Parse list of dicts
+        for c in cookies:
+            cookie_models.append(
+                Cookie(
+                    name=c["name"],
+                    value=c["value"],
+                    domain=c.get("domain", ".google.com"),
+                    path=c.get("path", "/"),
+                    expires=c.get("expires"),
+                    http_only=c.get("httpOnly", False),
+                    secure=c.get("secure", False),
+                    same_site=c.get("sameSite", "Lax"),
+                )
+            )
+    else:
+        raise ValueError("cookies must be a string or a list of dictionaries")
+
+    # Update state
+    now = datetime.now()
+    auth._auth_state = AuthState(
+        cookies=cookie_models,
+        csrf_token=csrf_token,
+        authenticated_at=now,
+        expires_at=now + timedelta(days=COOKIE_VALIDITY_DAYS),
+    )
+    auth._save_cookies()
+    logger.info("Manually saved %d tokens", len(cookie_models))
+
+
 async def _main_check() -> None:
     """CLI entry point for checking auth status."""
     import sys

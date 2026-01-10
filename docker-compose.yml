@@ -1,0 +1,9 @@
+services:
+  pynotebooklm:
+    build: .
+    volumes:
+      - ~/.pynotebooklm:/root/.pynotebooklm
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Run interactive login if needed
+    # command: auth login

@@ -121,7 +121,8 @@ def list_notebooks(
 
         async with BrowserSession(auth) as session:
             manager = NotebookManager(session)
-            notebooks = await manager.list()
+            with console.status("[bold green]Fetching notebooks..."):
+                notebooks = await manager.list()
 
             if not notebooks:
                 console.print("No notebooks found.")
@@ -170,7 +171,8 @@ def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> No
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = NotebookManager(session)
-            nb = await manager.create(name)
+            with console.status(f"[bold green]Creating notebook '{name}'..."):
+                nb = await manager.create(name)
             console.print(
                 f"[green]✓ Created notebook: [bold]{nb.name}[/bold] ({nb.id})[/green]"
             )
@@ -198,7 +200,8 @@ def delete_notebook(
                     console.print("Aborted.")
                     return
 
-            await manager.delete(notebook_id, confirm=True)
+            with console.status(f"[bold red]Deleting notebook {notebook_id}..."):
+                await manager.delete(notebook_id, confirm=True)
             console.print(f"[green]✓ Deleted notebook: {notebook_id}[/green]")
 
     asyncio.run(_run())
@@ -220,7 +223,8 @@ def add_source(
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
-            source = await manager.add_url(notebook_id, url)
+            with console.status(f"[bold green]Adding source {url}..."):
+                source = await manager.add_url(notebook_id, url)
             console.print(
                 f"[green]✓ Added source: [bold]{source.title}[/bold] ({source.id})[/green]"
             )
@@ -236,7 +240,8 @@ def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> 
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
-            sources = await manager.list_sources(notebook_id)
+            with console.status(f"[bold green]Fetching sources for {notebook_id}..."):
+                sources = await manager.list_sources(notebook_id)
 
             if not sources:
                 console.print(f"No sources found in notebook {notebook_id}.")
@@ -277,7 +282,8 @@ def delete_source(
                     console.print("Aborted.")
                     return
 
-            await manager.delete(notebook_id, source_id)
+            with console.status(f"[bold red]Deleting source {source_id}..."):
+                await manager.delete(notebook_id, source_id)
             console.print(f"[green]✓ Deleted source: {source_id}[/green]")
 
     asyncio.run(_run())
@@ -318,12 +324,13 @@ def start_research(
 
         async with BrowserSession(auth) as session:
             research = ResearchDiscovery(session)
-            result = await research.start_research(
-                notebook_id=notebook_id,
-                query=topic,
-                source=source,
-                mode=research_type,
-            )
+            with console.status(f"[bold green]Starting research on '{topic}'..."):
+                result = await research.start_research(
+                    notebook_id=notebook_id,
+                    query=topic,
+                    source=source,
+                    mode=research_type,
+                )
 
             console.print("[green]✓ Started research session[/green]")
             console.print(f"  Notebook: [cyan]{notebook_id}[/cyan]")
@@ -358,7 +365,10 @@ def poll_research(
 
         async with BrowserSession(auth) as session:
             research = ResearchDiscovery(session)
-            result = await research.poll_research(notebook_id)
+            with console.status(
+                f"[bold green]Polling research status for {notebook_id}..."
+            ):
+                result = await research.poll_research(notebook_id)
 
             if not result or result.status.value == "no_research":
                 console.print(
@@ -433,12 +443,11 @@ def create_mindmap(
         async with BrowserSession(auth) as session:
             generator = MindMapGenerator(session)
 
-            console.print(
-                f"[dim]Generating mind map for notebook {notebook_id}...[/dim]"
-            )
-
             try:
-                mindmap = await generator.create(notebook_id, title=title)
+                with console.status(
+                    f"[bold green]Generating mind map for notebook {notebook_id}..."
+                ):
+                    mindmap = await generator.create(notebook_id, title=title)
                 console.print("[green]✓ Created mind map successfully![/green]")
                 console.print(f"  ID: [cyan]{mindmap.id}[/cyan]")
                 console.print(f"  Title: [bold]{mindmap.title}[/bold]")
@@ -603,9 +612,8 @@ def query_ask(
 
         async with BrowserSession(auth) as session:
             chat = ChatSession(session)
-            console.print(f"[dim]Asking notebook {notebook_id}...[/dim]")
-
-            answer = await chat.query(notebook_id, question)
+            with console.status(f"[bold green]Asking notebook {notebook_id}..."):
+                answer = await chat.query(notebook_id, question)
 
             console.print("\n[bold]Answer:[/bold]")
             console.print(answer)
@@ -726,9 +734,10 @@ def list_studio(
 
         async with BrowserSession(auth) as session:
             chat = ChatSession(session)
-            console.print(f"[dim]Fetching studio artifacts for {notebook_id}...[/dim]")
-
-            artifacts = await chat.list_artifacts(notebook_id)
+            with console.status(
+                f"[bold green]Fetching studio artifacts for {notebook_id}..."
+            ):
+                artifacts = await chat.list_artifacts(notebook_id)
 
             if not artifacts:
                 console.print("[yellow]No studio artifacts found.[/yellow]")
@@ -790,9 +799,10 @@ def studio_status(
 
         async with BrowserSession(auth) as session:
             generator = ContentGenerator(session)
-            console.print(f"[dim]Fetching studio status for {notebook_id}...[/dim]")
-
-            artifacts = await generator.poll_status(notebook_id)
+            with console.status(
+                f"[bold green]Fetching studio status for {notebook_id}..."
+            ):
+                artifacts = await generator.poll_status(notebook_id)
 
             if not artifacts:
                 console.print("[yellow]No studio artifacts found.[/yellow]")
@@ -863,9 +873,8 @@ def studio_delete(
 
         async with BrowserSession(auth) as session:
             generator = ContentGenerator(session)
-            console.print(f"[dim]Deleting artifact {artifact_id}...[/dim]")
-
-            success = await generator.delete(artifact_id)
+            with console.status(f"[bold red]Deleting artifact {artifact_id}..."):
+                success = await generator.delete(artifact_id)
 
             if success:
                 console.print(f"[green]✓ Deleted artifact: {artifact_id}[/green]")
@@ -942,19 +951,18 @@ def generate_audio(
                 raise typer.Exit(1)
 
             source_ids = [s.id for s in sources]
-            console.print(
-                f"[dim]Generating audio from {len(source_ids)} sources...[/dim]"
-            )
-
             generator = ContentGenerator(session)
-            result = await generator.create_audio(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                format=format_map[format],
-                length=length_map[length],
-                language=language,
-                focus_prompt=focus,
-            )
+            with console.status(
+                f"[bold green]Generating audio overview for {notebook_id}..."
+            ):
+                result = await generator.create_audio(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    format=format_map[format],
+                    length=length_map[length],
+                    language=language,
+                    focus_prompt=focus,
+                )
 
             console.print("[green]✓ Audio generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1030,19 +1038,18 @@ def generate_video(
                 raise typer.Exit(1)
 
             source_ids = [s.id for s in sources]
-            console.print(
-                f"[dim]Generating video from {len(source_ids)} sources...[/dim]"
-            )
-
             generator = ContentGenerator(session)
-            result = await generator.create_video(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                format=format_map[format],
-                style=style_map[style],
-                language=language,
-                focus_prompt=focus,
-            )
+            with console.status(
+                f"[bold green]Generating video overview for {notebook_id}..."
+            ):
+                result = await generator.create_video(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    format=format_map[format],
+                    style=style_map[style],
+                    language=language,
+                    focus_prompt=focus,
+                )
 
             console.print("[green]✓ Video generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1115,19 +1122,18 @@ def generate_infographic(
                 raise typer.Exit(1)
 
             source_ids = [s.id for s in sources]
-            console.print(
-                f"[dim]Generating infographic from {len(source_ids)} sources...[/dim]"
-            )
-
             generator = ContentGenerator(session)
-            result = await generator.create_infographic(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                orientation=orientation_map[orientation],
-                detail_level=detail_map[detail],
-                language=language,
-                focus_prompt=focus,
-            )
+            with console.status(
+                f"[bold green]Generating infographic for {notebook_id}..."
+            ):
+                result = await generator.create_infographic(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    orientation=orientation_map[orientation],
+                    detail_level=detail_map[detail],
+                    language=language,
+                    focus_prompt=focus,
+                )
 
             console.print("[green]✓ Infographic generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1196,19 +1202,18 @@ def generate_slides(
                 raise typer.Exit(1)
 
             source_ids = [s.id for s in sources]
-            console.print(
-                f"[dim]Generating slide deck from {len(source_ids)} sources...[/dim]"
-            )
-
             generator = ContentGenerator(session)
-            result = await generator.create_slides(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                format=format_map[format],
-                length=length_map[length],
-                language=language,
-                focus_prompt=focus,
-            )
+            with console.status(
+                f"[bold green]Generating slide deck for {notebook_id}..."
+            ):
+                result = await generator.create_slides(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    format=format_map[format],
+                    length=length_map[length],
+                    language=language,
+                    focus_prompt=focus,
+                )
 
             console.print("[green]✓ Slide deck generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1272,16 +1277,15 @@ def create_flashcards(
                 console.print("[red]No sources found in notebook[/red]")
                 raise typer.Exit(1)
 
-            console.print(
-                f"[dim]Creating flashcards from {len(source_ids)} sources...[/dim]"
-            )
-
             study = StudyManager(session)
-            result = await study.create_flashcards(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                difficulty=difficulty_map[difficulty.lower()],
-            )
+            with console.status(
+                f"[bold green]Generating flashcards for {notebook_id}..."
+            ):
+                result = await study.create_flashcards(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    difficulty=difficulty_map[difficulty.lower()],
+                )
 
             console.print("[green]✓ Flashcard generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1330,17 +1334,14 @@ def create_quiz(
                 console.print("[red]No sources found in notebook[/red]")
                 raise typer.Exit(1)
 
-            console.print(
-                f"[dim]Creating quiz with {questions} questions from {len(source_ids)} sources...[/dim]"
-            )
-
             study = StudyManager(session)
-            result = await study.create_quiz(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                question_count=questions,
-                difficulty=difficulty,
-            )
+            with console.status(f"[bold green]Generating quiz for {notebook_id}..."):
+                result = await study.create_quiz(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    question_count=questions,
+                    difficulty=difficulty,
+                )
 
             console.print("[green]✓ Quiz generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")
@@ -1391,18 +1392,16 @@ def create_data_table(
                 console.print("[red]No sources found in notebook[/red]")
                 raise typer.Exit(1)
 
-            console.print(
-                f"[dim]Creating data table from {len(source_ids)} sources...[/dim]"
-            )
-            console.print(f"[dim]Description: {description}[/dim]")
-
             study = StudyManager(session)
-            result = await study.create_data_table(
-                notebook_id=notebook_id,
-                source_ids=source_ids,
-                description=description,
-                language=language,
-            )
+            with console.status(
+                f"[bold green]Generating data table for {notebook_id}..."
+            ):
+                result = await study.create_data_table(
+                    notebook_id=notebook_id,
+                    source_ids=source_ids,
+                    description=description,
+                    language=language,
+                )
 
             console.print("[green]✓ Data table generation started![/green]")
             console.print(f"  Artifact ID: [cyan]{result.artifact_id}[/cyan]")

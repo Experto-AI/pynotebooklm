@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pynotebooklm"
-version = "0.16.0"
+version = "0.17.0"
 description = "Production-grade Python library for NotebookLM automation with 31 tools"
 authors = ["Victor"]
 license = "Apache-2.0"
@@ -34,6 +34,9 @@ ruff = "^0.8.0"
 mypy = "^1.14.0"
 black = "^24.0.0"
 isort = "^5.13.0"
+mkdocs-material = "^9.7.1"
+mkdocstrings = {extras = ["python"], version = "^1.0.0"}
+mkdocs-autorefs = "^1.4.3"
 
 [tool.poetry.scripts]
 pynotebooklm = "pynotebooklm.cli:app"

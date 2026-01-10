@@ -24,7 +24,7 @@ Production-grade Python library for **Google NotebookLM** automation.
 - 🔍 **Research & Analysis** - Query notebooks and discover related sources
 - 🧠 **Mind Maps** - Generate, save, list, and export mind maps (JSON/OPML/FreeMind)
 - 🎙️ **Content Generation** - Create audio overviews (podcasts), videos, infographics, and slides
-- 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents (coming soon)
+- 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents
 
 ## Installation
 
@@ -68,19 +68,14 @@ pynotebooklm auth check
 
 ```python
 import asyncio
-from pynotebooklm import AuthManager, BrowserSession
+from pynotebooklm import NotebookLMClient
 
 async def main():
-    auth = AuthManager()
-    
-    if not auth.is_authenticated():
-        print("Please run: pynotebooklm auth login")
-        return
-    
-    async with BrowserSession(auth) as session:
+    async with NotebookLMClient() as client:
         # List notebooks
-        result = await session.call_rpc("wXbhsf", [None, 1, None, [2]])
-        print(f"Notebooks: {result}")
+        notebooks = await client.notebooks.list()
+        for nb in notebooks:
+            print(f"{nb.name} ({nb.id})")
 
 asyncio.run(main())
 ```
@@ -293,8 +288,8 @@ This approach provides:
 - [x] **Phase 4**: Mind Maps
 - [x] **Phase 5**: Chat, Writing & Tone
 - [x] **Phase 6**: Content Generation (Audio, Video, Infographics, Slides)
-- [ ] **Phase 7**: Study Tools
-- [ ] **Phase 8**: Production Readiness
+- [x] **Phase 7**: Study Tools
+- [x] **Phase 8**: Production Readiness
 
 ## License
 

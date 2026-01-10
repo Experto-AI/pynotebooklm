@@ -445,3 +445,99 @@ class TestStudyManagerResultParsing:
         # Should handle gracefully with unknown status
         assert result.artifact_id == "artifact-123"
         assert result.status == "unknown"
+
+
+class TestStudyManagerHelperFunctions:
+    """Tests for private helper functions in study module."""
+
+    def test_code_to_difficulty(self) -> None:
+        """Test _code_to_difficulty mapping."""
+        from pynotebooklm.study import _code_to_difficulty
+
+        assert _code_to_difficulty(1) == "easy"
+        assert _code_to_difficulty(2) == "medium"
+        assert _code_to_difficulty(3) == "hard"
+        assert _code_to_difficulty(99) == "medium"  # default
+
+
+class TestStudyManagerResultParsingExt:
+    """Extended tests for result parsing edge cases in StudyManager."""
+
+    @pytest.fixture
+    def mock_session(self) -> MagicMock:
+        """Create a mock session."""
+        session = MagicMock()
+        session.call_rpc = AsyncMock()
+        return session
+
+    @pytest.mark.asyncio
+    async def test_parse_quiz_invalid_response_empty(self, mock_session: MagicMock) -> None:
+        """Test parsing empty quiz response."""
+        mock_session.call_rpc.return_value = []
+        manager = StudyManager(mock_session)
+        with pytest.raises(GenerationError, match="Invalid response when creating quiz"):
+            await manager.create_quiz("nb", ["src"])
+
+    @pytest.mark.asyncio
+    async def test_parse_quiz_invalid_artifact_data(self, mock_session: MagicMock) -> None:
+        """Test parsing invalid artifact data in quiz response."""
+        mock_session.call_rpc.return_value = [[]]
+        manager = StudyManager(mock_session)
+        with pytest.raises(GenerationError, match="Invalid artifact data when creating quiz"):
+            await manager.create_quiz("nb", ["src"])
+
+    @pytest.mark.asyncio
+    async def test_parse_data_table_invalid_response_empty(self, mock_session: MagicMock) -> None:
+        """Test parsing empty data table response."""
+        mock_session.call_rpc.return_value = []
+        manager = StudyManager(mock_session)
+        with pytest.raises(GenerationError, match="Invalid response when creating data table"):
+            await manager.create_data_table("nb", ["src"], "desc")
+
+    @pytest.mark.asyncio
+    async def test_parse_data_table_invalid_artifact_data(self, mock_session: MagicMock) -> None:
+        """Test parsing invalid artifact data in data table response."""
+        mock_session.call_rpc.return_value = [[]]
+        manager = StudyManager(mock_session)
+        with pytest.raises(GenerationError, match="Invalid artifact data when creating data table"):
+            await manager.create_data_table("nb", ["src"], "desc")
+
+    @pytest.mark.asyncio
+    async def test_parse_flashcard_invalid_artifact_data(self, mock_session: MagicMock) -> None:
+        """Test parsing invalid artifact data in flashcard response."""
+        mock_session.call_rpc.return_value = [[]]
+        manager = StudyManager(mock_session)
+        with pytest.raises(GenerationError, match="Invalid artifact data when creating flashcards"):
+            await manager.create_flashcards("nb", ["src"])
+
+    @pytest.mark.asyncio
+    async def test_parse_quiz_completed_status(self, mock_session: MagicMock) -> None:
+        """Test quiz parsing with completed status."""
+        mock_session.call_rpc.return_value = [["q", None, None, None, STATUS_COMPLETED]]
+        manager = StudyManager(mock_session)
+        result = await manager.create_quiz("nb", ["src"])
+        assert result.status == "completed"
+
+    @pytest.mark.asyncio
+    async def test_parse_quiz_unknown_status(self, mock_session: MagicMock) -> None:
+        """Test quiz parsing with unknown status."""
+        mock_session.call_rpc.return_value = [["q", None, None, None, 99]]
+        manager = StudyManager(mock_session)
+        result = await manager.create_quiz("nb", ["src"])
+        assert result.status == "unknown"
+
+    @pytest.mark.asyncio
+    async def test_parse_data_table_completed_status(self, mock_session: MagicMock) -> None:
+        """Test data table parsing with completed status."""
+        mock_session.call_rpc.return_value = [["t", None, None, None, STATUS_COMPLETED]]
+        manager = StudyManager(mock_session)
+        result = await manager.create_data_table("nb", ["src"], "d")
+        assert result.status == "completed"
+
+    @pytest.mark.asyncio
+    async def test_parse_data_table_unknown_status(self, mock_session: MagicMock) -> None:
+        """Test data table parsing with unknown status."""
+        mock_session.call_rpc.return_value = [["t", None, None, None, 99]]
+        manager = StudyManager(mock_session)
+        result = await manager.create_data_table("nb", ["src"], "d")
+        assert result.status == "unknown"

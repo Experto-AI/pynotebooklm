@@ -6,7 +6,9 @@ including notebook management, source handling, and content generation.
 """
 
 from .api import NotebookLMAPI
-from .auth import AuthManager
+from .auth import AuthManager, save_auth_tokens
+from .chat import ChatSession
+from .client import NotebookLMClient
 from .content import (
     AudioFormat,
     AudioLength,
@@ -81,8 +83,11 @@ __all__ = [
     # Core classes
     "AuthManager",
     "BrowserSession",
+    "ChatSession",
     "NotebookLMAPI",
+    "NotebookLMClient",
     "NotebookManager",
+    "save_auth_tokens",
     "ResearchDiscovery",
     "SourceManager",
     "MindMapGenerator",
