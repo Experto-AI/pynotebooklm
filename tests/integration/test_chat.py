@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from pynotebooklm.api import QUERY_ENDPOINT, RPC_CONFIGURE_CHAT, RPC_CREATE_STUDIO
+from pynotebooklm.api import QUERY_ENDPOINT, RPC_CONFIGURE_CHAT
 from pynotebooklm.chat import ChatSession
 from pynotebooklm.session import BrowserSession
 
@@ -65,16 +65,30 @@ async def test_configure(mock_session):
 @pytest.mark.asyncio
 async def test_create_briefing(mock_session):
     chat = ChatSession(mock_session)
-    # Mock create result: [[id, ..., status=1]]
-    mock_session.call_rpc.return_value = [[["artifact-123", None, None, None, 1]]]
+
+    # Mock sequence:
+    # 1. get_notebook response (empty sources for simplicity)
+    # 2. create_studio_artifact response
+
+    # Notebook mock: [name, sources, id, ...]
+    notebook_mock = ["Notebook", [], "nb-123", 0, 0]
+
+    # Studio mock: [[id, ..., status=1]]
+    studio_mock = [[["artifact-123", None, None, None, 1]]]
+
+    mock_session.call_rpc.side_effect = [notebook_mock, studio_mock]
 
     result = await chat.create_briefing("nb-123")
     assert result["artifact_id"] == "artifact-123"
     assert result["status"] == "in_progress"
 
-    mock_session.call_rpc.assert_called_once()
-    args = mock_session.call_rpc.call_args[0]
-    assert args[0] == RPC_CREATE_STUDIO
+    # Should be called twice
+    assert mock_session.call_rpc.call_count == 2
+
+    # Verify calls if needed
+    calls = mock_session.call_rpc.call_args_list
+    assert calls[0][0][0] == "rLM1Ne"  # RPC_GET_NOTEBOOK
+    assert calls[1][0][0] == "R7cb6c"  # RPC_CREATE_STUDIO
 
 
 @pytest.mark.asyncio

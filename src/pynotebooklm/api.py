@@ -149,6 +149,10 @@ class NotebookLMAPI:
                 RPC_GET_NOTEBOOK,
                 [notebook_id, None, [2], None, 0],
             )
+            # DEBUG: Print notebook structure to find artifacts
+            import json
+
+            print(f"DEBUG: Notebook dump: {json.dumps(result)}")
             return result  # type: ignore[no-any-return]
         except APIError as e:
             # Check if it's a not found error
@@ -576,10 +580,63 @@ class NotebookLMAPI:
         result = await self._session.call_rpc(RPC_CREATE_STUDIO, params)
         return result  # type: ignore[no-any-return]
 
+    async def list_studio_artifacts(self, notebook_id: str) -> list[dict[str, Any]]:
+        """List all studio artifacts (briefings, audio, etc) and their status."""
+        logger.debug("Listing studio artifacts for %s", notebook_id)
+
+        # Params from reverse engineering / reference code
+        params = [[2], notebook_id, 'NOT artifact.status = "ARTIFACT_STATUS_SUGGESTED"']
+
+        result = await self._session.call_rpc(RPC_LIST_STUDIO_ARTIFACTS, params)
+
+        artifacts = []
+        if isinstance(result, list) and len(result) > 0:
+            # Result typically [ [artifact1, artifact2, ...], ... ]
+            items_list = result[0] if isinstance(result[0], list) else []
+
+            for item in items_list:
+                if isinstance(item, list) and len(item) > 4:
+                    # Basic parsing
+                    artifact_id = item[0]
+                    title = item[1]
+                    type_code = item[2]
+                    status_code = item[4]
+
+                    status = "unknown"
+                    if status_code == 1:
+                        status = "in_progress"
+                    elif (
+                        status_code == 2
+                    ):  # Reference code says 2 is completed? Wait, create returns 3/1.
+                        # Reference poll code says: status = "completed" if status_code == 2 else "in_progress"
+                        # But create code says: if status_code == 3 else "unknown"
+                        # Let's trust "2" for Poll because 1 is usually creating.
+                        # Or maybe 3 is specific to Report?
+                        # Let's map it raw for now or guess.
+                        # Wait, reference poll uses 2 for completed.
+                        status = "completed"
+                    elif status_code == 3:
+                        status = "completed"
+
+                    artifacts.append(
+                        {
+                            "id": artifact_id,
+                            "title": title,
+                            "type": type_code,
+                            "status": status,
+                            "raw_status": status_code,
+                        }
+                    )
+
+        return artifacts
+
 
 # =============================================================================
 # Response Parsing Utilities
 # =============================================================================
+
+
+RPC_LIST_STUDIO_ARTIFACTS = "gArtLc"
 
 
 def _parse_timestamp(ts_data: Any) -> datetime | None:

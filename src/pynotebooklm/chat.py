@@ -12,7 +12,9 @@ from typing import Any
 from .api import (
     STUDIO_TYPE_REPORT,
     NotebookLMAPI,
+    parse_notebook_response,
 )
+from .mindmaps import MindMapGenerator
 from .session import BrowserSession
 
 logger = logging.getLogger(__name__)
@@ -47,6 +49,21 @@ class ChatSession:
         self._session = session
         self._api = NotebookLMAPI(session)
 
+    async def _get_all_source_ids(self, notebook_id: str) -> list[str]:
+        """Helper to get all source IDs for a notebook."""
+        try:
+            raw_data = await self._api.get_notebook(notebook_id)
+            if not raw_data:
+                return []
+
+            notebook = parse_notebook_response(raw_data)
+            return [s.id for s in notebook.sources if s.id]
+        except Exception as e:
+            logger.warning(
+                "Failed to fetch sources for notebook %s: %s", notebook_id, e
+            )
+            return []
+
     async def query(
         self,
         notebook_id: str,
@@ -67,6 +84,11 @@ class ChatSession:
             The AI's answer text.
         """
         logger.info("Querying notebook %s: %s", notebook_id, question)
+
+        # If no sources provided, use all sources
+        if not source_ids:
+            source_ids = await self._get_all_source_ids(notebook_id)
+            logger.debug("Using all %d sources for query", len(source_ids))
 
         result = await self._api.query_notebook(
             notebook_id,
@@ -205,6 +227,11 @@ class ChatSession:
         """
         Create a report (briefing doc, blog post, etc) artifact.
         """
+        # If no sources provided, use all sources
+        if not source_ids:
+            source_ids = await self._get_all_source_ids(notebook_id)
+            logger.debug("Using all %d sources for report", len(source_ids))
+
         # Build source IDs structure
         sources_nested = [[[sid]] for sid in source_ids] if source_ids else []
         sources_simple = [[sid] for sid in source_ids] if source_ids else []
@@ -238,7 +265,10 @@ class ChatSession:
             artifact_data = result[0]
             if isinstance(artifact_data, list) and len(artifact_data) > 0:
                 first_item = artifact_data[0]
-                if isinstance(first_item, list) and len(first_item) > 0:
+                # It might be a string ID directly or wrapped in list
+                if isinstance(first_item, str):
+                    artifact_id = first_item
+                elif isinstance(first_item, list) and len(first_item) > 0:
                     artifact_id = first_item[0]
 
         return {
@@ -257,6 +287,30 @@ class ChatSession:
             prompt="Create a comprehensive briefing document...",
             source_ids=source_ids,
         )
+
+    async def list_artifacts(self, notebook_id: str) -> list[dict[str, Any]]:
+        """List all studio artifacts and their statuses."""
+        # Get studio artifacts (audio, video, reports)
+        artifacts = await self._api.list_studio_artifacts(notebook_id)
+
+        # Get mind maps
+        try:
+            mm_gen = MindMapGenerator(self._session)
+            mind_maps = await mm_gen.list(notebook_id)
+            for mm in mind_maps:
+                artifacts.append(
+                    {
+                        "id": mm.id,
+                        "title": mm.title,
+                        "type": "Mind Map",
+                        "status": "completed",
+                        "created_at": mm.created_at,
+                    }
+                )
+        except Exception as e:
+            logger.warning("Failed to list mind maps: %s", e)
+
+        return artifacts
 
     def _parse_query_response(self, response_text: str) -> str:
         """
@@ -332,11 +386,12 @@ class ChatSession:
             # Type indicator is at inner_data[0][4][-1]: 1 = answer, 2 = thinking
             if isinstance(inner_data, list) and len(inner_data) > 0:
                 first_elem = inner_data[0]
+
+                # Case A: nested list (standard)
                 if isinstance(first_elem, list) and len(first_elem) > 0:
                     answer_text = first_elem[0]
-                    if (
-                        isinstance(answer_text, str) and len(answer_text) > 20
-                    ):  # Min length heuristic
+                    # REDUCED THRESHOLD: > 0 chars (was 20)
+                    if isinstance(answer_text, str) and len(answer_text) > 0:
                         # Check type
                         is_answer = False
                         if (
@@ -344,10 +399,15 @@ class ChatSession:
                             and isinstance(first_elem[4], list)
                             and len(first_elem[4]) > 0
                         ):
-                            type_code = first_elem[4][-1]
-                            if type_code == 1:
+                            # Check for type code safely
+                            val = first_elem[4][-1]
+                            if isinstance(val, int) and val == 1:
                                 is_answer = True
 
                         return answer_text, is_answer
+
+                # Case B: direct string (fallback)
+                elif isinstance(first_elem, str) and len(first_elem) > 0:
+                    return first_elem, False
 
         return None, False

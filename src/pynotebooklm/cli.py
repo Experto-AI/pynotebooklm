@@ -673,6 +673,87 @@ def query_briefing(
             console.print("[green]✓ Briefing generation started[/green]")
             if result.get("artifact_id"):
                 console.print(f"  Artifact ID: {result['artifact_id']}")
+                console.print("  Check 'Studio' in NotebookLM to view progress.")
+            else:
+                console.print(
+                    "[yellow]  Note: Could not retrieve Artifact ID, but request was sent.[/yellow]"
+                )
+                console.print(
+                    "  Check your notebook in the browser to view the new briefing."
+                )
+
+    asyncio.run(_run())
+
+
+# =============================================================================
+# Studio Commands
+# =============================================================================
+
+
+studio_app = typer.Typer(help="Studio artifact management (Briefings, Audio, etc)")
+app.add_typer(studio_app, name="studio")
+
+
+@studio_app.command("list")
+def list_studio(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+) -> None:
+    """List all studio artifacts and show their status."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated.[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            chat = ChatSession(session)
+            console.print(f"[dim]Fetching studio artifacts for {notebook_id}...[/dim]")
+
+            artifacts = await chat.list_artifacts(notebook_id)
+
+            if not artifacts:
+                console.print("[yellow]No studio artifacts found.[/yellow]")
+                return
+
+            table = Table(title=f"Studio Artifacts in {notebook_id}")
+            table.add_column("Type", style="cyan")
+            table.add_column("ID", style="dim")
+            table.add_column("Title", style="white")
+            table.add_column("Status", style="green")
+
+            for item in artifacts:
+                # Map type code to name if possible
+                type_name = str(item.get("type", "unknown"))
+                if item.get("type") == 2:
+                    type_name = "Report"
+                elif item.get("type") == 1:
+                    type_name = "Audio"
+                elif item.get("type") == 3:
+                    type_name = "Video"
+                elif item.get("type") == 4:
+                    type_name = "Flashcards"
+                elif item.get("type") == 7:
+                    type_name = "Infographic"
+                elif item.get("type") == 8:
+                    type_name = "Slide Deck"
+
+                status_color = (
+                    "green" if item.get("status") == "completed" else "yellow"
+                )
+                if item.get("status") == "failed":
+                    status_color = "red"
+
+                status_display = f"[{status_color}]{item.get('status')}[/]"
+
+                table.add_row(
+                    type_name,
+                    item.get("id", "Unknown"),
+                    item.get("title", "Untitled"),
+                    status_display,
+                )
+
+            console.print(table)
 
     asyncio.run(_run())
 

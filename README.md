@@ -119,9 +119,12 @@ pynotebooklm mindmap export <notebook_id> <map_id> -f freemind  # Export to Free
 
 # Chat & Writing
 pynotebooklm query ask <notebook_id> "question"             # Ask a question
-pynotebooklm query configure <notebook_id> --goal learning  # Set tone/style
+pynotebooklm query configure <notebook_id> [--goal default/learning/custom] [--prompt None or required for custom goal] [--length default/longer/shorter] # Set goal and response length
 pynotebooklm query summary <notebook_id>                    # Get summary
 pynotebooklm query briefing <notebook_id>                   # Create briefing doc
+
+# Studio (Artifacts)
+pynotebooklm studio list <notebook_id>                      # List artifacts (Briefings, Audio, etc.)
 ```
 
 ## Development

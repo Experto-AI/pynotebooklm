@@ -247,13 +247,15 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
    - [x] `ChatSession.get_notebook_summary(notebook_id)` (`notebook_describe`)
    - [x] `ChatSession.get_source_summary(notebook_id, source_id)` (`source_describe`)
    - [x] `ChatSession.create_briefing(notebook_id)` - generate structured blog/brief (`briefing_create`)
+   - [x] `ChatSession.list_artifacts(notebook_id)` - list studio artifacts
  
  ### CLI Implementation
  - [x] Update `src/pynotebooklm/cli.py`:
-   - [x] Add `pynotebooklm query <notebook_id> <question>`
+   - [x] Add `pynotebooklm query ask <notebook_id> <question>`
    - [x] Add `pynotebooklm query configure <notebook_id>` (Set tone)
    - [x] Add `pynotebooklm query summary <notebook_id>`
    - [x] Add `pynotebooklm query briefing <notebook_id>`
+   - [x] Add `pynotebooklm studio list <notebook_id>`
  
  ### Testing
  - [x] Create `tests/integration/test_chat.py`
