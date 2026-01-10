@@ -39,12 +39,15 @@ The response is a custom format that needs text processing before JSON parsing:
 |----|-----------|------------------|
 | `wXbhsf` | List Notebooks | `[null, 1, null, [2]]` |
 | `CCqFvf` | Create Notebook | `[title, null, null, [2], [...]]` |
-| `izAoDd` | Add Source | `[[source_data], notebook_id, [2]]` |
+| `izAoDd` | Add Source | `[[source_data], notebook_id, [2], extra_param]` |
 | `tGMBJ` | Delete Source | `[[[source_id]], [2]]` |
-| `Ljjv0c` | Fast Research | `[topic, notebook_id, 1, [2]]` |
-| `QA9ei` | Deep Research | `[topic, notebook_id, 5, [2]]` |
-| `e3bVqc` | Research Status | `[research_id, [2]]` |
-| `LBwxtb` | Import Research | `[notebook_id, research_data, [2]]` |
+| `Ljjv0c` | Fast Research | `[[query, source_type], null, 1, notebook_id]` |
+| `QA9ei` | Deep Research | `[null, [1], [query, source_type], 5, notebook_id]` |
+| `e3bVqc` | Poll Research | `[null, null, notebook_id]` |
+| `LBwxtb` | Import Research | `[null, [1], task_id, notebook_id, source_array]` |
+
+**Source types:** 1=web, 2=drive
+**Research modes:** 1=fast, 5=deep
 
 ## Authentication Flow
 

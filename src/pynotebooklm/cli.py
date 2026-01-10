@@ -265,11 +265,16 @@ def start_research(
     deep: bool = typer.Option(
         False, "--deep", "-d", help="Use deep research (more comprehensive)"
     ),
+    source: str = typer.Option(
+        "web", "--source", "-s", help="Search source: 'web' or 'drive'"
+    ),
 ) -> None:
     """Start a web research session on a topic.
 
-    Research is performed in the context of a notebook. Results are stored
-    on NotebookLM's servers and persist in the notebook for later retrieval.
+    Research is ASYNC - this returns a task_id immediately.
+    Use 'pynotebooklm research poll' to check status and get results.
+
+    Results are stored on NotebookLM's servers and persist in the notebook.
     """
     from pynotebooklm.research import ResearchType
 
@@ -283,24 +288,91 @@ def start_research(
 
         async with BrowserSession(auth) as session:
             research = ResearchDiscovery(session)
-            result = await research.start_web_research(
+            result = await research.start_research(
                 notebook_id=notebook_id,
-                topic=topic,
-                research_type=research_type,
+                query=topic,
+                source=source,
+                mode=research_type,
             )
 
             console.print("[green]✓ Started research session[/green]")
             console.print(f"  Notebook: [cyan]{notebook_id}[/cyan]")
-            console.print(f"  ID: [cyan]{result.id}[/cyan]")
-            console.print(f"  Topic: {result.topic}")
-            console.print(f"  Type: {research_type.value}")
+            console.print(f"  Task ID: [cyan]{result.task_id}[/cyan]")
+            console.print(f"  Query: {result.query}")
+            console.print(f"  Mode: {result.mode}")
+            console.print(f"  Source: {result.source}")
             console.print(f"  Status: {result.status.value}")
+            console.print()
+            console.print(
+                "[dim]Use 'pynotebooklm research poll <notebook_id>' to check status[/dim]"
+            )
 
-            if result.error_message:
-                console.print(f"  [yellow]Note: {result.error_message}[/yellow]")
+    asyncio.run(_run())
+
+
+@research_app.command("poll")
+def poll_research(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to poll research for"),
+) -> None:
+    """Poll for research results.
+
+    Check the status of an ongoing research session and get results.
+    Call this after 'research start' to see discovered sources.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            research = ResearchDiscovery(session)
+            result = await research.poll_research(notebook_id)
+
+            if not result or result.status.value == "no_research":
+                console.print(
+                    "[yellow]No active research found for this notebook.[/yellow]"
+                )
+                return
+
+            console.print("[bold]Research Status[/bold]")
+            console.print(f"  Task ID: [cyan]{result.task_id}[/cyan]")
+            console.print(f"  Query: {result.query}")
+            console.print(f"  Mode: {result.mode}")
+            console.print(
+                f"  Status: [{'green' if result.status.value == 'completed' else 'yellow'}]{result.status.value}[/]"
+            )
+            console.print(f"  Sources found: {result.source_count}")
+
+            if result.summary:
+                console.print(f"\n[bold]Summary:[/bold]\n{result.summary}")
+
+            if result.report:
+                console.print(f"\n[bold]Report:[/bold]\n{result.report[:500]}...")
 
             if result.results:
-                console.print(f"  Results: {len(result.results)} found")
+                console.print(
+                    f"\n[bold]Discovered Sources ({len(result.results)}):[/bold]"
+                )
+                table = Table(show_header=True, header_style="bold magenta")
+                table.add_column("#", style="dim", justify="right")
+                table.add_column("Title", style="white", max_width=40)
+                table.add_column("Type", style="green")
+                table.add_column("URL", style="cyan", max_width=50)
+
+                for src in result.results[:10]:  # Show first 10
+                    table.add_row(
+                        str(src.index),
+                        src.title[:40] if src.title else "—",
+                        src.result_type_name,
+                        src.url[:50] if src.url else "—",
+                    )
+
+                console.print(table)
+
+                if len(result.results) > 10:
+                    console.print(f"  ... and {len(result.results) - 10} more")
 
     asyncio.run(_run())
 

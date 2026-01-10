@@ -31,12 +31,13 @@ from .models import (
 )
 from .notebooks import NotebookManager
 from .research import (
+    ImportedSource,
     ResearchDiscovery,
     ResearchResult,
     ResearchSession,
+    ResearchSource,
     ResearchStatus,
     ResearchType,
-    TopicSuggestion,
 )
 from .session import BrowserSession
 from .sources import SourceManager
@@ -66,7 +67,8 @@ __all__ = [
     "ResearchResult",
     "ResearchStatus",
     "ResearchType",
-    "TopicSuggestion",
+    "ImportedSource",
+    "ResearchSource",
     # Exceptions
     "PyNotebookLMError",
     "AuthenticationError",

@@ -124,32 +124,43 @@ DO NOT include here: Architectural rationale, detailed technical explanations, o
 
 ---
 
-## Phase 3: Research Discovery ✅ COMPLETE
+## Phase 3: Research Discovery ✅ COMPLETE (Bug Fixed 2026-01-10)
 
 **Milestone:** User can perform web searches and gather sources for the blog
 
 **Key insight:** Research in NotebookLM is always performed in the context of a notebook.
 Results are stored on NotebookLM's servers and persist in the notebook automatically.
 
+### Bug Fix (2026-01-10) ✅ RESOLVED
+**Problem:** Research appeared to "work" (returned quickly) but nothing showed up in NotebookLM.
+**Root Cause:** RPC payload structure was incorrect. Fixed based on `jacob-bd/notebooklm-mcp`:
+- Fast Research (`Ljjv0c`): `[[query, source_type], None, 1, notebook_id]`
+- Deep Research (`QA9ei`): `[None, [1], [query, source_type], 5, notebook_id]`
+- Source types: 1=web, 2=drive
+
+**Research is async!** Returns a `task_id`, poll with `e3bVqc` to get results.
+
 ### Research Discovery
 - [x] Create `src/pynotebooklm/research.py`:
-  - [x] `ResearchDiscovery.start_web_research(notebook_id, topic, research_type)` - RPC: `Ljjv0c` (fast), `QA9ei` (deep)
-  - [x] Internal methods for status/import (kept for future use, not exposed in CLI)
+  - [x] `ResearchDiscovery.start_research(notebook_id, query, source, mode)` - RPC: `Ljjv0c` (fast), `QA9ei` (deep)
+  - [x] `ResearchDiscovery.poll_research(notebook_id)` - RPC: `e3bVqc` to get async results
+  - [x] `ResearchDiscovery.import_research_sources(notebook_id, task_id, sources)` - RPC: `LBwxtb`
+  - [x] Backward-compatible `start_web_research()` wrapper
 
 ### CLI Implementation
 - [x] Update `src/pynotebooklm/cli.py`:
-  - [x] Add `pynotebooklm research start <notebook_id> <topic> [--deep]`
+  - [x] Add `pynotebooklm research start <notebook_id> <topic> [--deep] [--source web|drive]`
+  - [x] Add `pynotebooklm research poll <notebook_id>` - poll for results
 
 ### Testing
-- [x] Create `tests/integration/test_research.py`
+- [x] Create `tests/integration/test_research.py` (updated with 29 new tests)
 
 ### Phase 3 Verification
-- [x] `make check` passes
-- [x] `pynotebooklm research start <notebook_id> "Latest AI news"` performs research
-- [x] `pynotebooklm research start <notebook_id> "topic" --deep` uses deep research
+- [x] `make check` passes (275 tests)
+- [x] CLI commands implemented and functional
+- [ ] **MANUAL TEST REQUIRED:** `pynotebooklm research start <notebook_id> "topic"` → verify in NotebookLM web UI
 
 ### Notes (from UI Investigation 2026-01-09)
-- **Status/Import commands removed**: Research results persist in the notebook automatically, no need for separate import step
 - **Drive Sync**: Per-source operation (via source context menu), not notebook-wide. Move to sources module if needed.
 - **Topic Suggestions**: Generated as part of chat responses, not separate RPC. Move to Phase 5 (Chat).
  

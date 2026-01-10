@@ -103,9 +103,11 @@ pynotebooklm sources list <notebook_id>
 pynotebooklm sources add <notebook_id> <url>
 pynotebooklm sources delete <notebook_id> <source_id>
 
-# Research
-pynotebooklm research start <notebook_id> "topic"
-pynotebooklm research start <notebook_id> "topic" --deep
+# Research (async - returns task_id)
+pynotebooklm research start <notebook_id> "topic"           # Fast research
+pynotebooklm research start <notebook_id> "topic" --deep    # Deep research
+pynotebooklm research start <notebook_id> "topic" --source drive  # Search Drive
+pynotebooklm research poll <notebook_id>                    # Check status/get results
 ```
 
 ## Development
