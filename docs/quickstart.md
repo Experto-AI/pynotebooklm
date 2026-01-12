@@ -42,6 +42,10 @@ List your notebooks:
 pynotebooklm notebooks list
 ```
 
+!!! tip
+    You can run any command or sub-command without arguments to see the available options and help. For example: `pynotebooklm research start`.
+
+
 ### Using the Library
 
 ```python

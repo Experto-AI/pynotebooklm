@@ -24,7 +24,7 @@ Documentation: https://victor.github.io/pynotebooklm/
 - 🔐 **Secure Authentication** - Browser-based Google login with cookie persistence
 - 📓 **Notebook Management** - Create, list, rename, and delete notebooks
 - 📰 **Source Management** - Add URLs, YouTube videos, Google Drive docs, and text
-- 🔍 **Research & Analysis** - Query notebooks and discover related sources
+- 🔍 **Research & Analysis** - Query notebooks and discover related sources (Web/Google Drive)
 - 🧠 **Mind Maps** - Generate, save, list, and export mind maps (JSON/OPML/FreeMind)
 - 🎙️ **Content Generation** - Create audio overviews (podcasts), videos, infographics, and slides
 - 📚 **Study Tools** - Create flashcards, quizzes, and briefing documents

@@ -164,7 +164,7 @@ def list_notebooks(
     asyncio.run(_run())
 
 
-@notebooks_app.command("create")
+@notebooks_app.command("create", no_args_is_help=True)
 def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> None:
     """Create a new notebook."""
 
@@ -181,7 +181,7 @@ def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> No
     asyncio.run(_run())
 
 
-@notebooks_app.command("delete")
+@notebooks_app.command("delete", no_args_is_help=True)
 def delete_notebook(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
@@ -213,7 +213,7 @@ def delete_notebook(
 # =============================================================================
 
 
-@sources_app.command("add")
+@sources_app.command("add", no_args_is_help=True)
 def add_source(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     url: str = typer.Argument(..., help="URL to add"),
@@ -233,7 +233,7 @@ def add_source(
     asyncio.run(_run())
 
 
-@sources_app.command("list")
+@sources_app.command("list", no_args_is_help=True)
 def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> None:
     """List sources in a notebook."""
 
@@ -262,7 +262,7 @@ def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> 
     asyncio.run(_run())
 
 
-@sources_app.command("delete")
+@sources_app.command("delete", no_args_is_help=True)
 def delete_source(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     source_id: str = typer.Argument(..., help="Source ID"),
@@ -295,7 +295,7 @@ def delete_source(
 # =============================================================================
 
 
-@research_app.command("start")
+@research_app.command("start", no_args_is_help=True)
 def start_research(
     notebook_id: str = typer.Argument(..., help="Notebook ID to perform research in"),
     topic: str = typer.Argument(..., help="Research topic or query"),
@@ -306,10 +306,11 @@ def start_research(
         "web", "--source", "-s", help="Search source: 'web' or 'drive'"
     ),
 ) -> None:
-    """Start a web research session on a topic.
+    """Start a research session on a topic (Web or Google Drive).
 
     Research is ASYNC - this returns a task_id immediately.
     Use 'pynotebooklm research poll' to check status and get results.
+    Use --source drive to research from Google Drive instead of the web.
 
     Results are stored on NotebookLM's servers and persist in the notebook.
     """
@@ -348,7 +349,7 @@ def start_research(
     asyncio.run(_run())
 
 
-@research_app.command("poll")
+@research_app.command("poll", no_args_is_help=True)
 def poll_research(
     notebook_id: str = typer.Argument(..., help="Notebook ID to poll research for"),
     auto_import: bool = typer.Option(
@@ -453,7 +454,7 @@ def poll_research(
     asyncio.run(_run())
 
 
-@research_app.command("import")
+@research_app.command("import", no_args_is_help=True)
 def import_research(
     notebook_id: str = typer.Argument(..., help="Notebook ID to import sources into"),
     indices: str = typer.Option(
@@ -608,7 +609,7 @@ def import_research(
 # =============================================================================
 
 
-@mindmap_app.command("create")
+@mindmap_app.command("create", no_args_is_help=True)
 def create_mindmap(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     title: str = typer.Option("Mind Map", "--title", "-t", help="Mind map title"),
@@ -655,7 +656,7 @@ def create_mindmap(
     asyncio.run(_run())
 
 
-@mindmap_app.command("list")
+@mindmap_app.command("list", no_args_is_help=True)
 def list_mindmaps(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
 ) -> None:
@@ -703,7 +704,7 @@ def list_mindmaps(
     asyncio.run(_run())
 
 
-@mindmap_app.command("export")
+@mindmap_app.command("export", no_args_is_help=True)
 def export_mindmap(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     mindmap_id: str = typer.Argument(..., help="Mind map ID"),
@@ -783,7 +784,7 @@ def export_mindmap(
 # =============================================================================
 
 
-@query_app.command("ask")
+@query_app.command("ask", no_args_is_help=True)
 def query_ask(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     question: str = typer.Argument(..., help="Question to ask"),
@@ -807,7 +808,7 @@ def query_ask(
     asyncio.run(_run())
 
 
-@query_app.command("configure")
+@query_app.command("configure", no_args_is_help=True)
 def query_configure(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     goal: str = typer.Option("default", help="Goal: default, learning, custom"),
@@ -838,7 +839,7 @@ def query_configure(
     asyncio.run(_run())
 
 
-@query_app.command("summary")
+@query_app.command("summary", no_args_is_help=True)
 def query_summary(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
 ) -> None:
@@ -865,7 +866,7 @@ def query_summary(
     asyncio.run(_run())
 
 
-@query_app.command("briefing")
+@query_app.command("briefing", no_args_is_help=True)
 def query_briefing(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
 ) -> None:
@@ -908,7 +909,7 @@ studio_app = typer.Typer(
 app.add_typer(studio_app, name="studio")
 
 
-@studio_app.command("list")
+@studio_app.command("list", no_args_is_help=True)
 def list_studio(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
 ) -> None:
@@ -973,7 +974,7 @@ def list_studio(
     asyncio.run(_run())
 
 
-@studio_app.command("status")
+@studio_app.command("status", no_args_is_help=True)
 def studio_status(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
 ) -> None:
@@ -1038,7 +1039,7 @@ def studio_status(
     asyncio.run(_run())
 
 
-@studio_app.command("delete")
+@studio_app.command("delete", no_args_is_help=True)
 def studio_delete(
     artifact_id: str = typer.Argument(..., help="Artifact ID to delete"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
@@ -1078,7 +1079,7 @@ def studio_delete(
 # =============================================================================
 
 
-@generate_app.command("audio")
+@generate_app.command("audio", no_args_is_help=True)
 def generate_audio(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     format: str = typer.Option(
@@ -1165,7 +1166,7 @@ def generate_audio(
     asyncio.run(_run())
 
 
-@generate_app.command("video")
+@generate_app.command("video", no_args_is_help=True)
 def generate_video(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     format: str = typer.Option(
@@ -1252,7 +1253,7 @@ def generate_video(
     asyncio.run(_run())
 
 
-@generate_app.command("infographic")
+@generate_app.command("infographic", no_args_is_help=True)
 def generate_infographic(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     orientation: str = typer.Option(
@@ -1336,7 +1337,7 @@ def generate_infographic(
     asyncio.run(_run())
 
 
-@generate_app.command("slides")
+@generate_app.command("slides", no_args_is_help=True)
 def generate_slides(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     format: str = typer.Option(
@@ -1421,7 +1422,7 @@ def generate_slides(
 # =============================================================================
 
 
-@study_app.command("flashcards")
+@study_app.command("flashcards", no_args_is_help=True)
 def create_flashcards(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     difficulty: str = typer.Option(
@@ -1487,7 +1488,7 @@ def create_flashcards(
     asyncio.run(_run())
 
 
-@study_app.command("quiz")
+@study_app.command("quiz", no_args_is_help=True)
 def create_quiz(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     questions: int = typer.Option(
@@ -1544,7 +1545,7 @@ def create_quiz(
     asyncio.run(_run())
 
 
-@study_app.command("table")
+@study_app.command("table", no_args_is_help=True)
 def create_data_table(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     description: str = typer.Option(
