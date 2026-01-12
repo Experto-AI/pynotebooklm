@@ -41,7 +41,9 @@ generate_app = typer.Typer(
     help="Content generation (audio, video, infographic, slides)",
     no_args_is_help=True,
 )
-study_app = typer.Typer(help="Study tools (flashcards, quiz, data table)", no_args_is_help=True)
+study_app = typer.Typer(
+    help="Study tools (flashcards, quiz, data table)", no_args_is_help=True
+)
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
@@ -245,7 +247,7 @@ def add_text_source(
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
-            with console.status(f"[bold green]Adding text source..."):
+            with console.status("[bold green]Adding text source..."):
                 source = await manager.add_text(notebook_id, content, title)
             console.print(
                 f"[green]✓ Added text source: [bold]{source.title}[/bold] ({source.id})[/green]"
@@ -830,7 +832,10 @@ def query_ask(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     question: str = typer.Argument(..., help="Question to ask"),
     sources: str = typer.Option(
-        None, "--sources", "-s", help="Comma-separated source IDs to restrict the answer to"
+        None,
+        "--sources",
+        "-s",
+        help="Comma-separated source IDs to restrict the answer to",
     ),
     conversation_id: str = typer.Option(
         None, "--conversation-id", "-c", help="Conversation ID for follow-up questions"

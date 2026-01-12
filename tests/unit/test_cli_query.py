@@ -45,7 +45,9 @@ class TestCliQuery:
 
         assert result.exit_code == 0
         assert "The answer." in result.output
-        chat_inst.query.assert_called_with("nb_123", "What is it?")
+        chat_inst.query.assert_called_with(
+            "nb_123", "What is it?", source_ids=None, conversation_id=None
+        )
 
     def test_query_configure(self, mock_auth, mock_session, mock_chat):
         """Test query configure command."""
@@ -90,3 +92,12 @@ class TestCliQuery:
         assert result.exit_code == 0
         assert "art_123" in result.output
         chat_inst.create_briefing.assert_called_with("nb_123")
+
+    def test_query_unauthenticated(self, mock_auth):
+        """Test query command when not authenticated."""
+        mock_auth.return_value.is_authenticated.return_value = False
+
+        result = runner.invoke(app, ["query", "ask", "nb_123", "question"])
+
+        assert result.exit_code == 1
+        assert "Not authenticated" in result.output
