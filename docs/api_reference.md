@@ -203,19 +203,19 @@ export PYNOTEBOOKLM_MAX_DELAY=120.0    # Default: 60.0 seconds
     options:
       show_root_heading: true
 
-::: pynotebooklm.models.ResearchResult
+::: pynotebooklm.research.ResearchResult
     options:
       show_root_heading: true
 
-::: pynotebooklm.models.MindMap
+::: pynotebooklm.mindmaps.MindMap
     options:
       show_root_heading: true
 
-::: pynotebooklm.models.MindMapNode
+::: pynotebooklm.mindmaps.MindMapNode
     options:
       show_root_heading: true
 
-::: pynotebooklm.models.StudioArtifact
+::: pynotebooklm.content.StudioArtifact
     options:
       show_root_heading: true
 

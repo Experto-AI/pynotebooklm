@@ -30,14 +30,24 @@ theme:
 nav:
   - Home: index.md
   - Quickstart: quickstart.md
-  - Usage Guide: usage.md
+  - Usage:
+      - Basic Usage: usage.md
+      - Advanced Usage: advanced_usage.md
+      - FAQ: faq.md
+  - Examples: examples.md
   - API Reference: api_reference.md
   - Technical Details:
-      - Internal Protocol: internal_protocol.md
       - Architecture: architecture.md
+      - Internal Protocol: internal_protocol.md
+      - RPC Harvesting: rpc_harvesting.md
+      - Reverse Engineering: reverse_engineering_findings.md
+      - Deep Dives: technical_deep_dives.md
       - Decisions: decisions.md
+  - Research:
+      - Competitor Analysis: competitor_analysis.md
   - Development:
       - Contributing: contributing.md
+      - Tools: tools.md
       - Implementation Plan: implementation_plan.md
 
 markdown_extensions:

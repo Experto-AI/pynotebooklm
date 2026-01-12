@@ -4,10 +4,10 @@ This guide covers advanced features and patterns for production use of PyNoteboo
 
 ## Table of Contents
 
-1. [Retry Strategies & Error Handling](#retry-strategies--error-handling)
+1. [Retry Strategies & Error Handling](#retry-strategies-error-handling)
 2. [Persistent Sessions for Performance](#persistent-sessions-for-performance)
 3. [Batch Operations](#batch-operations)
-4. [Custom Logging & Debugging](#custom-logging--debugging)
+4. [Custom Logging & Debugging](#custom-logging-debugging)
 5. [Production Deployment Patterns](#production-deployment-patterns)
 
 ---
