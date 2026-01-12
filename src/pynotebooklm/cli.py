@@ -223,6 +223,119 @@ def describe_notebook(
     asyncio.run(_run())
 
 
+@notebooks_app.command("get", no_args_is_help=True)
+def get_notebook(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to retrieve"),
+) -> None:
+    """Get detailed notebook information including sources.
+
+    Shows notebook metadata, sources list, and timestamps.
+    Use this to see a complete overview of a specific notebook.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            manager = NotebookManager(session)
+            with console.status(f"[bold green]Fetching notebook {notebook_id}..."):
+                nb = await manager.get(notebook_id)
+
+            console.print(f"\n[bold cyan]Notebook: {nb.name}[/bold cyan]")
+            console.print(f"  [dim]ID:[/dim] {nb.id}")
+            console.print(
+                f"  [dim]URL:[/dim] https://notebooklm.google.com/notebook/{nb.id}"
+            )
+            console.print(f"  [dim]Sources:[/dim] {nb.source_count}")
+
+            if nb.created_at:
+                console.print(
+                    f"  [dim]Created:[/dim] {nb.created_at.strftime('%Y-%m-%d %H:%M')}"
+                )
+            if nb.updated_at:
+                console.print(
+                    f"  [dim]Updated:[/dim] {nb.updated_at.strftime('%Y-%m-%d %H:%M')}"
+                )
+
+            if nb.sources:
+                console.print(f"\n[bold]Sources ({len(nb.sources)}):[/bold]")
+                table = Table(show_header=True, header_style="bold magenta")
+                table.add_column("#", style="dim", justify="right")
+                table.add_column("ID", style="cyan")
+                table.add_column("Title", style="white", max_width=50)
+                table.add_column("Type", style="green")
+                table.add_column("Status", style="yellow")
+
+                for i, src in enumerate(nb.sources, 1):
+                    type_display = src.type.value
+                    if src.source_type_code:
+                        from pynotebooklm.api import SOURCE_TYPE_MAP
+
+                        type_name = SOURCE_TYPE_MAP.get(
+                            src.source_type_code, f"type_{src.source_type_code}"
+                        )
+                        type_display = f"{type_name}"
+
+                    status_display = src.status.value
+                    if src.is_fresh is not None:
+                        status_display += " ✓" if src.is_fresh else " (stale)"
+
+                    table.add_row(
+                        str(i), src.id, src.title[:50], type_display, status_display
+                    )
+
+                console.print(table)
+            else:
+                console.print("\n[dim]No sources in this notebook.[/dim]")
+
+    asyncio.run(_run())
+
+
+@notebooks_app.command("rename", no_args_is_help=True)
+def rename_notebook(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to rename"),
+    new_name: str = typer.Argument(..., help="New name for the notebook"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Rename an existing notebook.
+
+    Changes the display name of the notebook. The notebook ID remains the same.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            manager = NotebookManager(session)
+
+            # First get the current notebook to show old name
+            with console.status(f"[bold green]Fetching notebook {notebook_id}..."):
+                old_nb = await manager.get(notebook_id)
+
+            if not force:
+                confirm = typer.confirm(
+                    f"Rename notebook '{old_nb.name}' to '{new_name}'?"
+                )
+                if not confirm:
+                    console.print("Aborted.")
+                    return
+
+            with console.status(f"[bold green]Renaming notebook to '{new_name}'..."):
+                nb = await manager.rename(notebook_id, new_name)
+
+            console.print(
+                f"[green]✓ Renamed notebook: [bold]{old_nb.name}[/bold] → [bold]{nb.name}[/bold][/green]"
+            )
+
+    asyncio.run(_run())
+
+
 @notebooks_app.command("create", no_args_is_help=True)
 def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> None:
     """Create a new notebook."""

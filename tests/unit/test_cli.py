@@ -315,6 +315,192 @@ class TestNotebookDeleteCommand:
             assert "Deleted notebook" in result.output
 
 
+class TestNotebookGetCommand:
+    """Tests for the 'notebooks get' CLI command."""
+
+    def test_get_notebook_not_authenticated(self) -> None:
+        """Get notebook exits when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = False
+            mock_auth_cls.return_value = mock_auth
+
+            result = runner.invoke(app, ["notebooks", "get", "nb_123"])
+
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_get_notebook_success(self) -> None:
+        """Get notebook shows detailed information."""
+        from pynotebooklm.models import Notebook, Source, SourceStatus, SourceType
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.get = AsyncMock(
+                return_value=Notebook(
+                    id="nb_123",
+                    name="Test Notebook",
+                    source_count=2,
+                    created_at=datetime(2024, 1, 1, 12, 0),
+                    updated_at=datetime(2024, 1, 15, 14, 30),
+                    sources=[
+                        Source(
+                            id="src_1",
+                            title="Web Source",
+                            type=SourceType.URL,
+                            status=SourceStatus.READY,
+                            source_type_code=5,
+                        ),
+                        Source(
+                            id="src_2",
+                            title="Doc Source",
+                            type=SourceType.DRIVE,
+                            status=SourceStatus.READY,
+                            source_type_code=1,
+                            is_fresh=True,
+                        ),
+                    ],
+                )
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(app, ["notebooks", "get", "nb_123"])
+
+            assert result.exit_code == 0
+            assert "Test Notebook" in result.output
+            assert "nb_123" in result.output
+            assert "Web Source" in result.output
+            assert "Doc Source" in result.output
+
+    def test_get_notebook_no_sources(self) -> None:
+        """Get notebook handles notebook with no sources."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.get = AsyncMock(
+                return_value=Notebook(
+                    id="nb_empty",
+                    name="Empty Notebook",
+                    source_count=0,
+                    sources=[],
+                )
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(app, ["notebooks", "get", "nb_empty"])
+
+            assert result.exit_code == 0
+            assert "Empty Notebook" in result.output
+            assert "No sources" in result.output
+
+
+class TestNotebookRenameCommand:
+    """Tests for the 'notebooks rename' CLI command."""
+
+    def test_rename_notebook_not_authenticated(self) -> None:
+        """Rename notebook exits when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = False
+            mock_auth_cls.return_value = mock_auth
+
+            result = runner.invoke(app, ["notebooks", "rename", "nb_123", "New Name"])
+
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_rename_notebook_with_force(self) -> None:
+        """Rename notebook works with --force flag."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.get = AsyncMock(return_value=Notebook(id="nb_123", name="Old Name"))
+            mock_nm.rename = AsyncMock(
+                return_value=Notebook(id="nb_123", name="New Name")
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(
+                app, ["notebooks", "rename", "nb_123", "New Name", "--force"]
+            )
+
+            assert result.exit_code == 0
+            assert "Renamed notebook" in result.output
+            assert "Old Name" in result.output
+            assert "New Name" in result.output
+
+    def test_rename_notebook_abort_without_force(self) -> None:
+        """Rename notebook aborts when user declines confirmation."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.get = AsyncMock(return_value=Notebook(id="nb_123", name="Old Name"))
+            mock_nm_cls.return_value = mock_nm
+
+            # Simulate user typing 'n' to decline
+            result = runner.invoke(
+                app, ["notebooks", "rename", "nb_123", "New Name"], input="n\n"
+            )
+
+            assert result.exit_code == 0
+            assert "Aborted" in result.output
+
+
 # =============================================================================
 # Source Command Tests
 # =============================================================================

@@ -779,3 +779,251 @@ class TestPhase5ApiOps:
         assert "at=test_token" in call_kwargs["body"]
         assert "f.req=" in call_kwargs["body"]
         assert "s1" in call_kwargs["body"]
+
+
+# =============================================================================
+# Phase 11 Features Tests
+# =============================================================================
+
+
+class TestCheckSourceFreshness:
+    """Tests for check_source_freshness method."""
+
+    @pytest.mark.asyncio
+    async def test_check_source_freshness_fresh(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """check_source_freshness returns True for fresh sources."""
+        mock_session.call_rpc.return_value = [["src123", True]]
+
+        result = await api.check_source_freshness("src123")
+
+        assert result is True
+        mock_session.call_rpc.assert_called_once_with("yR9Yof", [None, ["src123"], [2]])
+
+    @pytest.mark.asyncio
+    async def test_check_source_freshness_stale(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """check_source_freshness returns False for stale sources."""
+        mock_session.call_rpc.return_value = [["src123", False]]
+
+        result = await api.check_source_freshness("src123")
+
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_check_source_freshness_api_error(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """check_source_freshness returns None on API error."""
+        mock_session.call_rpc.side_effect = APIError("Not applicable")
+
+        result = await api.check_source_freshness("non_drive_src")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_check_source_freshness_invalid_response(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """check_source_freshness returns None on invalid response."""
+        mock_session.call_rpc.return_value = []
+
+        result = await api.check_source_freshness("src123")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_check_source_freshness_empty_inner(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """check_source_freshness returns None when inner array is missing."""
+        mock_session.call_rpc.return_value = [[]]
+
+        result = await api.check_source_freshness("src123")
+
+        assert result is None
+
+
+class TestSyncSource:
+    """Tests for sync_source method."""
+
+    @pytest.mark.asyncio
+    async def test_sync_source_success(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """sync_source returns True on success."""
+        mock_session.call_rpc.return_value = {}
+
+        result = await api.sync_source("src123")
+
+        assert result is True
+        mock_session.call_rpc.assert_called_once_with("FLmJqe", [None, ["src123"], [2]])
+
+
+class TestGetSourceText:
+    """Tests for get_source_text method."""
+
+    @pytest.mark.asyncio
+    async def test_get_source_text_success(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """get_source_text extracts content from source."""
+        mock_session.call_rpc.return_value = [
+            [
+                ["src123"],
+                "My Document",
+                [None, None, None, None, 1],
+            ],  # metadata at index 2
+            None,
+            None,
+            [[[0, 100, "This is the content"]]],  # content blocks at index 3
+        ]
+
+        result = await api.get_source_text("src123")
+
+        assert result["title"] == "My Document"
+        assert result["content"] == "This is the content"
+        assert result["source_type"] == "google_docs"
+        assert result["char_count"] == 19
+
+    @pytest.mark.asyncio
+    async def test_get_source_text_empty_content(
+        self, api: NotebookLMAPI, mock_session: MagicMock
+    ) -> None:
+        """get_source_text handles missing content blocks."""
+        mock_session.call_rpc.return_value = [
+            [["src123"], "Empty Doc"],
+            None,
+            None,
+            None,  # No content blocks
+        ]
+
+        result = await api.get_source_text("src123")
+
+        assert result["content"] == ""
+        assert result["char_count"] == 0
+
+
+class TestSourceTypeMap:
+    """Tests for SOURCE_TYPE_MAP constant."""
+
+    def test_source_type_map_values(self) -> None:
+        """SOURCE_TYPE_MAP contains expected type mappings."""
+        from pynotebooklm.api import SOURCE_TYPE_MAP
+
+        assert SOURCE_TYPE_MAP[1] == "google_docs"
+        assert SOURCE_TYPE_MAP[2] == "google_slides_sheets"
+        assert SOURCE_TYPE_MAP[3] == "pdf"
+        assert SOURCE_TYPE_MAP[4] == "pasted_text"
+        assert SOURCE_TYPE_MAP[5] == "web_page"
+        assert SOURCE_TYPE_MAP[9] == "youtube"
+
+
+class TestParseSourceResponseWithMetadata:
+    """Tests for parse_source_response with new metadata format."""
+
+    def test_parse_source_with_metadata_list(self) -> None:
+        """Parses source with metadata at index 2."""
+        # Format: [id, title, metadata_list, ...]
+        # metadata_list: [drive_id?, ..., ..., ..., type_code, ...]
+        data = [
+            ["src123"],
+            "Google Doc",
+            [
+                None,
+                None,
+                None,
+                None,
+                1,
+                None,
+                None,
+                ["https://example.com"],
+            ],  # type_code=1 at pos 4
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.id == "src123"
+        assert source.type == SourceType.DRIVE  # google_docs maps to DRIVE
+        assert source.source_type_code == 1
+        assert source.url == "https://example.com"
+
+    def test_parse_source_youtube_from_metadata(self) -> None:
+        """Parses YouTube source from metadata type code."""
+        data = [
+            "src123",
+            "Video Title",
+            [None, None, None, None, 9, None, None, ["https://youtube.com/v/abc"]],
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.YOUTUBE
+        assert source.source_type_code == 9
+
+    def test_parse_source_web_page_from_metadata(self) -> None:
+        """Parses web page source from metadata type code."""
+        data = [
+            "src123",
+            "Web Page",
+            [None, None, None, None, 5, None, None, ["https://example.com"]],
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.URL
+        assert source.source_type_code == 5
+
+    def test_parse_source_pasted_text_from_metadata(self) -> None:
+        """Parses pasted text source from metadata type code."""
+        data = [
+            "src123",
+            "My Notes",
+            [None, None, None, None, 4],
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.TEXT
+        assert source.source_type_code == 4
+
+    def test_parse_source_generated_text_from_metadata(self) -> None:
+        """Parses generated text source from metadata type code 8."""
+        data = [
+            "src123",
+            "Generated Notes",
+            [None, None, None, None, 8],
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.TEXT
+        assert source.source_type_code == 8
+
+    def test_parse_source_unknown_type_defaults_to_text(self) -> None:
+        """Unknown type codes default to TEXT type."""
+        data = [
+            "src123",
+            "Unknown",
+            [None, None, None, None, 99],  # Unknown type
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.TEXT
+        assert source.source_type_code == 99
+
+    def test_parse_source_pdf_from_metadata(self) -> None:
+        """Parses PDF source from metadata type code."""
+        data = [
+            "src123",
+            "Document.pdf",
+            [None, None, None, None, 3, None, None, ["https://example.com/doc.pdf"]],
+        ]
+
+        source = parse_source_response(data)
+
+        assert source.type == SourceType.URL  # PDFs come from URLs
+        assert source.source_type_code == 3

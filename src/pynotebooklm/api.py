@@ -43,6 +43,7 @@ RPC_GET_SOURCE = "hizoJc"  # Get raw source content
 RPC_LIST_DRIVE_DOCS = "KGBelc"
 RPC_SYNC_SOURCE = "FLmJqe"  # Sync Drive source
 RPC_ADD_DRIVE_SOURCE = "izAoDd"
+RPC_CHECK_FRESHNESS = "yR9Yof"  # Check if Drive source is stale
 
 # Phase 5 RPCs
 RPC_CONFIGURE_CHAT = "s0tc2d"  # Also handles rename
@@ -55,6 +56,20 @@ QUERY_ENDPOINT = "/_/LabsTailwindUi/data/google.internal.labs.tailwind.orchestra
 STUDIO_TYPE_REPORT = 2
 STUDIO_TYPE_AUDIO = 1
 STUDIO_TYPE_VIDEO = 3
+
+# Source Type Codes (from metadata position 4)
+# Maps internal numeric codes to human-readable names
+SOURCE_TYPE_MAP: dict[int, str] = {
+    1: "google_docs",
+    2: "google_slides_sheets",  # Slides and Sheets both use type 2
+    3: "pdf",
+    4: "pasted_text",
+    5: "web_page",
+    6: "audio_file",
+    7: "gemini_notes",
+    8: "generated_text",  # Also pasted/generated text
+    9: "youtube",
+}
 
 
 class NotebookLMAPI:
@@ -495,6 +510,38 @@ class NotebookLMAPI:
         await self._session.call_rpc(RPC_SYNC_SOURCE, params)
         return True
 
+    async def check_source_freshness(self, source_id: str) -> bool | None:
+        """
+        Check if a Drive source is fresh (up-to-date with Google Drive).
+
+        This checks whether the source content matches the latest version
+        in Google Drive. Stale sources should be synced using sync_source().
+
+        Args:
+            source_id: The source UUID.
+
+        Returns:
+            True if fresh (up-to-date), False if stale (needs sync),
+            None if not applicable (non-Drive source or error).
+        """
+        logger.debug("Checking freshness for source %s", source_id)
+        # RPC params: [null, [source_id], [2]]
+        params = [None, [source_id], [2]]
+
+        try:
+            result = await self._session.call_rpc(RPC_CHECK_FRESHNESS, params)
+
+            # Response structure: [[source_id, is_fresh], ...]
+            # is_fresh: True = fresh, False = stale
+            if isinstance(result, list) and len(result) > 0:
+                inner = result[0] if result else []
+                if isinstance(inner, list) and len(inner) >= 2:
+                    return bool(inner[1])  # True = fresh, False = stale
+            return None
+        except APIError:
+            # Non-Drive sources or other errors return None
+            return None
+
     # =========================================================================
     # Helper Methods
     # =========================================================================
@@ -823,12 +870,43 @@ def parse_source_response(data: Any) -> Source:
     # Determine source type based on data structure
     source_type = SourceType.TEXT
     url = None
+    source_type_code: int | None = None
 
-    if len(data) > 2:
-        # Type indicator might be at index 2 or embedded in URL structure
+    # Source metadata is typically at index 2
+    if len(data) > 2 and isinstance(data[2], list):
+        metadata = data[2]
+
+        # Source type code is at metadata position 4
+        if len(metadata) > 4 and isinstance(metadata[4], int):
+            source_type_code = metadata[4]
+            type_name = SOURCE_TYPE_MAP.get(source_type_code, "unknown")
+
+            # Map internal codes to our SourceType enum
+            if type_name in ("google_docs", "google_slides_sheets"):
+                source_type = SourceType.DRIVE
+            elif type_name == "youtube":
+                source_type = SourceType.YOUTUBE
+            elif type_name == "web_page":
+                source_type = SourceType.URL
+            elif type_name in ("pasted_text", "generated_text"):
+                source_type = SourceType.TEXT
+            elif type_name == "pdf":
+                source_type = SourceType.URL  # PDFs come from URLs
+            else:
+                source_type = SourceType.TEXT
+
+        # URL might be at metadata position 7 for web sources
+        if len(metadata) > 7 and isinstance(metadata[7], list):
+            url_info = metadata[7]
+            if len(url_info) > 0 and isinstance(url_info[0], str):
+                url = url_info[0]
+
+    elif len(data) > 2:
+        # Fallback: Type indicator might be at index 2 as int (legacy format)
         type_indicator = data[2] if len(data) > 2 else None
 
         if isinstance(type_indicator, int):
+            source_type_code = type_indicator
             if type_indicator == 1:
                 source_type = SourceType.URL
             elif type_indicator == 2:
@@ -857,4 +935,5 @@ def parse_source_response(data: Any) -> Source:
         title=title,
         url=url,
         status=status,
+        source_type_code=source_type_code,
     )

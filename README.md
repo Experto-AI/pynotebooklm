@@ -99,6 +99,9 @@ pynotebooklm auth logout             # Clear saved authentication
 pynotebooklm notebooks list                        # List all notebooks
 pynotebooklm notebooks list --detailed             # With source count and dates
 pynotebooklm notebooks create "My Notebook"        # Create a new notebook
+pynotebooklm notebooks get <notebook_id>           # Get detailed notebook info with sources
+pynotebooklm notebooks describe <notebook_id>      # Get AI-generated summary and topics
+pynotebooklm notebooks rename <notebook_id> "New Name"  # Rename a notebook
 pynotebooklm notebooks delete <notebook_id>        # Delete a notebook
 pynotebooklm notebooks delete <notebook_id> -f     # Delete without confirmation
 ```
@@ -110,6 +113,9 @@ pynotebooklm sources add <notebook_id> <url>               # Add URL source (Web
 pynotebooklm sources add-text <notebook_id> "text"         # Add plain text source
 pynotebooklm sources add-drive <notebook_id> <drive_id>    # Add Google Drive source
 pynotebooklm sources list <notebook_id>                    # List sources in notebook
+pynotebooklm sources describe <source_id>                  # AI-generated summary and keywords
+pynotebooklm sources get-text <source_id>                  # Extract raw indexed text
+pynotebooklm sources sync <source_id>                      # Sync stale Drive source
 pynotebooklm sources delete <notebook_id> <source_id>      # Delete a source
 pynotebooklm sources delete <notebook_id> <source_id> -f   # Delete without confirmation
 ```

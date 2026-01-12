@@ -13,26 +13,38 @@
 - [ ] Audit all documentation for accuracy after Refactor.
 
 ## Phase 11: Competitor Parity & Research Enhancements
-- [x] **Research Deletion**: Implement `pynotebooklm research delete` (or `del`) to clear/cancel research results.
+
+### Completed Features
+- [x] **Research Deletion**: `pynotebooklm research delete` to clear/cancel research results.
 - [x] **Advanced Source Details**:
-    - [x] `pynotebooklm sources describe <id>`: Get AI-generated summary and keywords for a source (RPC `tr032e`).
-    - [x] `pynotebooklm sources get-text <id>`: Extract raw indexed text from a source (RPC `hizoJc`).
-- [ ] **Drive Synchronization**:
-    - [x] `pynotebooklm sources sync <id>`: Sync stale Drive sources (RPC `FLmJqe`).
-    - [ ] Implement freshness/stale check in `SourceManager.list_sources` using `yR9Yof`.
-- [x] **Notebook AI Description**:
-    - [x] `pynotebooklm notebooks describe <id>`: Get detailed AI summary of notebook content (RPC `VfAZjd`).
-- [ ] **Notebook Management**:
-    - [ ] `pynotebooklm notebooks get <id>`: Get detailed notebook info with sources (RPC `rLM1Ne`).
-    - [ ] `pynotebooklm notebooks rename <id> <name>`: Rename a notebook (RPC `s0tc2d`).
-    - [ ] Add created/modified timestamps to `notebooks list` and `notebooks get`.
-- [ ] **Chat Personalization**:
-    - [ ] `pynotebooklm chat configure`: Set chat goal (Learning Guide, Critique, Debate) and response style.
-- [ ] **Improved Type Support**: Map all 50+ source type codes discovered in competitor analysis.
-- [ ] **Full-Text search**: Implement searching across notebook sources using AI.
+    - [x] `pynotebooklm sources describe <id>`: AI-generated summary and keywords (RPC `tr032e`).
+    - [x] `pynotebooklm sources get-text <id>`: Extract raw indexed text (RPC `hizoJc`).
+- [x] **Drive Source Sync**: `pynotebooklm sources sync <id>` (RPC `FLmJqe`).
+- [x] **Notebook AI Description**: `pynotebooklm notebooks describe <id>` (RPC `VfAZjd`).
+- [x] **Chat Personalization**: `pynotebooklm query configure` - Set goal (default/learning/custom) and response length.
+- [x] **Drive Source Freshness Check** (RPC `yR9Yof`):
+    - [x] Added `check_source_freshness(source_id: str) -> bool | None` to `NotebookLMAPI`.
+    - [x] Updated `Source` model to include `is_fresh: bool | None` field.
+- [x] **Notebook Management CLI Commands**:
+    - [x] `pynotebooklm notebooks get <id>`: Show detailed notebook info with sources.
+    - [x] `pynotebooklm notebooks rename <id> <name>`: Rename a notebook with confirmation.
+    - [x] Detailed view (`-d`) shows created/modified timestamps.
+- [x] **Improved Source Type Mapping**:
+    - [x] Expanded `SOURCE_TYPE_MAP` in `api.py` with codes 1-9.
+    - [x] Added `source_type_code: int` to `Source` model.
+    - [x] `notebooks get` shows human-readable source types.
+
+### Remaining Tasks
+
+#### 1. SourceManager Integration
+- [ ] Update `SourceManager.list_sources` to call freshness check for Drive sources.
+- [ ] Update `sources list` CLI to show freshness status (✓/✗).
+
+#### 2. Full-Text Search (Deferred - Low Priority)
+- [ ] Research feasibility of searching across sources using the query RPC.
+- [ ] Consider implementing via `query` command with special search prompt.
 
 ## Future / Icebox
 - [ ] Note management (Save chat responses as notes).
-- [ ] Collaborative features (Share notebooks).
 - [ ] Export features (Download all sources as ZIP).
-- [ ] GUI / TUI Dashboard for notebook management.
+

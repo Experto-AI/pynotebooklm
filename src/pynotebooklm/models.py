@@ -87,6 +87,8 @@ class Source(BaseModel):
         url: Original URL for URL/YouTube sources.
         status: Processing status.
         created_at: When the source was added.
+        is_fresh: For Drive sources, whether content is up-to-date.
+        source_type_code: Internal numeric type code for debugging.
     """
 
     id: str = Field(..., description="Unique source identifier")
@@ -97,6 +99,12 @@ class Source(BaseModel):
         SourceStatus.PROCESSING, description="Processing status"
     )
     created_at: datetime | None = Field(None, description="Creation timestamp")
+    is_fresh: bool | None = Field(
+        None, description="For Drive sources, whether content is up-to-date"
+    )
+    source_type_code: int | None = Field(
+        None, description="Internal numeric type code for debugging"
+    )
 
     model_config = {"frozen": False}
 
