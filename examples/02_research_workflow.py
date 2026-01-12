@@ -43,7 +43,7 @@ async def demonstrate_web_research(client: NotebookLMClient, notebook_id: str) -
             notebook_id=notebook_id,
             query="latest developments in artificial intelligence 2024",
             source="web",
-            mode="standard",
+            mode="fast",
         )
 
         progress.update(task, description=f"Research started (Task ID: {result.task_id})")

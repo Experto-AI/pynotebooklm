@@ -622,6 +622,45 @@ def get_source_text(
     asyncio.run(_run())
 
 
+@sources_app.command("list-drive", no_args_is_help=False)
+def list_drive_docs() -> None:
+    """List available Google Drive documents.
+
+    Shows documents in your Drive that can be added as sources to notebooks.
+    IDs from this list can be used with 'pynotebooklm sources add-drive'.
+    """
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            manager = SourceManager(session)
+            with console.status("[bold green]Fetching Drive documents..."):
+                docs = await manager.list_drive()
+
+            if not docs:
+                console.print("[yellow]No Drive documents found.[/yellow]")
+                return
+
+            table = Table(title="Available Google Drive Documents")
+            table.add_column("#", style="dim", justify="right")
+            table.add_column("Title", style="magenta")
+            table.add_column("Drive ID", style="cyan")
+
+            for i, doc in enumerate(docs, 1):
+                table.add_row(str(i), doc["title"], doc["id"])
+
+            console.print(table)
+            console.print(
+                "\n[dim]To add a doc: pynotebooklm sources add-drive <notebook_id> <drive_id>[/dim]"
+            )
+
+    asyncio.run(_run())
+
+
 @sources_app.command("sync", no_args_is_help=True)
 def sync_source(
     source_id: str = typer.Argument(..., help="Source ID to sync"),

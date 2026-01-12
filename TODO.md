@@ -9,8 +9,6 @@
 - [x] Add exponential backoff to research polling.
 - [x] Create comprehensive integration tests for reliability edge cases.
 - [x] Implement `cleanup_old_artifacts.py` automation script.
-- [ ] Verify all code examples in `examples/` run successfully.
-- [ ] Audit all documentation for accuracy after Refactor.
 
 ## Phase 11: Competitor Parity & Research Enhancements
 
@@ -39,12 +37,9 @@
 #### 1. SourceManager Integration
 - [x] Update `SourceManager.list_sources` to call freshness check for Drive sources.
 - [x] Update `sources list` CLI to show freshness status (✓/✗).
+- [x] Add `sources list-drive` and `sources sync` commands for fullparity.
 
 #### 2. Full-Text Search
 - [x] Research feasibility of searching across sources using the query RPC. (Result: Use semantic `query` command).
-- [ ] Consider implementing via `query` command with special search prompt. (Decision: Omitted to keep CLI simple, user can custom query).
 
-## Future / Icebox
-- [ ] Note management (Save chat responses as notes).
-- [ ] Export features (Download all sources as ZIP).
 

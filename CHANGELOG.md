@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Research Deletion**: Added `pynotebooklm research delete` (and `del`) commands.
 - **Advanced Source Details**: Added `sources describe` and `sources get-text` commands.
 - **Notebook AI Description**: Added `notebooks describe` for automated summaries.
+- **Drive Parity**: Added `sources list-drive` and `sources sync` for Google Drive management.
+- **Improved Notebook Management**: Added `notebooks rename` and `notebooks get` commands.
+- **Source Freshness**: Integrated freshness checking for Drive sources in `sources list --check-freshness`.
+- **Source Type Improvements**: Enhanced mapping of internal source type codes to human-readable names.
 
 ### Changed
 - Added package metadata URLs and documentation link.
