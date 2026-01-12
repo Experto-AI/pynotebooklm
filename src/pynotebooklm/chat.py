@@ -319,51 +319,27 @@ class ChatSession:
         if not response_text:
             return ""
 
-        # Remove anti-XSSI prefix
-        if response_text.startswith(")]}'"):
-            response_text = response_text[4:]
-
-        lines = response_text.strip().split("\n")
         longest_answer = ""
         longest_thinking = ""
-
-        i = 0
-        while i < len(lines):
-            line = lines[i].strip()
-            if not line:
-                i += 1
-                continue
-
-            # Try to parse as byte count or JSON
-            json_str = None
-
-            if line.isdigit():
-                # Byte count, next line is JSON
-                i += 1
-                if i < len(lines):
-                    json_str = lines[i]
-            else:
-                # Direct JSON
-                json_str = line
-
-            if json_str:
-                text, is_answer = self._extract_answer_from_chunk(json_str)
-                if text:
-                    if is_answer and len(text) > len(longest_answer):
-                        longest_answer = text
-                    elif not is_answer and len(text) > len(longest_thinking):
-                        longest_thinking = text
-
-            i += 1
+        chunks = self._session.parse_streaming_response(response_text)
+        for chunk in chunks:
+            text, is_answer = self._extract_answer_from_chunk(chunk)
+            if text:
+                if is_answer and len(text) > len(longest_answer):
+                    longest_answer = text
+                elif not is_answer and len(text) > len(longest_thinking):
+                    longest_thinking = text
 
         return longest_answer if longest_answer else longest_thinking
 
-    def _extract_answer_from_chunk(self, json_str: str) -> tuple[str | None, bool]:
+    def _extract_answer_from_chunk(self, chunk: Any) -> tuple[str | None, bool]:
         """Extract answer from a JSON query chunk."""
-        try:
-            data = json.loads(json_str)
-        except json.JSONDecodeError:
-            return None, False
+        data = chunk
+        if isinstance(chunk, str):
+            try:
+                data = json.loads(chunk)
+            except json.JSONDecodeError:
+                return None, False
 
         if not isinstance(data, list) or len(data) == 0:
             return None, False

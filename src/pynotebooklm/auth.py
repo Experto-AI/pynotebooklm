@@ -55,6 +55,7 @@ class AuthManager:
         self,
         auth_path: Path | str | None = None,
         headless: bool = False,
+        refresh_threshold: int | timedelta = COOKIE_VALIDITY_DAYS,
     ) -> None:
         """
         Initialize the authentication manager.
@@ -64,16 +65,28 @@ class AuthManager:
                       Defaults to ~/.pynotebooklm/auth.json
             headless: Whether to run browser in headless mode for login.
                      Set to False for interactive login (recommended).
+            refresh_threshold: Threshold in days (or timedelta) for expiration warnings.
         """
         self.auth_path = Path(auth_path) if auth_path else DEFAULT_AUTH_FILE
         self.headless = headless
+        self.refresh_threshold = self._normalize_refresh_threshold(refresh_threshold)
         self._auth_state: AuthState | None = None
+        self._warned_expiration = False
 
         # Ensure config directory exists
         self.auth_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Try to load existing auth state
         self._load_cookies()
+
+    @staticmethod
+    def _normalize_refresh_threshold(
+        refresh_threshold: int | timedelta,
+    ) -> timedelta:
+        """Normalize refresh threshold to a timedelta."""
+        if isinstance(refresh_threshold, timedelta):
+            return refresh_threshold
+        return timedelta(days=refresh_threshold)
 
     def _load_cookies(self) -> None:
         """Load authentication state from file."""
@@ -115,7 +128,37 @@ class AuthManager:
         """
         if self._auth_state is None:
             return False
-        return self._auth_state.is_valid()
+        is_valid = self._auth_state.is_valid()
+        if is_valid:
+            self._log_expiration_warning()
+        return is_valid
+
+    def is_expired(self) -> bool:
+        """
+        Check whether authentication cookies are expired.
+
+        Returns:
+            True if expired, False otherwise.
+        """
+        if self._auth_state is None:
+            return True
+        if self._auth_state.expires_at is None:
+            return False
+        return datetime.now() > self._auth_state.expires_at
+
+    def _log_expiration_warning(self) -> None:
+        """Warn once if cookies are close to expiration."""
+        if self._warned_expiration or self._auth_state is None:
+            return
+        expires_at = self._auth_state.expires_at
+        if not expires_at:
+            return
+        if expires_at - datetime.now() <= self.refresh_threshold:
+            logger.warning(
+                "Authentication cookies are nearing expiration (expires_at=%s)",
+                expires_at.isoformat(),
+            )
+            self._warned_expiration = True
 
     def get_cookies(self) -> list[dict[str, Any]]:
         """

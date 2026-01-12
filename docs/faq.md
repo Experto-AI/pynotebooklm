@@ -3,7 +3,7 @@
 ## Authentication & Cookies
 
 ### Q: How long do authentication cookies last?
-**A:** Typically 2-4 weeks. When cookies expire, you'll get an `AuthenticationError`. Simply run `pynotebooklm auth login` to re-authenticate.
+**A:** Typically 2-4 weeks. When cookies expire, you'll get an `AuthenticationError`. You can re-authenticate with `pynotebooklm auth login` or enable auto-refresh with `BrowserSession(auto_refresh=True)` for long-running sessions.
 
 ### Q: Where are cookies stored?
 **A:** Cookies are stored in `~/.pynotebooklm/auth.json`. This file contains sensitive session data - never share it or commit it to version control.

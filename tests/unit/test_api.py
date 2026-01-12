@@ -767,6 +767,7 @@ class TestPhase5ApiOps:
         self, api: NotebookLMAPI, mock_session: MagicMock
     ) -> None:
         """query_notebook builds correct request and handles CSRF."""
+        mock_session.ensure_csrf_token = AsyncMock()
         mock_session.csrf_token = "test_token"
         mock_session.call_api_raw = AsyncMock(return_value="response")
 

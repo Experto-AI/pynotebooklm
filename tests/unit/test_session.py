@@ -6,6 +6,7 @@ and error handling without requiring actual browser automation.
 """
 
 import json
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -210,6 +211,57 @@ class TestResponseParsing:
         with pytest.raises(APIError):
             session._parse_response(response)
 
+    def test_parse_streaming_response_handles_partial(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        """parse_streaming_response buffers partial JSON lines."""
+        session = BrowserSession(mock_auth_manager)
+
+        response_text = ")]}'\n10\n[1,2\n,3]\n"
+        chunks = session.parse_streaming_response(response_text)
+
+        assert chunks == [[1, 2, 3]]
+
+    def test_parse_response_no_data_lines(self, mock_auth_manager: AuthManager) -> None:
+        session = BrowserSession(mock_auth_manager)
+
+        response = {
+            "ok": True,
+            "status": 200,
+            "text": ")]}'\n123\n",
+        }
+
+        with pytest.raises(APIError):
+            session._parse_response(response)
+
+    def test_parse_response_malformed_json(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+
+        response = {
+            "ok": True,
+            "status": 200,
+            "text": ")]}'\nabc\n{not-json}",
+        }
+
+        with pytest.raises(APIError):
+            session._parse_response(response)
+
+    def test_parse_streaming_response_handles_empty(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+        assert session.parse_streaming_response("") == []
+
+    def test_parse_streaming_response_skips_malformed(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+        response_text = ")]}'\n5\n{bad}\n"
+        chunks = session.parse_streaming_response(response_text)
+        assert chunks == []
+
 
 # =============================================================================
 # Session Property Tests
@@ -230,6 +282,12 @@ class TestSessionProperties:
         """csrf_token is None before session starts."""
         session = BrowserSession(mock_auth_manager)
         assert session.csrf_token is None
+
+    def test_is_authenticated_page_without_page(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+        assert session._is_authenticated_page() is False
 
 
 # =============================================================================
@@ -315,3 +373,54 @@ class TestExceptions:
         """SessionError has correct message."""
         error = SessionError("Custom message")
         assert error.message == "Custom message"
+
+
+class TestSessionHelpers:
+    """Tests for helper utilities."""
+
+    def test_response_indicates_auth_failure(
+        self, mock_auth_manager: AuthManager
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+        assert session._response_indicates_auth_failure(
+            "https://accounts.google.com/ServiceLogin"
+        )
+        assert session._response_indicates_auth_failure("accounts.google.com")
+        assert not session._response_indicates_auth_failure("ok")
+
+    def test_emit_telemetry_logs(
+        self, mock_auth_manager: AuthManager, monkeypatch, caplog
+    ) -> None:
+        session = BrowserSession(mock_auth_manager)
+        monkeypatch.setenv("PYNOTEBOOKLM_TELEMETRY", "1")
+        with caplog.at_level(logging.INFO):
+            session._emit_telemetry("rpc_id", 12.3, True)
+        assert "rpc_call" in caplog.text
+
+    def test_sanitize_headers(self) -> None:
+        from pynotebooklm import session as session_module
+
+        headers = {"Cookie": "secret", "Authorization": "token", "X": "ok"}
+        sanitized = session_module._sanitize_headers(headers)
+        assert sanitized["Cookie"] == "[REDACTED]"
+        assert sanitized["Authorization"] == "[REDACTED]"
+        assert sanitized["X"] == "ok"
+
+    def test_sanitize_text(self) -> None:
+        from pynotebooklm import session as session_module
+
+        text = "at=token&SID=abc"
+        sanitized = session_module._sanitize_text(text)
+        assert "REDACTED" in sanitized
+
+    def test_log_if_debug(self, monkeypatch) -> None:
+        from pynotebooklm import session as session_module
+
+        monkeypatch.setenv("PYNOTEBOOKLM_DEBUG", "1")
+        messages: list[str] = []
+
+        def recorder(message: str) -> None:
+            messages.append(message)
+
+        session_module._log_if_debug(recorder, "hello")
+        assert messages == ["hello"]

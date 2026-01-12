@@ -135,6 +135,29 @@ MOCK_POLL_DEEP_RESEARCH_RESPONSE = [
     ],
 ]
 
+
+# =============================================================================
+# Poll With Backoff Tests
+# =============================================================================
+
+
+@pytest.mark.asyncio
+async def test_poll_with_backoff_completes(research_discovery, mock_session) -> None:
+    """poll_with_backoff returns when research completes."""
+    mock_session.call_rpc = AsyncMock(
+        side_effect=[
+            MOCK_POLL_IN_PROGRESS_RESPONSE,
+            MOCK_POLL_COMPLETED_RESPONSE,
+        ]
+    )
+
+    result = await research_discovery.poll_with_backoff(
+        "notebook123", max_attempts=2, base_interval=0, max_interval=0
+    )
+
+    assert result.status == ResearchStatus.COMPLETED
+
+
 # Import research response: [[source1, source2, ...]]
 MOCK_IMPORT_RESPONSE = [
     [

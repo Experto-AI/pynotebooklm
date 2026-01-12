@@ -5,6 +5,7 @@ This module provides the SourceManager class for adding, listing,
 and deleting sources in NotebookLM notebooks.
 """
 
+import asyncio
 import logging
 import re
 from typing import TYPE_CHECKING
@@ -227,6 +228,27 @@ class SourceManager:
 
         logger.info("Added Drive source: %s (%s)", source.title, source.id)
         return source
+
+    async def batch_add_urls(self, notebook_id: str, urls: list[str]) -> list[Source]:
+        """
+        Add multiple URL sources concurrently.
+
+        Args:
+            notebook_id: The notebook ID.
+            urls: List of URLs to add.
+
+        Returns:
+            List of created Source objects.
+        """
+        if not notebook_id:
+            raise ValueError("Notebook ID cannot be empty")
+        if not urls:
+            raise ValueError("URLs list cannot be empty")
+
+        results = await asyncio.gather(
+            *(self.add_url(notebook_id, url) for url in urls)
+        )
+        return list(results)
 
     async def list_sources(self, notebook_id: str) -> list[Source]:
         """

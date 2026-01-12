@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -9,6 +10,7 @@ from pynotebooklm.session import APIError, BrowserSession
 def mock_auth():
     auth = MagicMock()
     auth.is_authenticated.return_value = True
+    auth.is_expired.return_value = False
     auth.get_cookies.return_value = []
     return auth
 
@@ -17,6 +19,9 @@ def mock_auth():
 async def test_call_api_raw_success(mock_auth):
     session = BrowserSession(mock_auth)
     session._page = AsyncMock()
+    session._page.url = "https://notebooklm.google.com"
+    session._csrf_token = "token"
+    session._csrf_cached_at = datetime.now()
 
     # Mock evaluate response
     session._page.evaluate.return_value = {
@@ -40,6 +45,9 @@ async def test_call_api_raw_success(mock_auth):
 async def test_call_api_raw_failure(mock_auth):
     session = BrowserSession(mock_auth)
     session._page = AsyncMock()
+    session._page.url = "https://notebooklm.google.com"
+    session._csrf_token = "token"
+    session._csrf_cached_at = datetime.now()
 
     # Mock evaluate response
     session._page.evaluate.return_value = {

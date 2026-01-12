@@ -7,6 +7,9 @@ license = "Apache-2.0"
 readme = "README.md"
 packages = [{include = "pynotebooklm", from = "src"}]
 keywords = ["notebooklm", "google", "automation", "podcast", "ai", "notebook"]
+homepage = "https://github.com/victor/pynotebooklm"
+repository = "https://github.com/victor/pynotebooklm"
+documentation = "https://victor.github.io/pynotebooklm/"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -17,6 +20,10 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+
+[tool.poetry.urls]
+Issues = "https://github.com/victor/pynotebooklm/issues"
+Changelog = "https://github.com/victor/pynotebooklm/blob/main/CHANGELOG.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"

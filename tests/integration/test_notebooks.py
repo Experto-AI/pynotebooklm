@@ -292,3 +292,25 @@ class TestNotebookExists:
         result = await notebook_manager.exists("invalid_id")
 
         assert result is False
+
+
+# =============================================================================
+# Batch Delete Tests
+# =============================================================================
+
+
+class TestBatchDeleteNotebooks:
+    """Tests for NotebookManager.batch_delete()."""
+
+    @pytest.mark.asyncio
+    async def test_batch_delete_requires_confirm(self, notebook_manager) -> None:
+        with pytest.raises(ValueError):
+            await notebook_manager.batch_delete(["nb1", "nb2"], confirm=False)
+
+    @pytest.mark.asyncio
+    async def test_batch_delete_returns_results(self, notebook_manager) -> None:
+        notebook_manager.delete = AsyncMock(side_effect=[True, False])
+
+        results = await notebook_manager.batch_delete(["nb1", "nb2"], confirm=True)
+
+        assert results == {"nb1": True, "nb2": False}

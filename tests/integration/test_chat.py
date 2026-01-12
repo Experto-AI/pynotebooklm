@@ -11,8 +11,13 @@ from pynotebooklm.session import BrowserSession
 @pytest.fixture
 def mock_session():
     session = MagicMock(spec=BrowserSession)
+    parser_session = BrowserSession(MagicMock())
+    session.parse_streaming_response.side_effect = (
+        lambda text: parser_session.parse_streaming_response(text)
+    )
     session.call_rpc = AsyncMock()
     session.call_api_raw = AsyncMock()
+    session.ensure_csrf_token = AsyncMock()
     session.csrf_token = "mock_token"
     return session
 

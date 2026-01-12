@@ -345,3 +345,31 @@ class TestUrlValidation:
         """Should reject non-YouTube URLs."""
         assert not source_manager._is_youtube_url("https://example.com")
         assert not source_manager._is_youtube_url("https://vimeo.com/12345")
+
+
+# =============================================================================
+# Batch Add URLs Tests
+# =============================================================================
+
+
+class TestBatchAddUrls:
+    """Tests for SourceManager.batch_add_urls()."""
+
+    @pytest.mark.asyncio
+    async def test_batch_add_urls_requires_inputs(self, source_manager) -> None:
+        with pytest.raises(ValueError):
+            await source_manager.batch_add_urls("", ["https://example.com"])
+        with pytest.raises(ValueError):
+            await source_manager.batch_add_urls("nb", [])
+
+    @pytest.mark.asyncio
+    async def test_batch_add_urls_returns_sources(self, source_manager) -> None:
+        source_manager.add_url = AsyncMock(
+            side_effect=[MagicMock(id="s1"), MagicMock(id="s2")]
+        )
+
+        results = await source_manager.batch_add_urls(
+            "nb", ["https://a.com", "https://b.com"]
+        )
+
+        assert [r.id for r in results] == ["s1", "s2"]

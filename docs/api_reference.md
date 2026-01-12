@@ -32,6 +32,7 @@ This page provides the complete API reference for the PyNotebookLM library, cove
         - delete
         - rename
         - exists
+        - batch_delete
 
 ## Source Management
 
@@ -43,6 +44,7 @@ This page provides the complete API reference for the PyNotebookLM library, cove
         - add_youtube
         - add_text
         - add_drive
+        - batch_add_urls
         - list_sources
         - delete
         - list_drive
@@ -55,6 +57,7 @@ This page provides the complete API reference for the PyNotebookLM library, cove
       members:
         - start_research
         - poll_research
+        - poll_with_backoff
         - import_research_sources
         - start_web_research
 
@@ -261,6 +264,18 @@ export PYNOTEBOOKLM_MAX_DELAY=120.0    # Default: 60.0 seconds
         - __aexit__
         - call_rpc
         - call_api
+        - call_api_raw
+        - ensure_csrf_token
+        - parse_streaming_response
+
+::: pynotebooklm.session.PersistentBrowserSession
+    options:
+      show_root_heading: true
+      members:
+        - __init__
+        - __aenter__
+        - __aexit__
+        - shutdown_pool
 
 ## Authentication
 
@@ -270,6 +285,7 @@ export PYNOTEBOOKLM_MAX_DELAY=120.0    # Default: 60.0 seconds
       members:
         - login
         - is_authenticated
+        - is_expired
         - get_cookies
         - refresh
 

@@ -493,6 +493,7 @@ class NotebookLMAPI:
 
         # Build body
         body_parts = [f"f.req={urllib.parse.quote(f_req_json, safe='')}"]
+        await self._session.ensure_csrf_token()
         csrf_token = self._session.csrf_token
         if csrf_token:
             body_parts.append(f"at={urllib.parse.quote(csrf_token, safe='')}")

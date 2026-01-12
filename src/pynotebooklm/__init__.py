@@ -66,7 +66,7 @@ from .research import (
     ResearchType,
 )
 from .retry import RetryStrategy, with_retry
-from .session import BrowserSession
+from .session import BrowserSession, PersistentBrowserSession
 from .sources import SourceManager
 from .study import (
     DataTableCreateResult,
@@ -84,6 +84,7 @@ __all__ = [
     # Core classes
     "AuthManager",
     "BrowserSession",
+    "PersistentBrowserSession",
     "ChatSession",
     "NotebookLMAPI",
     "NotebookLMClient",

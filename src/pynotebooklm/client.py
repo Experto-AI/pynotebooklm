@@ -34,15 +34,21 @@ class NotebookLMClient:
         ...     print(notebooks)
     """
 
-    def __init__(self, auth: AuthManager | None = None) -> None:
+    def __init__(
+        self,
+        auth: AuthManager | None = None,
+        session_class: type[BrowserSession] | None = None,
+    ) -> None:
         """
         Initialize the unified client.
 
         Args:
             auth: Optional AuthManager instance. If not provided,
                   a default one will be created.
+            session_class: BrowserSession class to use (e.g. PersistentBrowserSession).
         """
         self._auth = auth or AuthManager()
+        self._session_class = session_class or BrowserSession
         self._session: BrowserSession | None = None
 
         # Managers - initialized in __aenter__
@@ -58,7 +64,7 @@ class NotebookLMClient:
         """
         Start the browser session and initialize all managers.
         """
-        self._session = BrowserSession(self._auth)
+        self._session = self._session_class(self._auth)
         await self._session.__aenter__()
 
         # Initialize managers with the active session

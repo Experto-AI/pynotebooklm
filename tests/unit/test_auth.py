@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from pynotebooklm.auth import AuthManager
+from pynotebooklm.auth import AuthManager, save_auth_tokens
 from pynotebooklm.exceptions import AuthenticationError
 from pynotebooklm.models import AuthState, Cookie
 
@@ -202,6 +202,71 @@ class TestAuthManagerCookies:
 
         auth = AuthManager(auth_path=mock_cookies_path)
         assert auth.get_csrf_token() == "test_csrf_token"
+
+
+class TestAuthManagerExpiration:
+    """Tests for cookie expiration helpers."""
+
+    def test_is_expired_with_no_state(self, tmp_path: Path) -> None:
+        """is_expired returns True when auth state is missing."""
+        auth_path = tmp_path / ".pynotebooklm" / "auth.json"
+        auth = AuthManager(auth_path=auth_path)
+        assert auth.is_expired() is True
+
+    def test_is_expired_with_future_expires(
+        self, mock_cookies_path: Path, mock_auth_state: AuthState
+    ) -> None:
+        """is_expired returns False when cookies are still valid."""
+        mock_cookies_path.parent.mkdir(parents=True)
+        mock_cookies_path.write_text(mock_auth_state.model_dump_json())
+
+        auth = AuthManager(auth_path=mock_cookies_path)
+        assert auth.is_expired() is False
+
+
+class TestSaveAuthTokens:
+    """Tests for save_auth_tokens helper."""
+
+    def test_save_auth_tokens_from_string(self, tmp_path: Path) -> None:
+        auth_path = tmp_path / "auth.json"
+        save_auth_tokens(
+            cookies="SID=abc; HSID=def",
+            csrf_token="csrf",
+            auth_path=auth_path,
+        )
+        assert auth_path.exists()
+        data = json.loads(auth_path.read_text())
+        assert data["csrf_token"] == "csrf"
+        assert any(cookie["name"] == "SID" for cookie in data["cookies"])
+
+    def test_save_auth_tokens_from_list(self, tmp_path: Path) -> None:
+        auth_path = tmp_path / "auth.json"
+        save_auth_tokens(
+            cookies=[{"name": "SID", "value": "abc", "domain": ".google.com"}],
+            auth_path=auth_path,
+        )
+        assert auth_path.exists()
+        data = json.loads(auth_path.read_text())
+        assert data["cookies"][0]["name"] == "SID"
+
+    def test_save_auth_tokens_invalid_type(self) -> None:
+        with pytest.raises(ValueError):
+            save_auth_tokens(cookies=123)  # type: ignore[arg-type]
+
+
+class TestLogout:
+    """Tests for AuthManager.logout."""
+
+    def test_logout_removes_auth_file(
+        self, mock_cookies_path: Path, mock_auth_state: AuthState
+    ) -> None:
+        mock_cookies_path.parent.mkdir(parents=True)
+        mock_cookies_path.write_text(mock_auth_state.model_dump_json())
+
+        auth = AuthManager(auth_path=mock_cookies_path)
+        auth.logout()
+
+        assert not mock_cookies_path.exists()
 
     def test_get_csrf_token_returns_none_when_not_authenticated(
         self, tmp_path: Path

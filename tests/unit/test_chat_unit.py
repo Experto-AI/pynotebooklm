@@ -7,12 +7,18 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from pynotebooklm.chat import ChatSession
+from pynotebooklm.session import BrowserSession
 
 
 class TestChatSession:
     @pytest.fixture
     def mock_session(self):
-        return MagicMock()
+        session = MagicMock()
+        parser_session = BrowserSession(MagicMock())
+        session.parse_streaming_response.side_effect = (
+            lambda text: parser_session.parse_streaming_response(text)
+        )
+        return session
 
     @pytest.fixture
     def chat(self, mock_session):

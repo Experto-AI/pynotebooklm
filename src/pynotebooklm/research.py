@@ -7,6 +7,7 @@ discovering related sources, and importing findings into notebooks.
 Based on reverse engineering of jacob-bd/notebooklm-mcp (Jan 2026).
 """
 
+import asyncio
 import logging
 import re
 from enum import Enum
@@ -316,6 +317,42 @@ class ResearchDiscovery:
             if e.status_code == 404:
                 raise NotebookNotFoundError(notebook_id) from e
             raise
+
+    async def poll_with_backoff(
+        self,
+        notebook_id: str,
+        max_attempts: int = 10,
+        base_interval: float = 5.0,
+        max_interval: float = 60.0,
+    ) -> ResearchSession:
+        """
+        Poll research status with exponential backoff.
+
+        Args:
+            notebook_id: The notebook UUID.
+            max_attempts: Maximum number of polling attempts.
+            base_interval: Initial polling interval in seconds.
+            max_interval: Maximum polling interval in seconds.
+
+        Returns:
+            ResearchSession when completed or after max_attempts.
+        """
+        interval = base_interval
+        last_result = ResearchSession(
+            task_id="",
+            notebook_id=notebook_id,
+            query="",
+            status=ResearchStatus.NO_RESEARCH,
+        )
+
+        for _ in range(max_attempts):
+            last_result = await self.poll_research(notebook_id)
+            if last_result.status != ResearchStatus.IN_PROGRESS:
+                return last_result
+            await asyncio.sleep(interval)
+            interval = min(max_interval, interval * 2)
+
+        return last_result
 
     async def import_research_sources(
         self,

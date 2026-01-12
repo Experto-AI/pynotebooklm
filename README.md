@@ -12,9 +12,12 @@ DO NOT include here: Detailed implementation plans, architectural decisions, or 
 
 [![CI](https://img.shields.io/github/actions/workflow/status/victor/pynotebooklm/ci.yml?branch=main)](https://github.com/victor/pynotebooklm/actions)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![PyPI](https://img.shields.io/pypi/v/pynotebooklm.svg)](https://pypi.org/project/pynotebooklm/)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Production-grade Python library for **Google NotebookLM** automation.
+
+Documentation: https://victor.github.io/pynotebooklm/
 
 ## Features
 
@@ -197,6 +200,23 @@ pynotebooklm studio status <notebook_id>           # Detailed status with downlo
 pynotebooklm studio delete <artifact_id>           # Delete an artifact (with confirmation)
 pynotebooklm studio delete <artifact_id> --force   # Delete without confirmation
 ```
+
+## Troubleshooting
+
+### Authentication Errors
+
+- Run `pynotebooklm auth login` to refresh cookies.
+- Delete `~/.pynotebooklm/auth.json` if cookies are corrupted, then login again.
+
+### Playwright Issues
+
+- Ensure the browser is installed: `playwright install chromium`
+- On Linux, install required system deps (see `Dockerfile` for a reference list).
+
+### Debugging Requests
+
+- Enable verbose logging with `PYNOTEBOOKLM_DEBUG=1`.
+- Enable structured telemetry with `PYNOTEBOOKLM_TELEMETRY=1`.
 
 
 ## Development

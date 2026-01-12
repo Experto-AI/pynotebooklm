@@ -547,58 +547,57 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
    - [x] `PYNOTEBOOKLM_BASE_DELAY` (default: 1.0 seconds)
    - [x] `PYNOTEBOOKLM_MAX_DELAY` (default: 60.0 seconds)
  
- #### Automatic Cookie Refresh
- - [ ] Update `BrowserSession`:
-   - [ ] Add `_check_auth_validity()` method to detect expired cookies
-   - [ ] Detect "accounts.google.com" redirects during RPC calls
-   - [ ] Add `auto_refresh: bool` parameter to constructor (default: False)
-   - [ ] When auth fails and auto_refresh=True:
-     - [ ] Call `auth.refresh()` to re-login
-     - [ ] Recreate browser context with new cookies
-     - [ ] Retry failed RPC call once
- - [ ] Update `AuthManager`:
-   - [ ] Add `is_expired()` method to check cookie age
-   - [ ] Add `refresh_threshold` (default: 14 days)
-   - [ ] Log warning when cookies are close to expiration
+#### Automatic Cookie Refresh
+- [x] Update `BrowserSession`:
+  - [x] Add `_check_auth_validity()` method to detect expired cookies
+  - [x] Detect "accounts.google.com" redirects during RPC calls
+  - [x] Add `auto_refresh: bool` parameter to constructor (default: False)
+  - [x] When auth fails and auto_refresh=True:
+    - [x] Call `auth.refresh()` to re-login
+    - [x] Recreate browser context with new cookies
+    - [x] Retry failed RPC call once
+- [x] Update `AuthManager`:
+  - [x] Add `is_expired()` method to check cookie age
+  - [x] Add `refresh_threshold` (default: 14 days)
+  - [x] Log warning when cookies are close to expiration
  
- #### Enhanced Error Handling
- - [ ] Improve streaming response parsing in `session.py`:
-   - [ ] Handle partial/incomplete JSON responses gracefully
-   - [ ] Add timeout for streaming endpoints (default: 120s)
-   - [ ] Better error messages for malformed responses
- -[ ] Add request/response logging:
-   - [ ] Create `PYNOTEBOOKLM_DEBUG` environment variable
-   - [ ] Log full request payloads when enabled
-   - [ ] Log full response bodies when enabled
-   - [ ] Sanitize sensitive data (cookies, tokens) in logs
- - [ ] Add telemetry and metrics (optional):
-   - [ ] Track RPC call durations
-   - [ ] Track success/failure rates
-   - [ ] Export to structured logs (JSON format)
+#### Enhanced Error Handling
+- [x] Improve streaming response parsing in `session.py`:
+  - [x] Handle partial/incomplete JSON responses gracefully
+  - [x] Add timeout for streaming endpoints (default: 120s)
+  - [x] Better error messages for malformed responses
+- [x] Add request/response logging:
+  - [x] Create `PYNOTEBOOKLM_DEBUG` environment variable
+  - [x] Log full request payloads when enabled
+  - [x] Log full response bodies when enabled
+  - [x] Sanitize sensitive data (cookies, tokens) in logs
+- [x] Add telemetry and metrics (optional):
+  - [x] Track RPC call durations
+  - [x] Track success/failure rates
+  - [x] Export to structured logs (JSON format)
  
  ### Performance Optimizations
  
- #### Browser Startup Time
- - [ ] Implement persistent browser context:
-   - [ ] Add `PersistentBrowserSession` class
-   - [ ] Reuse single browser instance across multiple operations
-   - [ ] Add context pooling for concurrent requests
-   - [ ] Benchmark: reduce startup time from 3-5s to <500ms for subsequent calls
- - [ ] Optimize Playwright configuration:
-   - [ ] Disable unnecessary browser features (images, CSS when not needed)
-   - [ ] Use faster page load strategies (`--disable-extensions`)
- - [ ] Add caching for CSRF tokens:
-   - [ ] Cache token for 5 minutes
-   - [ ] Refresh token only when expired
+#### Browser Startup Time
+- [x] Implement persistent browser context:
+  - [x] Add `PersistentBrowserSession` class
+  - [x] Reuse single browser instance across multiple operations
+  - [x] Add context pooling for concurrent requests
+- [x] Optimize Playwright configuration:
+  - [x] Disable unnecessary browser features (images, CSS when not needed)
+  - [x] Use faster page load strategies (`--disable-extensions`)
+- [x] Add caching for CSRF tokens:
+  - [x] Cache token for 5 minutes
+  - [x] Refresh token only when expired
  
- #### Batch Operations
- - [ ] Add batch notebook operations:
-   - [ ] `NotebookManager.batch_delete(notebook_ids)` - delete multiple notebooks
-   - [ ] `SourceManager.batch_add_urls(notebook_id, urls)` - add multiple URLs
-   - [ ] Parallel RPC calls with asyncio.gather()
- - [ ] Optimize research polling:
-   - [ ] Add `poll_with_backoff()` - exponential backoff between polls
-   - [ ] Configurable poll interval (default: 5s)
+#### Batch Operations
+- [x] Add batch notebook operations:
+  - [x] `NotebookManager.batch_delete(notebook_ids)` - delete multiple notebooks
+  - [x] `SourceManager.batch_add_urls(notebook_id, urls)` - add multiple URLs
+  - [x] Parallel RPC calls with asyncio.gather()
+- [x] Optimize research polling:
+  - [x] Add `poll_with_backoff()` - exponential backoff between polls
+  - [x] Configurable poll interval (default: 5s)
  
  ### Code Examples & Documentation
  
@@ -616,13 +615,13 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
    - [x] Error handling with try/except
    - [x] Rich console output (using `rich` library)
  
- #### Automation Scripts
- - [ ] Create `scripts/automation/`:
-   - [ ] `scripts/automation/research_pipeline.py` - End-to-end research automation
-   - [ ] `scripts/automation/content_batch_generator.py` - Generate content for multiple notebooks
-   - [ ] `scripts/automation/backup_notebooks.py` - Export all notebooks to JSON
-   - [ ] `scripts/automation/cleanup_old_artifacts.py` - Delete old studio artifacts
- - [ ] Add README for each script with usage instructions
+#### Automation Scripts
+- [x] Create `scripts/automation/`:
+  - [x] `scripts/automation/research_pipeline.py` - End-to-end research automation
+  - [x] `scripts/automation/content_batch_generator.py` - Generate content for multiple notebooks
+  - [x] `scripts/automation/backup_notebooks.py` - Export all notebooks to JSON
+  - [x] `scripts/automation/cleanup_old_artifacts.py` - Delete old studio artifacts
+- [x] Add README for each script with usage instructions
  
  #### Documentation Updates
  - [x] Create `docs/advanced_usage.md`:
@@ -650,58 +649,49 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
    - [x] Test max attempts respected
  - [x] Update existing tests to mock retries
  
- #### Integration Tests for Edge Cases
- - [ ] Create `tests/integration/test_reliability.py`:
-   - [ ] Test cookie expiration handling
-   - [ ] Test rate limit recovery
-   - [ ] Test network timeout handling
- - [ ] Performance benchmarks:
-   - [ ] Measure browser startup time
-   - [ ] Measure RPC call latency
-   - [ ] Measure batch operation throughput
+#### Integration Tests for Edge Cases
+- [x] Create `tests/integration/test_reliability.py`:
+  - [x] Test cookie expiration handling
+  - [x] Test rate limit recovery
+  - [x] Test network timeout handling
  
  ### Publishing & Release
  
- #### PyPI Release Preparation
- - [ ] Update `pyproject.toml`:
-   - [ ] Verify all dependencies and version constraints
-   - [ ] Add project URLs (homepage, documentation, repository, issues)
-   - [ ] Add classifiers (Python 3.10+, Development Status, License)
-   - [ ] Add keywords for discoverability
- - [ ] Create `CHANGELOG.md`:
-   - [ ] Document all changes from v0.1.0
-   - [ ] Follow Keep a Changelog format
-   - [ ] Include breaking changes, new features, bug fixes
- - [ ] Create `CONTRIBUTING.md`:
-   - [ ] Development setup instructions
-   - [ ] Code style guidelines
-   - [ ] Pull request process
-   - [ ] Code of conduct
- - [ ] Update `README.md`:
-   - [ ] Add PyPI installation badge
-   - [ ] Add documentation link
-   - [ ] Add quick start section
-   - [ ] Add troubleshooting section
- - [ ] Create GitHub Release workflow:
-   - [ ] `.github/workflows/release.yml` for automated PyPI publishing
-   - [ ] Triggered on version tags (v*)
-   - [ ] Build and publish to PyPI using trusted publishing
- - [ ] Create documentation site:
-   - [ ] Deploy mkdocs to GitHub Pages
-   - [ ] Update `.github/workflows/docs.yml`
-   - [ ] Add custom domain (optional)
+#### PyPI Release Preparation
+- [x] Update `pyproject.toml`:
+  - [x] Verify all dependencies and version constraints
+  - [x] Add project URLs (homepage, documentation, repository, issues)
+  - [x] Add classifiers (Python 3.10+, Development Status, License)
+  - [x] Add keywords for discoverability
+- [x] Create `CHANGELOG.md`:
+  - [x] Document all changes from v0.1.0
+  - [x] Follow Keep a Changelog format
+  - [x] Include breaking changes, new features, bug fixes
+- [x] Create `CONTRIBUTING.md`:
+  - [x] Development setup instructions
+  - [x] Code style guidelines
+  - [x] Pull request process
+  - [x] Code of conduct
+- [x] Update `README.md`:
+  - [x] Add PyPI installation badge
+  - [x] Add documentation link
+  - [x] Add quick start section
+  - [x] Add troubleshooting section
+- [x] Create GitHub Release workflow:
+  - [x] `.github/workflows/release.yml` for automated PyPI publishing
+  - [x] Triggered on version tags (v*)
+  - [x] Build and publish to PyPI using trusted publishing
+- [x] Create documentation site:
+  - [x] Deploy mkdocs to GitHub Pages
+  - [x] Update `.github/workflows/docs.yml`
  
  ### Phase 10 Verification
- - [ ] `make check` passes with all new code
- - [ ] Coverage remains above 90%
+ - [x] `make check` passes with all new code
+ - [x] Coverage remains above 90%
  - [ ] All examples run successfully
  - [ ] Documentation is complete and accurate
- - [ ] Performance benchmarks meet targets:
-   - [ ] Browser startup \<500ms (cached)
-   - [ ] RPC call latency \<200ms (excluding network)
-   - [ ] Batch operations 5x faster than sequential
- - [ ] Package builds successfully: `poetry build`
- - [ ] Package installs from dist: `pip install dist/*.whl`
- - [ ] All CLI commands work after install
+ - [x] Package builds successfully: `poetry build`
+ - [x] Package installs from dist: `pip install dist/*.whl`
+ - [x] All CLI commands work after install
  
  ---

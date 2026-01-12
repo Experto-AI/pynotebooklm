@@ -18,7 +18,7 @@
 #   make build                - Build distribution package
 #   make clean                - Remove build artifacts
 
-.PHONY: setup test test-unit test-integration test-cov lint lint-fix typecheck format check build clean help version-check version-update bump-version
+.PHONY: setup test test-unit test-integration test-cov lint lint-fix typecheck format check build clean help version-check version-update bump-version check-llm lint-llm typecheck-llm test-llm test-cov-llm
 
 # Default Python command
 PYTHON ?= poetry run python
@@ -40,6 +40,10 @@ help:
 	@echo "  make typecheck            - Run type checking"
 	@echo "  make format               - Format code with black"
 	@echo "  make check                - Run all checks (lint, typecheck, test)"
+	@echo ""
+	@echo "LLM Optimized Checks (Quiet on success):"
+	@echo "  make check-llm            - Run all checks quietly"
+	@echo "  make test-cov-llm         - Run coverage quietly"
 	@echo ""
 	@echo "Build:"
 	@echo "  make build                - Build distribution package"
@@ -130,7 +134,7 @@ clean:
 
 SUPPORTED_COMMANDS := bump-version
 SUPPORTS_MAKE_ARGS := $(findstring $(firstword $(MAKECMDGOALS)), $(SUPPORTED_COMMANDS))
-ifneq "$(SUPPORTS_MAKE_ARGS)" ""
+ifneq "$(SUPPORTS_MAKE_ARGS)" "" 
   VERSION_ARG := $(wordlist 2,$(words $(MAKECMDGOALS)),$(MAKECMDGOALS))
   $(eval $(VERSION_ARG):;@:)
 endif
@@ -169,3 +173,25 @@ bump-version:
 	@echo "  UPDATED: src/pynotebooklm/__init__.py"
 	@echo "✅ Version bumped to $(VERSION_ARG)"
 
+
+# --- LLM Optimized Targets ---
+
+lint-llm:
+	@$(PYTHON) -m ruff check src tests --quiet
+	@$(PYTHON) -m ruff format --check src tests --quiet
+
+typecheck-llm:
+	@$(PYTHON) -m mypy src --show-error-codes > mypy_log.txt 2>&1 || { cat mypy_log.txt; rm mypy_log.txt; exit 1; }
+	@rm -f mypy_log.txt
+
+test-llm:
+	@$(PYTHON) -m pytest tests/ -q --tb=short > pytest_log.txt 2>&1 || { cat pytest_log.txt; rm pytest_log.txt; exit 1; }
+	@rm -f pytest_log.txt
+
+test-cov-llm:
+	@$(PYTHON) -m pytest tests/ -q --tb=short --cov=src/pynotebooklm --cov-report=term-missing --cov-report=json > pytest_cov_log.txt 2>&1 || { cat pytest_cov_log.txt; rm pytest_cov_log.txt; exit 1; }
+	@rm -f pytest_cov_log.txt
+	@$(PYTHON) scripts/check_coverage.py --total 90 --file 80 > coverage_log.txt 2>&1 || { cat coverage_log.txt; rm coverage_log.txt; exit 1; }
+	@rm -f coverage_log.txt
+
+check-llm: lint-llm typecheck-llm test-llm

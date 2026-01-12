@@ -5,7 +5,11 @@ This module provides the NotebookManager class for creating, listing,
 retrieving, renaming, and deleting NotebookLM notebooks.
 """
 
+from __future__ import annotations
+
+import asyncio
 import logging
+from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
 from .api import NotebookLMAPI, parse_notebook_response
@@ -32,7 +36,7 @@ class NotebookManager:
         ...     new_notebook = await notebooks.create("My Research")
     """
 
-    def __init__(self, session: "BrowserSession") -> None:
+    def __init__(self, session: BrowserSession) -> None:
         """
         Initialize the notebook manager.
 
@@ -221,6 +225,34 @@ class NotebookManager:
 
         logger.info("Deleted notebook: %s", notebook_id)
         return result
+
+    async def batch_delete(
+        self, notebook_ids: Sequence[str], confirm: bool = False
+    ) -> dict[str, bool]:
+        """
+        Delete multiple notebooks concurrently.
+
+        Args:
+            notebook_ids: Sequence of notebook IDs to delete.
+            confirm: Must be True to proceed.
+
+        Returns:
+            Mapping of notebook ID to deletion success.
+        """
+        if not confirm:
+            raise ValueError("confirm must be True to delete notebooks in batch")
+        if not notebook_ids:
+            raise ValueError("Notebook IDs cannot be empty")
+
+        async def _delete_single(nid: str) -> tuple[str, bool]:
+            try:
+                result = await self.delete(nid, confirm=True)
+                return nid, bool(result)
+            except Exception:
+                return nid, False
+
+        results = await asyncio.gather(*(_delete_single(nid) for nid in notebook_ids))
+        return dict(results)
 
     async def exists(self, notebook_id: str) -> bool:
         """

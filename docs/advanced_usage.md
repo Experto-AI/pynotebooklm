@@ -14,7 +14,7 @@ This guide covers advanced features and patterns for production use of PyNoteboo
 
 ## Retry Strategies & Error Handling
 
-###Automatic Retry with Exponential Backoff
+### Automatic Retry with Exponential Backoff
 
 PyNotebookLM includes built-in retry logic for transient errors:
 
@@ -141,6 +141,18 @@ async def robust_notebook_operation(notebook_id: str):
         raise
 ```
 
+### Automatic Cookie Refresh
+
+Enable auto-refresh to re-login when cookies expire during a session:
+
+```python
+from pynotebooklm import AuthManager, BrowserSession
+
+auth = AuthManager()
+async with BrowserSession(auth, auto_refresh=True) as session:
+    result = await session.call_rpc("wXbhsf", [None, 1])
+```
+
 ---
 
 ## Persistent Sessions for Performance
@@ -166,6 +178,21 @@ async with NotebookLMClient() as client:
     notebooks = await client.notebooks.list()
     new_nb = await client.notebooks.create("Test")
     source = await client.sources.add_url(new_nb.id, "https://example.com")
+```
+
+### PersistentBrowserSession (Shared Browser)
+
+Reuse a shared browser instance across client sessions:
+
+```python
+from pynotebooklm import NotebookLMClient, PersistentBrowserSession
+
+async with NotebookLMClient(session_class=PersistentBrowserSession) as client:
+    notebooks = await client.notebooks.list()
+    await client.sources.add_url(notebooks[0].id, "https://example.com")
+
+# Optional: shutdown shared browser when the app exits
+await PersistentBrowserSession.shutdown_pool()
 ```
 
 ### Long-Running Service Pattern
@@ -331,6 +358,16 @@ successful, failed = await batch_add_sources(notebook_id, urls)
 print(f"Added {len(successful)} sources, {len(failed)} failed")
 ```
 
+### Built-In Batch Helpers
+
+Use the built-in batch helpers for common workflows:
+
+```python
+async with NotebookLMClient() as client:
+    await client.sources.batch_add_urls(notebook_id, urls)
+    await client.notebooks.batch_delete(notebook_ids, confirm=True)
+```
+
 ### Rate-Limited Batch Processing
 
 Process large batches with rate limiting:
@@ -368,7 +405,7 @@ async def rate_limited_batch(
 
 # Usage
 async def process_url(url: str):
-    asyncwith NotebookLMClient() as client:
+    async with NotebookLMClient() as client:
         notebook = await client.notebooks.create(f"Analysis: {url}")
         await client.sources.add_url(notebook.id, url)
         return notebook
@@ -433,6 +470,14 @@ logger = logging.getLogger(__name__)
 async with NotebookLMClient() as client:
     # All RPC calls logged with DEBUG level
     notebooks = await client.notebooks.list()
+```
+
+### Telemetry Logs
+
+Enable structured telemetry logs for RPC timing and success rates:
+
+```bash
+export PYNOTEBOOKLM_TELEMETRY=1
 ```
 
 ---
