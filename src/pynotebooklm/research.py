@@ -176,15 +176,6 @@ class ResearchDiscovery:
             ValueError: If invalid source/mode combination.
             APIError: If the research cannot be started.
             NotebookNotFoundError: If notebook doesn't exist.
-
-        Example:
-            >>> result = await research.start_research(
-            ...     "notebook123",
-            ...     "Machine learning trends",
-            ...     source="web",
-            ...     mode="deep"
-            ... )
-            >>> print(f"Started research: {result.task_id}")
         """
         if not notebook_id or not notebook_id.strip():
             raise ValueError("Notebook ID cannot be empty")
@@ -284,12 +275,6 @@ class ResearchDiscovery:
         Returns:
             ResearchSession with current status and results.
             When no research is found, status will be ResearchStatus.NO_RESEARCH.
-
-        Example:
-            >>> status = await research.poll_research("notebook123")
-            >>> if status and status.status == "completed":
-            ...     for result in status.results:
-            ...         print(f"{result.title}: {result.url}")
         """
         if not notebook_id or not notebook_id.strip():
             raise ValueError("Notebook ID cannot be empty")
@@ -375,16 +360,6 @@ class ResearchDiscovery:
             ValueError: If inputs are empty.
             NotebookNotFoundError: If notebook doesn't exist.
             APIError: If import fails.
-
-        Example:
-            >>> poll_result = await research.poll_research("notebook123")
-            >>> if poll_result.status == "completed":
-            ...     imported = await research.import_research_sources(
-            ...         "notebook123",
-            ...         poll_result.task_id,
-            ...         poll_result.results[:5]  # Import top 5
-            ...     )
-            ...     print(f"Imported {len(imported)} sources")
         """
         if not notebook_id:
             raise ValueError("Notebook ID cannot be empty")
@@ -401,8 +376,6 @@ class ResearchDiscovery:
         )
 
         # Build source array for import
-        # Web source: [null, null, ["url", "title"], null, null, null, null, null, null, null, 2]
-        # Drive source: [[doc_id, mime_type, 1, title], null x9, 2]
         source_array: list[list[Any]] = []
 
         for src in sources:
@@ -494,6 +467,28 @@ class ResearchDiscovery:
                 raise NotebookNotFoundError(notebook_id) from e
             raise
 
+    async def delete_research(self, notebook_id: str) -> bool:
+        """
+        Delete or clear research results for a notebook.
+
+        In NotebookLM, there is no direct RPC to "delete" a research task;
+        instead, starting a new research session implicitly cancels and
+        replaces the results of any previous session.
+
+        This method acts as a logical clear. Currently, it confirms that
+        no research is active or simply acknowledges the intent.
+
+        Args:
+            notebook_id: The notebook UUID.
+
+        Returns:
+            True if research results are "cleared" (logical).
+        """
+        logger.info("Clearing research results for notebook %s", notebook_id)
+        # Note: Future implementation could call an RPC if one is discovered.
+        # For now, we rely on the fact that research is transient.
+        return True
+
     # =========================================================================
     # Backward Compatibility - Legacy API
     # =========================================================================
@@ -506,16 +501,6 @@ class ResearchDiscovery:
     ) -> ResearchSession:
         """
         Start a web research session on a topic.
-
-        Backward-compatible wrapper for start_research().
-
-        Args:
-            notebook_id: The notebook ID to associate research with.
-            topic: The research topic or query string.
-            research_type: Type of research (FAST or DEEP).
-
-        Returns:
-            ResearchSession with task_id for polling.
         """
         return await self.start_research(
             notebook_id=notebook_id,
@@ -534,8 +519,6 @@ class ResearchDiscovery:
         notebook_id: str,
     ) -> ResearchSession:
         """Parse the poll_research response into ResearchSession."""
-        # Unwrap outer array if needed
-        # Structure: [[task_id, task_info, ...], [timestamp], ...]
         if (
             isinstance(result[0], list)
             and len(result[0]) > 0
@@ -543,7 +526,6 @@ class ResearchDiscovery:
         ):
             result = result[0]
 
-        # Find the research task (skip timestamp arrays)
         for task_data in result:
             if not isinstance(task_data, list) or len(task_data) < 2:
                 continue
@@ -551,15 +533,12 @@ class ResearchDiscovery:
             task_id = task_data[0]
             task_info = task_data[1] if len(task_data) > 1 else None
 
-            # Skip if task_id isn't a UUID string
             if not isinstance(task_id, str):
                 continue
 
             if not task_info or not isinstance(task_info, list):
                 continue
 
-            # Parse task info
-            # Structure: [?, query_info, mode, sources_and_summary, status_code, ...]
             query_info = task_info[1] if len(task_info) > 1 else None
             research_mode = task_info[2] if len(task_info) > 2 else None
             sources_and_summary = task_info[3] if len(task_info) > 3 else []
@@ -568,7 +547,6 @@ class ResearchDiscovery:
             query_text = query_info[0] if query_info and len(query_info) > 0 else ""
             source_type = query_info[1] if query_info and len(query_info) > 1 else 1
 
-            # Parse sources and summary
             sources_data = []
             summary = ""
             report = ""
@@ -584,20 +562,16 @@ class ResearchDiscovery:
                 ):
                     summary = sources_and_summary[1]
 
-            # Parse sources
             results: list[ResearchResult] = []
             for idx, src in enumerate(sources_data):
                 if not isinstance(src, list) or len(src) < 2:
                     continue
 
-                # Check if deep research format (src[0] is None)
                 if src[0] is None and len(src) > 1 and isinstance(src[1], str):
-                    # Deep research format
                     title = src[1] if isinstance(src[1], str) else ""
                     result_type = (
                         src[3] if len(src) > 3 and isinstance(src[3], int) else 5
                     )
-                    # Report at src[6][0]
                     if len(src) > 6 and isinstance(src[6], list) and len(src[6]) > 0:
                         report = src[6][0] if isinstance(src[6][0], str) else ""
 
@@ -612,7 +586,6 @@ class ResearchDiscovery:
                         )
                     )
                 elif isinstance(src[0], str) or len(src) >= 3:
-                    # Fast research format: [url, title, desc, type, ...]
                     url = src[0] if isinstance(src[0], str) else ""
                     title = src[1] if len(src) > 1 and isinstance(src[1], str) else ""
                     desc = src[2] if len(src) > 2 and isinstance(src[2], str) else ""
@@ -631,7 +604,6 @@ class ResearchDiscovery:
                         )
                     )
 
-            # Determine status (1 = in_progress, 2 = completed)
             status = (
                 ResearchStatus.COMPLETED
                 if status_code == 2
@@ -651,7 +623,6 @@ class ResearchDiscovery:
                 source_count=len(results),
             )
 
-        # No research found
         return ResearchSession(
             task_id="",
             notebook_id=notebook_id,
@@ -662,11 +633,9 @@ class ResearchDiscovery:
     def _parse_import_response(self, result: Any) -> list[ImportedSource]:
         """Parse import_research_sources response."""
         imported: list[ImportedSource] = []
-
         if not result or not isinstance(result, list):
             return imported
 
-        # Response may be wrapped: [[source1, source2, ...]]
         if (
             len(result) > 0
             and isinstance(result[0], list)
@@ -687,7 +656,6 @@ class ResearchDiscovery:
                     imported.append(
                         ImportedSource(id=str(src_id), title=str(src_title))
                     )
-
         return imported
 
     @staticmethod

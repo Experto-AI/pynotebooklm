@@ -37,10 +37,11 @@ RPC_ADD_URL_SOURCE = "izAoDd"
 RPC_ADD_TEXT_SOURCE = "dqfPBf"
 RPC_DELETE_SOURCE = "tGMBJ"
 RPC_LIST_SOURCES = "rLM1Ne"
+RPC_GET_SOURCE = "hizoJc"  # Get raw source content
 
 # Drive operations
 RPC_LIST_DRIVE_DOCS = "KGBelc"
-RPC_LIST_DRIVE_DOCS = "KGBelc"
+RPC_SYNC_SOURCE = "FLmJqe"  # Sync Drive source
 RPC_ADD_DRIVE_SOURCE = "izAoDd"
 
 # Phase 5 RPCs
@@ -415,6 +416,84 @@ class NotebookLMAPI:
         if isinstance(result, list):
             return result
         return []
+
+    async def get_source_text(self, source_id: str) -> dict[str, Any]:
+        """
+        Get the full text content of a source.
+
+        Args:
+            source_id: The source UUID.
+
+        Returns:
+            Dict with content, title, source_type, and char_count.
+        """
+        logger.debug("Getting full text for source %s", source_id)
+
+        # RPC params: [[source_id], [2], [2]]
+        params = [[source_id], [2], [2]]
+        result = await self._session.call_rpc(RPC_GET_SOURCE, params)
+
+        content = ""
+        title = ""
+        source_type_name = "unknown"
+
+        if isinstance(result, list):
+            # result[0] often contains metadata
+            if len(result) > 0 and isinstance(result[0], list):
+                source_meta = result[0]
+                if len(source_meta) > 1 and isinstance(source_meta[1], str):
+                    title = source_meta[1]
+                if len(source_meta) > 2 and isinstance(source_meta[2], list):
+                    meta = source_meta[2]
+                    if len(meta) > 4 and isinstance(meta[4], int):
+                        # Use same mapping as competitors
+                        type_map = {
+                            1: "google_docs",
+                            3: "pdf",
+                            4: "pasted_text",
+                            5: "web_page",
+                            9: "youtube",
+                        }
+                        source_type_name = type_map.get(meta[4], f"type_{meta[4]}")
+
+            # result[3] contains content blocks
+            if len(result) > 3 and isinstance(result[3], list):
+                content_blocks = result[3]
+                if content_blocks and isinstance(content_blocks[0], list):
+                    blocks = content_blocks[0]
+                    # Each block: [start, end, text, ...]
+                    text_parts = []
+                    for block in blocks:
+                        if (
+                            isinstance(block, list)
+                            and len(block) > 2
+                            and isinstance(block[2], str)
+                        ):
+                            text_parts.append(block[2])
+                    content = "".join(text_parts)
+
+        return {
+            "content": content,
+            "title": title,
+            "source_type": source_type_name,
+            "char_count": len(content),
+        }
+
+    async def sync_source(self, source_id: str) -> bool:
+        """
+        Sync a Drive source with latest content.
+
+        Args:
+            source_id: The source UUID.
+
+        Returns:
+            True if sync was triggered successfully.
+        """
+        logger.debug("Syncing source %s", source_id)
+        # RPC params: [null, [source_id], [2]]
+        params = [None, [source_id], [2]]
+        await self._session.call_rpc(RPC_SYNC_SOURCE, params)
+        return True
 
     # =========================================================================
     # Helper Methods

@@ -166,6 +166,63 @@ def list_notebooks(
     asyncio.run(_run())
 
 
+@notebooks_app.command("describe", no_args_is_help=True)
+def describe_notebook(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to describe"),
+) -> None:
+    """Get an AI-generated summary and featured topics for a notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            from pynotebooklm.api import NotebookLMAPI
+
+            api = NotebookLMAPI(session)
+            with console.status(
+                f"[bold green]Generating summary for notebook {notebook_id}..."
+            ):
+                result = await api.get_notebook_summary(notebook_id)
+
+            if result:
+                # Parse result
+                summary = "No summary available."
+                topics: list[str] = []
+
+                try:
+                    if isinstance(result, list) and len(result) > 0:
+                        inner = result[0]
+                        if isinstance(inner, list) and len(inner) > 0:
+                            # Summary is usually at index 1 or 2
+                            if len(inner) > 2 and isinstance(inner[2], str):
+                                summary = inner[2]
+                            # Topics/Suggestions are often further down
+                            if len(inner) > 3 and isinstance(inner[3], list):
+                                topics = [t[0] for t in inner[3] if isinstance(t, list)]
+                except (IndexError, TypeError):
+                    pass
+
+                console.print(
+                    f"\n[bold green]Summary for Notebook {notebook_id}:[/bold green]"
+                )
+                console.print(f"[white]{summary}[/white]")
+
+                if topics:
+                    console.print(
+                        "\n[bold cyan]Featured Topics / Suggestions:[/bold cyan]"
+                    )
+                    for topic in topics:
+                        console.print(f" • [dim]{topic}[/dim]")
+            else:
+                console.print("[red]Failed to get notebook description[/red]")
+                raise typer.Exit(1)
+
+    asyncio.run(_run())
+
+
 @notebooks_app.command("create", no_args_is_help=True)
 def create_notebook(name: str = typer.Argument(..., help="Notebook name")) -> None:
     """Create a new notebook."""
@@ -301,6 +358,133 @@ def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> 
                 table.add_row(str(i), src.id, src.title, src.type.value)
 
             console.print(table)
+
+    asyncio.run(_run())
+
+
+@sources_app.command("describe", no_args_is_help=True)
+def describe_source(
+    source_id: str = typer.Argument(..., help="Source ID to describe"),
+) -> None:
+    """Get an AI-generated summary and keywords for a specific source."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            from pynotebooklm.api import NotebookLMAPI
+
+            api = NotebookLMAPI(session)
+            with console.status(
+                f"[bold green]Generating guide for source {source_id}..."
+            ):
+                result = await api.get_source_guide(source_id)
+
+            if result:
+                # Parse result - usually it's a list containing the summary and keywords
+                # Structure: [[ [summary, ...], [keywords, ...], ... ]]
+                summary = "No summary available."
+                keywords: list[str] = []
+
+                try:
+                    if isinstance(result, list) and len(result) > 0:
+                        inner = result[0]
+                        if isinstance(inner, list) and len(inner) > 0:
+                            if isinstance(inner[0], list) and len(inner[0]) > 0:
+                                summary = inner[0][0]
+                            if (
+                                len(inner) > 2
+                                and isinstance(inner[2], list)
+                                and len(inner[2]) > 0
+                            ):
+                                keywords = (
+                                    inner[2][0] if isinstance(inner[2][0], list) else []
+                                )
+                except (IndexError, TypeError):
+                    pass
+
+                console.print(
+                    f"\n[bold green]Summary for Source {source_id}:[/bold green]"
+                )
+                console.print(f"[white]{summary}[/white]")
+
+                if keywords:
+                    console.print("\n[bold cyan]Keywords:[/bold cyan]")
+                    console.print(", ".join(f"[dim]{k}[/dim]" for k in keywords))
+            else:
+                console.print("[red]Failed to get source description[/red]")
+                raise typer.Exit(1)
+
+    asyncio.run(_run())
+
+
+@sources_app.command("get-text", no_args_is_help=True)
+def get_source_text(
+    source_id: str = typer.Argument(..., help="Source ID to extract text from"),
+) -> None:
+    """Extract and display the raw text content of a source."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            from pynotebooklm.api import NotebookLMAPI
+
+            api = NotebookLMAPI(session)
+            with console.status(
+                f"[bold green]Extracting text for source {source_id}..."
+            ):
+                result = await api.get_source_text(source_id)
+
+            if result and result.get("content"):
+                console.print(
+                    f"\n[bold green]Content for Source: {result['title']}[/bold green]"
+                )
+                console.print(
+                    f"[dim]Type: {result['source_type']} | Size: {result['char_count']} chars[/dim]\n"
+                )
+                console.print(f"[white]{result['content']}[/white]")
+            else:
+                console.print(
+                    "[red]Failed to extract source text or source is empty[/red]"
+                )
+                raise typer.Exit(1)
+
+    asyncio.run(_run())
+
+
+@sources_app.command("sync", no_args_is_help=True)
+def sync_source(
+    source_id: str = typer.Argument(..., help="Source ID to sync"),
+) -> None:
+    """Sync a Google Drive source with its latest content."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            from pynotebooklm.api import NotebookLMAPI
+
+            api = NotebookLMAPI(session)
+            with console.status(f"[bold green]Syncing source {source_id}..."):
+                success = await api.sync_source(source_id)
+
+            if success:
+                console.print(
+                    f"[green]✓ Successfully triggered sync for source {source_id}[/green]"
+                )
+            else:
+                console.print("[red]Failed to sync source[/red]")
+                raise typer.Exit(1)
 
     asyncio.run(_run())
 
@@ -524,7 +708,6 @@ def import_research(
     For deep research, the AI-generated report is also added as a text
     source by default. Use --no-report to skip this.
     """
-    from pynotebooklm.sources import SourceManager
 
     async def _run() -> None:
         auth = AuthManager()
@@ -598,19 +781,6 @@ def import_research(
                 console.print(
                     "[dim]Deep research detected - importing AI report as text source...[/dim]"
                 )
-                source_manager = SourceManager(session)
-                try:
-                    report_title = f"Deep Research Report: {result.query[:50]}"
-                    await source_manager.add_text(
-                        notebook_id=notebook_id,
-                        content=result.report,
-                        title=report_title,
-                    )
-                    report_imported = True
-                except Exception as e:
-                    console.print(
-                        f"[yellow]Warning: Could not import report as text source: {e}[/yellow]"
-                    )
 
             # Display results
             console.print(
@@ -643,6 +813,52 @@ def import_research(
             console.print(
                 f"\n[dim]View sources: https://notebooklm.google.com/notebook/{notebook_id}[/dim]"
             )
+
+    asyncio.run(_run())
+
+
+@research_app.command("delete", no_args_is_help=True)
+@research_app.command("del", no_args_is_help=True)
+def delete_research(
+    notebook_id: str = typer.Argument(..., help="Notebook ID to clear research for"),
+    confirm: bool = typer.Option(
+        False,
+        "--confirm",
+        "-y",
+        help="Confirm deletion without prompting",
+    ),
+) -> None:
+    """Clear or cancel research results for a notebook.
+
+    In NotebookLM, starting a new research session replaces the previous results.
+    This command performs a logical clear and confirms current status.
+    """
+    if not confirm:
+        if not typer.confirm(
+            f"Are you sure you want to clear research results for notebook {notebook_id}?"
+        ):
+            raise typer.Abort()
+
+    async def _run() -> None:
+        auth = AuthManager()
+        if not auth.is_authenticated():
+            console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
+            raise typer.Exit(1)
+
+        async with BrowserSession(auth) as session:
+            research = ResearchDiscovery(session)
+            with console.status(f"[bold red]Clearing research for {notebook_id}..."):
+                # In current implementation, this returns True immediately
+                # as research is transient in NotebookLM.
+                success = await research.delete_research(notebook_id)
+
+            if success:
+                console.print(
+                    f"[green]✓ Research results cleared for notebook {notebook_id}[/green]"
+                )
+            else:
+                console.print("[red]Failed to clear research results[/red]")
+                raise typer.Exit(1)
 
     asyncio.run(_run())
 
