@@ -283,18 +283,6 @@ This approach provides:
 - ⚠️ Requires browser automation
 - ⚠️ Cookie refresh needed every 2-4 weeks
 
-## Roadmap
-
-- [x] **Phase 1**: Foundation & Authentication
-- [x] **Phase 2**: Notebook & Source Management
-- [x] **Phase 3**: Research Discovery
-- [x] **Phase 4**: Mind Maps
-- [x] **Phase 5**: Chat, Writing & Tone
-- [x] **Phase 6**: Content Generation (Audio, Video, Infographics, Slides)
-- [x] **Phase 7**: Study Tools
-- [x] **Phase 8**: Production Readiness
-- [x] **Phase 9**: Research Import (auto-add discovered sources)
-
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE) for details.

@@ -65,6 +65,7 @@ from .research import (
     ResearchStatus,
     ResearchType,
 )
+from .retry import RetryStrategy, with_retry
 from .session import BrowserSession
 from .sources import SourceManager
 from .study import (
@@ -133,6 +134,9 @@ __all__ = [
     "export_to_opml",
     "export_to_freemind",
     "export_to_json",
+    # Retry strategies
+    "RetryStrategy",
+    "with_retry",
     # Exceptions
     "PyNotebookLMError",
     "AuthenticationError",

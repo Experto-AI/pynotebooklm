@@ -26,6 +26,7 @@ from .exceptions import (
     RateLimitError,
     SessionError,
 )
+from .retry import with_retry
 
 logger = logging.getLogger(__name__)
 
@@ -236,6 +237,7 @@ class BrowserSession:
         """Get the CSRF token."""
         return self._csrf_token
 
+    @with_retry()
     async def call_rpc(
         self,
         rpc_id: str,

@@ -530,20 +530,178 @@ Results are stored on NotebookLM's servers and persist in the notebook automatic
  
  **Milestone:** High reliability, improved performance, and ecosystem integration
  
- ### Reliability
- - [ ] Implement exponential backoff for RPC calls
- - [ ] Add automatic cookie refresh logic in `BrowserSession`
- - [ ] Improve error handling for streaming RPC responses
+ ### Reliability Improvements
  
- ### Performance
- - [ ] Support parallel source additions
- - [ ] Optimize browser startup time (persistent context)
+ #### Exponential Backoff for RPC Calls
+ - [x] Create `src/pynotebooklm/retry.py`:
+   - [x] `RetryStrategy` class with configurable max_attempts, base_delay, max_delay
+   - [x] `with_retry()` decorator for async functions
+   - [x] Exponential backoff algorithm with jitter
+   - [x] Retry on transient errors (APIError with 5xx, RateLimitError)
+   - [x] Do not retry on AuthenticationError or NotebookNotFoundError
+ - [x] Update `BrowserSession.call_rpc()`:
+   - [x] Wrap call with `@with_retry()` decorator
+   - [x] Log retry attempts at INFO level
+ - [x] Add configuration via environment variables:
+   - [x] `PYNOTEBOOKLM_MAX_RETRIES` (default: 3)
+   - [x] `PYNOTEBOOKLM_BASE_DELAY` (default: 1.0 seconds)
+   - [x] `PYNOTEBOOKLM_MAX_DELAY` (default: 60.0 seconds)
  
- ### Integrations
- - [ ] DeterminAgent adapter for autonomous research
-
- ### Examples
- - [ ] Scripts automation examples
-
- ### Publishing
- - [ ] Prepare for PyPI release
+ #### Automatic Cookie Refresh
+ - [ ] Update `BrowserSession`:
+   - [ ] Add `_check_auth_validity()` method to detect expired cookies
+   - [ ] Detect "accounts.google.com" redirects during RPC calls
+   - [ ] Add `auto_refresh: bool` parameter to constructor (default: False)
+   - [ ] When auth fails and auto_refresh=True:
+     - [ ] Call `auth.refresh()` to re-login
+     - [ ] Recreate browser context with new cookies
+     - [ ] Retry failed RPC call once
+ - [ ] Update `AuthManager`:
+   - [ ] Add `is_expired()` method to check cookie age
+   - [ ] Add `refresh_threshold` (default: 14 days)
+   - [ ] Log warning when cookies are close to expiration
+ 
+ #### Enhanced Error Handling
+ - [ ] Improve streaming response parsing in `session.py`:
+   - [ ] Handle partial/incomplete JSON responses gracefully
+   - [ ] Add timeout for streaming endpoints (default: 120s)
+   - [ ] Better error messages for malformed responses
+ -[ ] Add request/response logging:
+   - [ ] Create `PYNOTEBOOKLM_DEBUG` environment variable
+   - [ ] Log full request payloads when enabled
+   - [ ] Log full response bodies when enabled
+   - [ ] Sanitize sensitive data (cookies, tokens) in logs
+ - [ ] Add telemetry and metrics (optional):
+   - [ ] Track RPC call durations
+   - [ ] Track success/failure rates
+   - [ ] Export to structured logs (JSON format)
+ 
+ ### Performance Optimizations
+ 
+ #### Browser Startup Time
+ - [ ] Implement persistent browser context:
+   - [ ] Add `PersistentBrowserSession` class
+   - [ ] Reuse single browser instance across multiple operations
+   - [ ] Add context pooling for concurrent requests
+   - [ ] Benchmark: reduce startup time from 3-5s to <500ms for subsequent calls
+ - [ ] Optimize Playwright configuration:
+   - [ ] Disable unnecessary browser features (images, CSS when not needed)
+   - [ ] Use faster page load strategies (`--disable-extensions`)
+ - [ ] Add caching for CSRF tokens:
+   - [ ] Cache token for 5 minutes
+   - [ ] Refresh token only when expired
+ 
+ #### Batch Operations
+ - [ ] Add batch notebook operations:
+   - [ ] `NotebookManager.batch_delete(notebook_ids)` - delete multiple notebooks
+   - [ ] `SourceManager.batch_add_urls(notebook_id, urls)` - add multiple URLs
+   - [ ] Parallel RPC calls with asyncio.gather()
+ - [ ] Optimize research polling:
+   - [ ] Add `poll_with_backoff()` - exponential backoff between polls
+   - [ ] Configurable poll interval (default: 5s)
+ 
+ ### Code Examples & Documentation
+ 
+ #### Library Usage Examples
+ - [x] Create `examples/` directory:
+   - [x] `examples/01_basic_usage.py` - Create notebook, add sources, query
+   - [x] `examples/02_research_workflow.py` - Start research, poll, import sources
+   - [x] `examples/03_content_generation.py` - Generate audio, video, slides
+   - [x] `examples/04_study_tools.py` - Create flashcards, quiz, data tables
+   - [x] `examples/05_mind_maps.py` - Generate and export mind maps
+   - [x] `examples/06_batch_operations.py` - Process multiple notebooks
+   - [x] `examples/07_error_handling.py` - Proper exception handling patterns
+ - [x] Each example must include:
+   - [x] Docstring explaining the use case
+   - [x] Error handling with try/except
+   - [x] Rich console output (using `rich` library)
+ 
+ #### Automation Scripts
+ - [ ] Create `scripts/automation/`:
+   - [ ] `scripts/automation/research_pipeline.py` - End-to-end research automation
+   - [ ] `scripts/automation/content_batch_generator.py` - Generate content for multiple notebooks
+   - [ ] `scripts/automation/backup_notebooks.py` - Export all notebooks to JSON
+   - [ ] `scripts/automation/cleanup_old_artifacts.py` - Delete old studio artifacts
+ - [ ] Add README for each script with usage instructions
+ 
+ #### Documentation Updates
+ - [x] Create `docs/advanced_usage.md`:
+   - [x] Retry strategies and error handling
+   - [x] Persistent sessions for performance
+   - [x] Batch operations best practices
+ - [x] Create `docs/faq.md`:
+   - [x] Common errors and solutions
+   - [x] Cookie expiration handling
+   - [x] Rate limiting guidance
+ - [x] Create `docs/examples.md`:
+   - [x] Link to all example files
+   - [x] Explained code walkthroughs
+ - [x] Update `docs/api_reference.md`:
+   - [x] Add all Phase 6-9 APIs
+   - [x] Include retry and error handling options
+ 
+ ### Testing & Quality
+ 
+ #### Retry Logic Tests
+ - [x] Create `tests/unit/test_retry.py`:
+   - [x] Test exponential backoff calculation
+   - [x] Test retry on transient errors
+   - [x] Test no retry on permanent errors
+   - [x] Test max attempts respected
+ - [x] Update existing tests to mock retries
+ 
+ #### Integration Tests for Edge Cases
+ - [ ] Create `tests/integration/test_reliability.py`:
+   - [ ] Test cookie expiration handling
+   - [ ] Test rate limit recovery
+   - [ ] Test network timeout handling
+ - [ ] Performance benchmarks:
+   - [ ] Measure browser startup time
+   - [ ] Measure RPC call latency
+   - [ ] Measure batch operation throughput
+ 
+ ### Publishing & Release
+ 
+ #### PyPI Release Preparation
+ - [ ] Update `pyproject.toml`:
+   - [ ] Verify all dependencies and version constraints
+   - [ ] Add project URLs (homepage, documentation, repository, issues)
+   - [ ] Add classifiers (Python 3.10+, Development Status, License)
+   - [ ] Add keywords for discoverability
+ - [ ] Create `CHANGELOG.md`:
+   - [ ] Document all changes from v0.1.0
+   - [ ] Follow Keep a Changelog format
+   - [ ] Include breaking changes, new features, bug fixes
+ - [ ] Create `CONTRIBUTING.md`:
+   - [ ] Development setup instructions
+   - [ ] Code style guidelines
+   - [ ] Pull request process
+   - [ ] Code of conduct
+ - [ ] Update `README.md`:
+   - [ ] Add PyPI installation badge
+   - [ ] Add documentation link
+   - [ ] Add quick start section
+   - [ ] Add troubleshooting section
+ - [ ] Create GitHub Release workflow:
+   - [ ] `.github/workflows/release.yml` for automated PyPI publishing
+   - [ ] Triggered on version tags (v*)
+   - [ ] Build and publish to PyPI using trusted publishing
+ - [ ] Create documentation site:
+   - [ ] Deploy mkdocs to GitHub Pages
+   - [ ] Update `.github/workflows/docs.yml`
+   - [ ] Add custom domain (optional)
+ 
+ ### Phase 10 Verification
+ - [ ] `make check` passes with all new code
+ - [ ] Coverage remains above 90%
+ - [ ] All examples run successfully
+ - [ ] Documentation is complete and accurate
+ - [ ] Performance benchmarks meet targets:
+   - [ ] Browser startup \<500ms (cached)
+   - [ ] RPC call latency \<200ms (excluding network)
+   - [ ] Batch operations 5x faster than sequential
+ - [ ] Package builds successfully: `poetry build`
+ - [ ] Package installs from dist: `pip install dist/*.whl`
+ - [ ] All CLI commands work after install
+ 
+ ---
