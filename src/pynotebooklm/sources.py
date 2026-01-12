@@ -250,15 +250,21 @@ class SourceManager:
         )
         return list(results)
 
-    async def list_sources(self, notebook_id: str) -> list[Source]:
+    async def list_sources(
+        self, notebook_id: str, check_freshness: bool = False
+    ) -> list[Source]:
         """
         List all sources in a notebook.
 
         Args:
             notebook_id: The notebook ID.
+            check_freshness: If True, check freshness status for Drive sources.
+                            This makes additional API calls but provides accurate
+                            freshness information. Default is False for performance.
 
         Returns:
-            List of Source objects.
+            List of Source objects with freshness status populated for Drive sources
+            (if check_freshness=True).
 
         Raises:
             NotebookNotFoundError: If notebook doesn't exist.
@@ -268,6 +274,13 @@ class SourceManager:
             >>> sources = await manager.list_sources("notebook123")
             >>> for src in sources:
             ...     print(f"{src.title} ({src.type})")
+
+            >>> # With freshness checking for Drive sources:
+            >>> sources = await manager.list_sources("notebook123", check_freshness=True)
+            >>> for src in sources:
+            ...     if src.type == SourceType.DRIVE:
+            ...         status = "fresh" if src.is_fresh else "stale"
+            ...         print(f"{src.title} - {status}")
         """
         if not notebook_id:
             raise ValueError("Notebook ID cannot be empty")
@@ -282,6 +295,26 @@ class SourceManager:
         except Exception as e:
             logger.warning("Failed to parse notebook sources: %s", e)
             sources = []
+
+        # Check freshness for Drive sources if requested
+        if check_freshness and sources:
+            drive_sources = [s for s in sources if s.type == SourceType.DRIVE]
+            if drive_sources:
+                logger.info(
+                    "Checking freshness for %d Drive sources", len(drive_sources)
+                )
+                # Check freshness for each Drive source
+                for source in drive_sources:
+                    try:
+                        is_fresh = await self._api.check_source_freshness(source.id)
+                        source.is_fresh = is_fresh
+                    except Exception as e:
+                        logger.warning(
+                            "Failed to check freshness for source %s: %s",
+                            source.id,
+                            e,
+                        )
+                        source.is_fresh = None
 
         logger.info("Found %d sources", len(sources))
         return sources

@@ -37,12 +37,12 @@
 ### Remaining Tasks
 
 #### 1. SourceManager Integration
-- [ ] Update `SourceManager.list_sources` to call freshness check for Drive sources.
-- [ ] Update `sources list` CLI to show freshness status (✓/✗).
+- [x] Update `SourceManager.list_sources` to call freshness check for Drive sources.
+- [x] Update `sources list` CLI to show freshness status (✓/✗).
 
-#### 2. Full-Text Search (Deferred - Low Priority)
-- [ ] Research feasibility of searching across sources using the query RPC.
-- [ ] Consider implementing via `query` command with special search prompt.
+#### 2. Full-Text Search
+- [x] Research feasibility of searching across sources using the query RPC. (Result: Use semantic `query` command).
+- [ ] Consider implementing via `query` command with special search prompt. (Decision: Omitted to keep CLI simple, user can custom query).
 
 ## Future / Icebox
 - [ ] Note management (Save chat responses as notes).

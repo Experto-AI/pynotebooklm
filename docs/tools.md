@@ -29,6 +29,8 @@ Tests: `tests/integration/test_sources.py`
 | `notebook_add_drive` | `izAoDd` | Add Google Drive document |
 | `source_list_drive` | N/A | List available Drive documents |
 | `source_delete` | `tGMBJ` | Remove source from notebook |
+| `source_check_freshness` | `tGMBJ` | Check if Drive source is up-to-date (part of list) |
+| `source_get_text` | `tGMBJ` | Get raw text content of source |
 | `source_describe` | (Phase 4) | AI summary of single source |
 | `source_sync_drive` | (Phase 4) | Sync/update Drive sources |
 

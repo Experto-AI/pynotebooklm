@@ -113,6 +113,7 @@ pynotebooklm sources add <notebook_id> <url>               # Add URL source (Web
 pynotebooklm sources add-text <notebook_id> "text"         # Add plain text source
 pynotebooklm sources add-drive <notebook_id> <drive_id>    # Add Google Drive source
 pynotebooklm sources list <notebook_id>                    # List sources in notebook
+pynotebooklm sources list <notebook_id> --check-freshness  # Check if Drive sources are up-to-date
 pynotebooklm sources describe <source_id>                  # AI-generated summary and keywords
 pynotebooklm sources get-text <source_id>                  # Extract raw indexed text
 pynotebooklm sources sync <source_id>                      # Sync stale Drive source

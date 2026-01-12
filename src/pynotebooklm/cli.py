@@ -447,15 +447,32 @@ def add_drive_source(
 
 
 @sources_app.command("list", no_args_is_help=True)
-def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> None:
-    """List sources in a notebook."""
+def list_sources(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    check_freshness: bool = typer.Option(
+        False,
+        "--check-freshness",
+        "-c",
+        help="Check freshness status for Drive sources (slower but accurate)",
+    ),
+) -> None:
+    """List sources in a notebook.
+
+    Shows all sources with their IDs, titles, and types.
+    Use --check-freshness to also verify if Drive sources are up-to-date.
+    """
 
     async def _run() -> None:
         auth = AuthManager()
         async with BrowserSession(auth) as session:
             manager = SourceManager(session)
-            with console.status(f"[bold green]Fetching sources for {notebook_id}..."):
-                sources = await manager.list_sources(notebook_id)
+            status_msg = f"[bold green]Fetching sources for {notebook_id}..."
+            if check_freshness:
+                status_msg = f"[bold green]Fetching sources and checking freshness for {notebook_id}..."
+            with console.status(status_msg):
+                sources = await manager.list_sources(
+                    notebook_id, check_freshness=check_freshness
+                )
 
             if not sources:
                 console.print(f"No sources found in notebook {notebook_id}.")
@@ -467,10 +484,43 @@ def list_sources(notebook_id: str = typer.Argument(..., help="Notebook ID")) -> 
             table.add_column("Title", style="magenta")
             table.add_column("Type", style="green")
 
+            if check_freshness:
+                table.add_column("Fresh", style="yellow", justify="center")
+
             for i, src in enumerate(sources, 1):
-                table.add_row(str(i), src.id, src.title, src.type.value)
+                row_data = [str(i), src.id, src.title, src.type.value]
+
+                if check_freshness:
+                    # Show freshness status for Drive sources
+                    if src.type.value == "drive":
+                        if src.is_fresh is True:
+                            fresh_status = "[green]✓[/green]"
+                        elif src.is_fresh is False:
+                            fresh_status = "[red]✗[/red] (stale)"
+                        else:
+                            fresh_status = "[dim]?[/dim]"
+                    else:
+                        fresh_status = "[dim]—[/dim]"
+                    row_data.append(fresh_status)
+
+                table.add_row(*row_data)
 
             console.print(table)
+
+            # Provide hint about stale sources
+            if check_freshness:
+                stale_sources = [
+                    s
+                    for s in sources
+                    if s.type.value == "drive" and s.is_fresh is False
+                ]
+                if stale_sources:
+                    console.print(
+                        f"\n[yellow]Found {len(stale_sources)} stale Drive source(s).[/yellow]"
+                    )
+                    console.print(
+                        "[dim]Use 'pynotebooklm sources sync <source_id>' to sync stale sources.[/dim]"
+                    )
 
     asyncio.run(_run())
 

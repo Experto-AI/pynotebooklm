@@ -134,3 +134,187 @@ class TestCliExtra:
         result = runner.invoke(app, ["studio", "delete", "art_123"], input="n\n")
         assert "Aborted" in result.output
         assert result.exit_code == 0
+
+    def test_sources_add_text(self, mock_auth, mock_session):
+        """Test sources add-text command."""
+        from pynotebooklm.models import Source, SourceType
+
+        with patch("pynotebooklm.cli.SourceManager") as mock_src:
+            inst = MagicMock()
+            inst.add_text = AsyncMock(
+                return_value=Source(
+                    id="src_txt_123", title="My Text", type=SourceType.TEXT
+                )
+            )
+            mock_src.return_value = inst
+
+            result = runner.invoke(
+                app,
+                [
+                    "sources",
+                    "add-text",
+                    "nb_123",
+                    "This is some content",
+                    "--title",
+                    "My Text",
+                ],
+            )
+
+            assert result.exit_code == 0
+            assert "Added text source" in result.output
+            inst.add_text.assert_called_once_with(
+                "nb_123", "This is some content", "My Text"
+            )
+
+    def test_sources_add_drive(self, mock_auth, mock_session):
+        """Test sources add-drive command."""
+        from pynotebooklm.models import Source, SourceType
+
+        with patch("pynotebooklm.cli.SourceManager") as mock_src:
+            inst = MagicMock()
+            inst.add_drive = AsyncMock(
+                return_value=Source(
+                    id="src_drive_123", title="Google Doc", type=SourceType.DRIVE
+                )
+            )
+            mock_src.return_value = inst
+
+            result = runner.invoke(
+                app, ["sources", "add-drive", "nb_123", "1ABC123XYZ"]
+            )
+
+            assert result.exit_code == 0
+            assert "Added Drive source" in result.output
+            inst.add_drive.assert_called_once_with("nb_123", "1ABC123XYZ")
+
+    def test_sources_describe_success(self, mock_auth, mock_session):
+        """Test sources describe command success."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.get_source_guide = AsyncMock(
+            return_value=[
+                [
+                    ["This is the source summary."],
+                    None,
+                    [["keyword1", "keyword2"]],
+                ]
+            ]
+        )
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "describe", "src_123"])
+
+        assert result.exit_code == 0
+        assert "Summary for Source src_123" in result.output
+        assert "This is the source summary." in result.output
+
+    def test_sources_describe_no_result(self, mock_auth, mock_session):
+        """Test sources describe when no result."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.get_source_guide = AsyncMock(return_value=None)
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "describe", "src_123"])
+
+        assert result.exit_code == 1
+        assert "Failed to get source description" in result.output
+
+    def test_sources_describe_not_authenticated(self):
+        """Test sources describe when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth_cls.return_value.is_authenticated.return_value = False
+            result = runner.invoke(app, ["sources", "describe", "src_123"])
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_sources_get_text_success(self, mock_auth, mock_session):
+        """Test sources get-text command success."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.get_source_text = AsyncMock(
+            return_value={
+                "content": "This is the full text content.",
+                "title": "Test Source",
+                "source_type": "url",
+                "char_count": 30,
+            }
+        )
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "get-text", "src_123"])
+
+        assert result.exit_code == 0
+        assert "Content for Source: Test Source" in result.output
+        assert "This is the full text content." in result.output
+        assert "30 chars" in result.output
+
+    def test_sources_get_text_empty(self, mock_auth, mock_session):
+        """Test sources get-text when content is empty."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.get_source_text = AsyncMock(return_value=None)
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "get-text", "src_123"])
+
+        assert result.exit_code == 1
+        assert "Failed to extract source text" in result.output
+
+    def test_sources_get_text_not_authenticated(self):
+        """Test sources get-text when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth_cls.return_value.is_authenticated.return_value = False
+            result = runner.invoke(app, ["sources", "get-text", "src_123"])
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_sources_sync_success(self, mock_auth, mock_session):
+        """Test sources sync command success."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.sync_source = AsyncMock(return_value=True)
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "sync", "src_123"])
+
+        assert result.exit_code == 0
+        assert "Successfully triggered sync" in result.output
+
+    def test_sources_sync_failure(self, mock_auth, mock_session):
+        """Test sources sync command failure."""
+        mock_api_instance = MagicMock()
+        mock_api_instance.sync_source = AsyncMock(return_value=False)
+
+        with patch("pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance):
+            result = runner.invoke(app, ["sources", "sync", "src_123"])
+
+        assert result.exit_code == 1
+        assert "Failed to sync source" in result.output
+
+    def test_sources_sync_not_authenticated(self):
+        """Test sources sync when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth_cls.return_value.is_authenticated.return_value = False
+            result = runner.invoke(app, ["sources", "sync", "src_123"])
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_sources_delete_abort(self, mock_auth, mock_session):
+        """Test sources delete when user aborts."""
+        with patch("pynotebooklm.cli.SourceManager") as mock_src:
+            inst = MagicMock()
+            mock_src.return_value = inst
+
+            result = runner.invoke(
+                app, ["sources", "delete", "nb_123", "src_456"], input="n\n"
+            )
+
+            assert "Aborted" in result.output
+            assert result.exit_code == 0
+
+    def test_notebooks_delete_abort(self, mock_auth, mock_session):
+        """Test notebooks delete when user aborts."""
+        with patch("pynotebooklm.cli.NotebookManager") as mock_nb:
+            inst = MagicMock()
+            mock_nb.return_value = inst
+
+            result = runner.invoke(app, ["notebooks", "delete", "nb_123"], input="n\n")
+
+            assert "Aborted" in result.output
+            assert result.exit_code == 0

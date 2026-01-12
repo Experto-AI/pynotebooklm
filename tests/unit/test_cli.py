@@ -253,6 +253,196 @@ class TestNotebookListCommand:
             assert result.exit_code == 0
             assert "No notebooks found" in result.output
 
+    def test_list_notebooks_short_view(self) -> None:
+        """List command with --short shows only IDs and names."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.list = AsyncMock(
+                return_value=[
+                    Notebook(id="nb_short_123", name="Short View Test", source_count=3)
+                ]
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(app, ["notebooks", "list", "--short"])
+
+            assert result.exit_code == 0
+            assert "nb_short_123" in result.output
+            assert "Short View Test" in result.output
+
+    def test_list_notebooks_detailed_view(self) -> None:
+        """List command with --detailed shows timestamps."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.list = AsyncMock(
+                return_value=[
+                    Notebook(
+                        id="nb_detailed_456",
+                        name="Detailed View Test",
+                        source_count=7,
+                        created_at=datetime(2024, 6, 15, 10, 30),
+                    )
+                ]
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(app, ["notebooks", "list", "--detailed"])
+
+            assert result.exit_code == 0
+            assert "nb_detailed_456" in result.output
+            assert "Detailed View Test" in result.output
+            assert "2024-06-15" in result.output
+
+    def test_list_notebooks_detailed_view_no_created_at(self) -> None:
+        """List command with --detailed handles missing created_at."""
+        from pynotebooklm.models import Notebook
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.NotebookManager") as mock_nm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_nm = MagicMock()
+            mock_nm.list = AsyncMock(
+                return_value=[
+                    Notebook(
+                        id="nb_no_date",
+                        name="No Date Notebook",
+                        source_count=0,
+                        created_at=None,
+                    )
+                ]
+            )
+            mock_nm_cls.return_value = mock_nm
+
+            result = runner.invoke(app, ["notebooks", "list", "--detailed"])
+
+            assert result.exit_code == 0
+            assert "Unknown" in result.output
+
+
+class TestNotebookDescribeCommand:
+    """Tests for the 'notebooks describe' CLI command."""
+
+    def test_describe_notebook_not_authenticated(self) -> None:
+        """Describe notebook exits when not authenticated."""
+        with patch("pynotebooklm.cli.AuthManager") as mock_auth_cls:
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = False
+            mock_auth_cls.return_value = mock_auth
+
+            result = runner.invoke(app, ["notebooks", "describe", "nb_123"])
+
+            assert result.exit_code == 1
+            assert "Not authenticated" in result.output
+
+    def test_describe_notebook_success(self) -> None:
+        """Describe notebook shows summary and topics."""
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            # Mock the API response
+            mock_api_instance = MagicMock()
+            mock_api_instance.get_notebook_summary = AsyncMock(
+                return_value=[
+                    [
+                        None,
+                        None,
+                        "This is the notebook summary.",
+                        [
+                            ["Topic 1"],
+                            ["Topic 2"],
+                        ],
+                    ]
+                ]
+            )
+
+            with patch(
+                "pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance
+            ):
+                result = runner.invoke(app, ["notebooks", "describe", "nb_123"])
+
+            assert result.exit_code == 0
+            assert "Summary for Notebook nb_123" in result.output
+            assert "This is the notebook summary." in result.output
+            assert "Topic 1" in result.output
+            assert "Topic 2" in result.output
+
+    def test_describe_notebook_no_result(self) -> None:
+        """Describe notebook handles no result."""
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth.is_authenticated.return_value = True
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_api_instance = MagicMock()
+            mock_api_instance.get_notebook_summary = AsyncMock(return_value=None)
+
+            with patch(
+                "pynotebooklm.api.NotebookLMAPI", return_value=mock_api_instance
+            ):
+                result = runner.invoke(app, ["notebooks", "describe", "nb_123"])
+
+            assert result.exit_code == 1
+            assert "Failed to get notebook description" in result.output
+
 
 class TestNotebookCreateCommand:
     """Tests for the 'notebooks create' CLI command."""
@@ -596,6 +786,121 @@ class TestSourceListCommand:
 
             assert result.exit_code == 0
             assert "No sources found" in result.output
+
+    def test_list_sources_with_freshness_check(self) -> None:
+        """List sources with --check-freshness shows freshness column."""
+        from pynotebooklm.models import Source, SourceType
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.SourceManager") as mock_sm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_sm = MagicMock()
+            mock_sm.list_sources = AsyncMock(
+                return_value=[
+                    Source(
+                        id="src_123",
+                        title="Fresh Drive",
+                        type=SourceType.DRIVE,
+                        is_fresh=True,
+                    ),
+                    Source(
+                        id="src_456",
+                        title="Stale Drive",
+                        type=SourceType.DRIVE,
+                        is_fresh=False,
+                    ),
+                ]
+            )
+            mock_sm_cls.return_value = mock_sm
+
+            result = runner.invoke(
+                app, ["sources", "list", "nb_123", "--check-freshness"]
+            )
+
+            assert result.exit_code == 0
+            assert "Fresh" in result.output
+            assert "stale" in result.output
+            # Should call list_sources with check_freshness=True
+            mock_sm.list_sources.assert_called_once_with("nb_123", check_freshness=True)
+
+    def test_list_sources_freshness_shows_stale_hint(self) -> None:
+        """List sources with stale sources shows sync hint."""
+        from pynotebooklm.models import Source, SourceType
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.SourceManager") as mock_sm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_sm = MagicMock()
+            mock_sm.list_sources = AsyncMock(
+                return_value=[
+                    Source(
+                        id="src_stale",
+                        title="Stale Drive",
+                        type=SourceType.DRIVE,
+                        is_fresh=False,
+                    ),
+                ]
+            )
+            mock_sm_cls.return_value = mock_sm
+
+            result = runner.invoke(
+                app, ["sources", "list", "nb_123", "--check-freshness"]
+            )
+
+            assert result.exit_code == 0
+            assert "stale Drive source" in result.output
+            assert "pynotebooklm sources sync" in result.output
+
+    def test_list_sources_without_freshness_flag(self) -> None:
+        """List sources without --check-freshness does not check freshness."""
+        from pynotebooklm.models import Source, SourceType
+
+        with (
+            patch("pynotebooklm.cli.AuthManager") as mock_auth_cls,
+            patch("pynotebooklm.cli.BrowserSession") as mock_session_cls,
+            patch("pynotebooklm.cli.SourceManager") as mock_sm_cls,
+        ):
+            mock_auth = MagicMock()
+            mock_auth_cls.return_value = mock_auth
+
+            mock_session = MagicMock()
+            mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+            mock_session.__aexit__ = AsyncMock(return_value=None)
+            mock_session_cls.return_value = mock_session
+
+            mock_sm = MagicMock()
+            mock_sm.list_sources = AsyncMock(
+                return_value=[Source(id="src_123", title="Test", type=SourceType.DRIVE)]
+            )
+            mock_sm_cls.return_value = mock_sm
+
+            result = runner.invoke(app, ["sources", "list", "nb_123"])
+
+            assert result.exit_code == 0
+            # Should call list_sources with check_freshness=False
+            mock_sm.list_sources.assert_called_once_with(
+                "nb_123", check_freshness=False
+            )
 
 
 class TestSourceDeleteCommand:
