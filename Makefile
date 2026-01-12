@@ -18,7 +18,7 @@
 #   make build                - Build distribution package
 #   make clean                - Remove build artifacts
 
-.PHONY: setup test test-unit test-integration test-cov lint lint-fix typecheck format check build clean help
+.PHONY: setup test test-unit test-integration test-cov lint lint-fix typecheck format check build clean help version-check version-update bump-version
 
 # Default Python command
 PYTHON ?= poetry run python
@@ -44,6 +44,11 @@ help:
 	@echo "Build:"
 	@echo "  make build                - Build distribution package"
 	@echo "  make clean                - Remove build artifacts"
+	@echo ""
+	@echo "Version Management:"
+	@echo "  make version-check        - Verify VERSION matches pyproject.toml and __init__.py"
+	@echo "  make version-update       - Update pyproject.toml and __init__.py from VERSION file"
+	@echo "  make bump-version X.Y.Z   - Set new version and update all files"
 
 # Setup development environment
 setup:
@@ -115,8 +120,14 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Cleaned!"
 
-# Bump version
-# Usage: make bump-version 0.1.1
+# Version management
+# Single source of truth: VERSION file
+#
+# Usage:
+#   make version-check              - Verify VERSION matches pyproject.toml and __init__.py
+#   make version-update             - Update pyproject.toml and __init__.py from VERSION file
+#   make bump-version 0.1.1         - Set new version and update all files
+
 SUPPORTED_COMMANDS := bump-version
 SUPPORTS_MAKE_ARGS := $(findstring $(firstword $(MAKECMDGOALS)), $(SUPPORTED_COMMANDS))
 ifneq "$(SUPPORTS_MAKE_ARGS)" ""
@@ -124,9 +135,37 @@ ifneq "$(SUPPORTS_MAKE_ARGS)" ""
   $(eval $(VERSION_ARG):;@:)
 endif
 
+# Read version from VERSION file
+VERSION := $(shell cat VERSION 2>/dev/null | tr -d '\r' | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$$//')
+
+version-check:
+	@echo "Repository VERSION: $(VERSION)"
+	@PYP_VER=$$(grep -m1 '^version' pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/'); \
+	INIT_VER=$$(grep -m1 '__version__' src/pynotebooklm/__init__.py | sed -E 's/.*"([^"]+)".*/\1/'); \
+	echo "pyproject.toml: $$PYP_VER"; \
+	echo "__init__.py: $$INIT_VER"; \
+	if [ "$(VERSION)" != "$$PYP_VER" ] || [ "$(VERSION)" != "$$INIT_VER" ]; then \
+		echo "❌ Version mismatch detected!"; \
+		exit 1; \
+	fi
+	@echo "✅ All versions in sync!"
+
+version-update:
+	@if [ -z "$(VERSION)" ]; then echo "Error: VERSION file not found or empty"; exit 1; fi
+	@echo "Updating all files to version $(VERSION)..."
+	@sed -E -i '0,/^version[[:space:]]*=[[:space:]]*"[^"]+"/s//version = "$(VERSION)"/' pyproject.toml
+	@echo "  UPDATED: pyproject.toml"
+	@sed -i 's/__version__ = "[^"]*"/__version__ = "$(VERSION)"/' src/pynotebooklm/__init__.py
+	@echo "  UPDATED: src/pynotebooklm/__init__.py"
+	@echo "✅ All files updated to version $(VERSION)"
+
 bump-version:
 	@if [ -z "$(VERSION_ARG)" ]; then echo "Error: version argument required (e.g. make bump-version 0.1.1)"; exit 1; fi
-	@poetry version $(VERSION_ARG)
+	@echo "$(VERSION_ARG)" > VERSION
+	@echo "  UPDATED: VERSION"
+	@sed -E -i '0,/^version[[:space:]]*=[[:space:]]*"[^"]+"/s//version = "$(VERSION_ARG)"/' pyproject.toml
+	@echo "  UPDATED: pyproject.toml"
 	@sed -i 's/__version__ = "[^"]*"/__version__ = "$(VERSION_ARG)"/' src/pynotebooklm/__init__.py
+	@echo "  UPDATED: src/pynotebooklm/__init__.py"
 	@echo "✅ Version bumped to $(VERSION_ARG)"
 
