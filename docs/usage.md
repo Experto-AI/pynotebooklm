@@ -61,12 +61,54 @@ pynotebooklm study flashcards <notebook_id> --difficulty hard
 pynotebooklm study quiz <notebook_id> --questions 5 --difficulty 3
 ```
 
+## Source Management
+
+Add different types of content to your notebooks.
+
+### Web & YouTube URLs
+```bash
+pynotebooklm sources add <notebook_id> "https://en.wikipedia.org/wiki/Python"
+pynotebooklm sources add <notebook_id> "https://www.youtube.com/watch?v=..."
+```
+
+### Plain Text
+```bash
+pynotebooklm sources add-text <notebook_id> "Your research notes here..." --title "My Notes"
+```
+
+### Google Drive
+```bash
+pynotebooklm sources add-drive <notebook_id> "<drive_doc_id>"
+```
+
+## Chat & Query
+
+Interact with your sources through AI.
+
+### Asking Questions
+```bash
+pynotebooklm query ask <notebook_id> "What are the main findings?"
+```
+
+### Restricting Scope
+Focus the answer on specific sources only:
+```bash
+pynotebooklm query ask <notebook_id> "..." --sources "source1,source2"
+```
+
+### Follow-up Conversations
+```bash
+pynotebooklm query ask <notebook_id> "What else?" --conversation-id "conv_123"
+```
+
 ## Research Discovery
 
 Search the web or Google Drive for new sources related to your topic:
 
 ```bash
 pynotebooklm research start <notebook_id> "Quantum Computing" --deep
+# For Google Drive research
+pynotebooklm research start <notebook_id> "Internal Project X" --source drive
 ```
 
 Research is asynchronous. Check the status:
@@ -74,6 +116,7 @@ Research is asynchronous. Check the status:
 ```bash
 pynotebooklm research poll <notebook_id>
 ```
+
 
 ## Advanced Authentication
 

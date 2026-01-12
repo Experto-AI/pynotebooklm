@@ -216,9 +216,9 @@ def delete_notebook(
 @sources_app.command("add", no_args_is_help=True)
 def add_source(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
-    url: str = typer.Argument(..., help="URL to add"),
+    url: str = typer.Argument(..., help="URL to add (Web or YouTube)"),
 ) -> None:
-    """Add a URL source to a notebook."""
+    """Add a URL source (Web or YouTube) to a notebook."""
 
     async def _run() -> None:
         auth = AuthManager()
@@ -228,6 +228,47 @@ def add_source(
                 source = await manager.add_url(notebook_id, url)
             console.print(
                 f"[green]✓ Added source: [bold]{source.title}[/bold] ({source.id})[/green]"
+            )
+
+    asyncio.run(_run())
+
+
+@sources_app.command("add-text", no_args_is_help=True)
+def add_text_source(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    content: str = typer.Argument(..., help="Text content to add"),
+    title: str = typer.Option(None, "--title", "-t", help="Title for the source"),
+) -> None:
+    """Add a plain text source to a notebook."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        async with BrowserSession(auth) as session:
+            manager = SourceManager(session)
+            with console.status(f"[bold green]Adding text source..."):
+                source = await manager.add_text(notebook_id, content, title)
+            console.print(
+                f"[green]✓ Added text source: [bold]{source.title}[/bold] ({source.id})[/green]"
+            )
+
+    asyncio.run(_run())
+
+
+@sources_app.command("add-drive", no_args_is_help=True)
+def add_drive_source(
+    notebook_id: str = typer.Argument(..., help="Notebook ID"),
+    drive_id: str = typer.Argument(..., help="Google Drive document ID"),
+) -> None:
+    """Add a Google Drive document as a source."""
+
+    async def _run() -> None:
+        auth = AuthManager()
+        async with BrowserSession(auth) as session:
+            manager = SourceManager(session)
+            with console.status(f"[bold green]Adding Drive document {drive_id}..."):
+                source = await manager.add_drive(notebook_id, drive_id)
+            console.print(
+                f"[green]✓ Added Drive source: [bold]{source.title}[/bold] ({source.id})[/green]"
             )
 
     asyncio.run(_run())
@@ -788,6 +829,12 @@ def export_mindmap(
 def query_ask(
     notebook_id: str = typer.Argument(..., help="Notebook ID"),
     question: str = typer.Argument(..., help="Question to ask"),
+    sources: str = typer.Option(
+        None, "--sources", "-s", help="Comma-separated source IDs to restrict the answer to"
+    ),
+    conversation_id: str = typer.Option(
+        None, "--conversation-id", "-c", help="Conversation ID for follow-up questions"
+    ),
 ) -> None:
     """Ask a question to the notebook."""
 
@@ -797,10 +844,17 @@ def query_ask(
             console.print("[red]Not authenticated. Run 'pynotebooklm auth login'[/red]")
             raise typer.Exit(1)
 
+        source_ids = sources.split(",") if sources else None
+
         async with BrowserSession(auth) as session:
             chat = ChatSession(session)
             with console.status(f"[bold green]Asking notebook {notebook_id}..."):
-                answer = await chat.query(notebook_id, question)
+                answer = await chat.query(
+                    notebook_id,
+                    question,
+                    source_ids=source_ids,
+                    conversation_id=conversation_id,
+                )
 
             console.print("\n[bold]Answer:[/bold]")
             console.print(answer)

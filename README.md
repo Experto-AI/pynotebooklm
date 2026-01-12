@@ -106,8 +106,10 @@ pynotebooklm notebooks delete <notebook_id> -f     # Delete without confirmation
 ### Sources
 
 ```bash
+pynotebooklm sources add <notebook_id> <url>               # Add URL source (Web or YouTube)
+pynotebooklm sources add-text <notebook_id> "text"         # Add plain text source
+pynotebooklm sources add-drive <notebook_id> <drive_id>    # Add Google Drive source
 pynotebooklm sources list <notebook_id>                    # List sources in notebook
-pynotebooklm sources add <notebook_id> <url>               # Add URL source
 pynotebooklm sources delete <notebook_id> <source_id>      # Delete a source
 pynotebooklm sources delete <notebook_id> <source_id> -f   # Delete without confirmation
 ```
@@ -139,6 +141,8 @@ pynotebooklm mindmap export <notebook_id> <map_id> -f freemind # Export to FreeM
 
 ```bash
 pynotebooklm query ask <notebook_id> "question"                # Ask a question
+pynotebooklm query ask <notebook_id> "question" --sources <ids> # Scope to specific sources
+pynotebooklm query ask <notebook_id> "question" -c <id>        # Follow-up in conversation
 pynotebooklm query summary <notebook_id>                       # Get AI summary
 pynotebooklm query briefing <notebook_id>                      # Create briefing document
 pynotebooklm query configure <notebook_id> --goal learning     # Set conversation goal
