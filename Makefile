@@ -189,7 +189,7 @@ test-llm:
 	@rm -f pytest_log.txt
 
 test-cov-llm:
-	@$(PYTHON) -m pytest tests/ -q --tb=short --cov=src/pynotebooklm --cov-report=term-missing --cov-report=json > pytest_cov_log.txt 2>&1 || { cat pytest_cov_log.txt; rm pytest_cov_log.txt; exit 1; }
+	@$(PYTHON) -m pytest tests/ -q --tb=short --cov=pynotebooklm --cov-report=term-missing --cov-report=json > pytest_cov_log.txt 2>&1 || { cat pytest_cov_log.txt; rm pytest_cov_log.txt; exit 1; }
 	@rm -f pytest_cov_log.txt
 	@$(PYTHON) scripts/check_coverage.py --total 90 --file 80 > coverage_log.txt 2>&1 || { cat coverage_log.txt; rm coverage_log.txt; exit 1; }
 	@rm -f coverage_log.txt

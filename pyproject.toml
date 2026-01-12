@@ -100,7 +100,7 @@ addopts = "-v --tb=short"
 
 # Coverage configuration
 [tool.coverage.run]
-source = ["src/pynotebooklm"]
+source = ["pynotebooklm"]
 branch = true
 
 [tool.coverage.report]
