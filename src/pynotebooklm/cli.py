@@ -30,17 +30,18 @@ from pynotebooklm.session import BrowserSession
 from pynotebooklm.sources import SourceManager
 from pynotebooklm.study import FlashcardDifficulty, StudyManager
 
-app = typer.Typer(help="PyNotebookLM CLI - Management Tools")
-auth_app = typer.Typer(help="Authentication management")
-notebooks_app = typer.Typer(help="Notebook management")
-sources_app = typer.Typer(help="Source management")
-research_app = typer.Typer(help="Research discovery")
-mindmap_app = typer.Typer(help="Mind map generation and export")
-query_app = typer.Typer(help="Chat and query tools")
+app = typer.Typer(help="PyNotebookLM CLI - Management Tools", no_args_is_help=True)
+auth_app = typer.Typer(help="Authentication management", no_args_is_help=True)
+notebooks_app = typer.Typer(help="Notebook management", no_args_is_help=True)
+sources_app = typer.Typer(help="Source management", no_args_is_help=True)
+research_app = typer.Typer(help="Research discovery", no_args_is_help=True)
+mindmap_app = typer.Typer(help="Mind map generation and export", no_args_is_help=True)
+query_app = typer.Typer(help="Chat and query tools", no_args_is_help=True)
 generate_app = typer.Typer(
-    help="Content generation (audio, video, infographic, slides)"
+    help="Content generation (audio, video, infographic, slides)",
+    no_args_is_help=True,
 )
-study_app = typer.Typer(help="Study tools (flashcards, quiz, data table)")
+study_app = typer.Typer(help="Study tools (flashcards, quiz, data table)", no_args_is_help=True)
 
 app.add_typer(auth_app, name="auth")
 app.add_typer(notebooks_app, name="notebooks")
@@ -901,7 +902,9 @@ def query_briefing(
 # =============================================================================
 
 
-studio_app = typer.Typer(help="Studio artifact management (Briefings, Audio, etc)")
+studio_app = typer.Typer(
+    help="Studio artifact management (Briefings, Audio, etc)", no_args_is_help=True
+)
 app.add_typer(studio_app, name="studio")
 
 
