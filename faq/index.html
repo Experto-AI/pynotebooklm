@@ -1,0 +1,2535 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Production-grade Python library for NotebookLM automation.">
+      
+      
+      
+        <link rel="canonical" href="https://victor.github.io/pynotebooklm/faq/">
+      
+      
+        <link rel="prev" href="../advanced_usage/">
+      
+      
+        <link rel="next" href="../examples/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>FAQ - PyNotebookLM Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#frequently-asked-questions-faq" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="PyNotebookLM Documentation" class="md-header__button md-logo" aria-label="PyNotebookLM Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            PyNotebookLM Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              FAQ
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Quickstart
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../usage/" class="md-tabs__link">
+          
+  
+  
+  Usage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../examples/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Examples
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../api_reference/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  API Reference
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../architecture/" class="md-tabs__link">
+          
+  
+  
+  Technical Details
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../competitor_analysis/" class="md-tabs__link">
+          
+  
+  
+  Research
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../contributing/" class="md-tabs__link">
+          
+  
+  
+  Development
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="PyNotebookLM Documentation" class="md-nav__button md-logo" aria-label="PyNotebookLM Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    PyNotebookLM Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Usage
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Usage
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Basic Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced_usage/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced Usage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Cookies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication &amp; Cookies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-long-do-authentication-cookies-last" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How long do authentication cookies last?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-where-are-cookies-stored" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Where are cookies stored?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-use-pynotebooklm-with-google-workspace-accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I use PyNotebookLM with Google Workspace accounts?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-what-happens-if-im-not-authenticated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What happens if I'm not authenticated?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-use-environment-variables-for-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I use environment variables for authentication?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rate Limiting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-what-are-the-rate-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What are the rate limits?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-does-retry-logic-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How does retry logic work?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-customize-retry-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I customize retry behavior?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-long-does-content-generation-take" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How long does content generation take?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-why-is-my-content-generation-stuck-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Why is my content generation stuck "in progress"?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-download-generated-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I download generated content?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-many-sources-do-i-need-for-content-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How many sources do I need for content generation?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#research-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research Discovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Research Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-whats-the-difference-between-standard-and-deep-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What's the difference between standard and deep research?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-search-google-drive-with-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I search Google Drive with research?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-import-discovered-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I import discovered sources?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-import-specific-sources-not-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I import specific sources, not all?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-why-is-browser-startup-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Why is browser startup slow?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-make-operations-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I make operations faster?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-there-a-way-to-keep-browser-open-between-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is there a way to keep browser open between scripts?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#errors-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors &amp; Debugging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Errors &amp; Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-im-getting-browser-automation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: I'm getting "Browser automation failed"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-enable-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I enable debug logging?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-im-getting-session-not-active-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: I'm getting "Session not active" errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-what-does-csrf-token-not-found-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What does "CSRF token not found" mean?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notebooks-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebooks &amp; Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notebooks &amp; Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-what-types-of-sources-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What types of sources are supported?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-add-local-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I add local files?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-many-notebookssources-can-i-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How many notebooks/sources can I have?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-organize-notebooks-into-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I organize notebooks into folders?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker &amp; Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker &amp; Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-run-pynotebooklm-in-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I run PyNotebookLM in Docker?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-deploy-pynotebooklm-as-a-web-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I deploy PyNotebookLM as a web service?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-pynotebooklm-production-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is PyNotebookLM production-ready?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing &amp; Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing &amp; Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-report-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I report bugs?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I contribute?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-this-library-officially-supported-by-google" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is this library officially supported by Google?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-will-google-block-my-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Will Google block my account?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-where-can-i-get-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Where can I get help?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api_reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Technical Details
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Technical Details
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../internal_protocol/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Internal Protocol
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rpc_harvesting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    RPC Harvesting
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reverse_engineering_findings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reverse Engineering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../technical_deep_dives/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deep Dives
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../competitor_analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Competitor Analysis
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Development
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Development
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tools/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tools
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../implementation_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Plan
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-cookies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authentication &amp; Cookies
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication &amp; Cookies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-long-do-authentication-cookies-last" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How long do authentication cookies last?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-where-are-cookies-stored" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Where are cookies stored?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-use-pynotebooklm-with-google-workspace-accounts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I use PyNotebookLM with Google Workspace accounts?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-what-happens-if-im-not-authenticated" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What happens if I'm not authenticated?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-use-environment-variables-for-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I use environment variables for authentication?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rate-limiting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rate Limiting
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rate Limiting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-what-are-the-rate-limits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What are the rate limits?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-does-retry-logic-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How does retry logic work?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-customize-retry-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I customize retry behavior?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#content-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Content Generation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Content Generation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-long-does-content-generation-take" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How long does content generation take?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-why-is-my-content-generation-stuck-in-progress" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Why is my content generation stuck "in progress"?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-download-generated-content" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I download generated content?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-many-sources-do-i-need-for-content-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How many sources do I need for content generation?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#research-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Research Discovery
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Research Discovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-whats-the-difference-between-standard-and-deep-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What's the difference between standard and deep research?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-search-google-drive-with-research" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I search Google Drive with research?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-import-discovered-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I import discovered sources?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-import-specific-sources-not-all" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I import specific sources, not all?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-why-is-browser-startup-slow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Why is browser startup slow?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-make-operations-faster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I make operations faster?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-there-a-way-to-keep-browser-open-between-scripts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is there a way to keep browser open between scripts?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#errors-debugging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Errors &amp; Debugging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Errors &amp; Debugging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-im-getting-browser-automation-failed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: I'm getting "Browser automation failed"
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-enable-debug-logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I enable debug logging?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-im-getting-session-not-active-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: I'm getting "Session not active" errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-what-does-csrf-token-not-found-mean" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What does "CSRF token not found" mean?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#notebooks-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Notebooks &amp; Sources
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Notebooks &amp; Sources">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-what-types-of-sources-are-supported" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: What types of sources are supported?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-add-local-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I add local files?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-how-many-notebookssources-can-i-have" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How many notebooks/sources can I have?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-organize-notebooks-into-folders" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I organize notebooks into folders?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#docker-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Docker &amp; Deployment
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Docker &amp; Deployment">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-run-pynotebooklm-in-docker" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I run PyNotebookLM in Docker?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-deploy-pynotebooklm-as-a-web-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I deploy PyNotebookLM as a web service?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-pynotebooklm-production-ready" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is PyNotebookLM production-ready?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-support" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Contributing &amp; Support
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing &amp; Support">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#q-how-do-i-report-bugs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: How do I report bugs?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-can-i-contribute" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Can I contribute?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-is-this-library-officially-supported-by-google" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Is this library officially supported by Google?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-will-google-block-my-account" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Will Google block my account?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#q-where-can-i-get-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Q: Where can I get help?
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="frequently-asked-questions-faq">Frequently Asked Questions (FAQ)<a class="headerlink" href="#frequently-asked-questions-faq" title="Permanent link">&para;</a></h1>
+<h2 id="authentication-cookies">Authentication &amp; Cookies<a class="headerlink" href="#authentication-cookies" title="Permanent link">&para;</a></h2>
+<h3 id="q-how-long-do-authentication-cookies-last">Q: How long do authentication cookies last?<a class="headerlink" href="#q-how-long-do-authentication-cookies-last" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Typically 2-4 weeks. When cookies expire, you'll get an <code>AuthenticationError</code>. You can re-authenticate with <code>pynotebooklm auth login</code> or enable auto-refresh with <code>BrowserSession(auto_refresh=True)</code> for long-running sessions.</p>
+<h3 id="q-where-are-cookies-stored">Q: Where are cookies stored?<a class="headerlink" href="#q-where-are-cookies-stored" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Cookies are stored in <code>~/.pynotebooklm/auth.json</code>. This file contains sensitive session data - never share it or commit it to version control.</p>
+<h3 id="q-can-i-use-pynotebooklm-with-google-workspace-accounts">Q: Can I use PyNotebookLM with Google Workspace accounts?<a class="headerlink" href="#q-can-i-use-pynotebooklm-with-google-workspace-accounts" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> PyNotebookLM is primarily tested with personal Google accounts. Workspace accounts may work but haven't been extensively tested. Some organizations may block automated access.</p>
+<h3 id="q-what-happens-if-im-not-authenticated">Q: What happens if I'm not authenticated?<a class="headerlink" href="#q-what-happens-if-im-not-authenticated" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> You'll receive an <code>AuthenticationError</code> when trying to use any client method. Run <code>pynotebooklm auth login</code> first.</p>
+<h3 id="q-can-i-use-environment-variables-for-authentication">Q: Can I use environment variables for authentication?<a class="headerlink" href="#q-can-i-use-environment-variables-for-authentication" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Not currently recommended for production. The browser-based authentication flow is the most reliable method.</p>
+<h2 id="rate-limiting">Rate Limiting<a class="headerlink" href="#rate-limiting" title="Permanent link">&para;</a></h2>
+<h3 id="q-what-are-the-rate-limits">Q: What are the rate limits?<a class="headerlink" href="#q-what-are-the-rate-limits" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> NotebookLM has internal rate limits that vary by operation. The exact limits aren't publicly documented. PyNotebookLM automatically handles rate limits with exponential backoff.</p>
+<h3 id="q-how-does-retry-logic-work">Q: How does retry logic work?<a class="headerlink" href="#q-how-does-retry-logic-work" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> When a rate limit (429) or transient error (5xx) occurs, PyNotebookLM:
+1. Waits using exponential backoff (1s, 2s, 4s, ...)
+2. Adds random jitter to prevent thundering herd
+3. Retries up to 3 times by default
+4. Throws the error if all retries fail</p>
+<h3 id="q-can-i-customize-retry-behavior">Q: Can I customize retry behavior?<a class="headerlink" href="#q-can-i-customize-retry-behavior" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! Set environment variables:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PYNOTEBOOKLM_MAX_RETRIES</span><span class="o">=</span><span class="m">5</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PYNOTEBOOKLM_BASE_DELAY</span><span class="o">=</span><span class="m">2</span>.0
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PYNOTEBOOKLM_MAX_DELAY</span><span class="o">=</span><span class="m">60</span>.0
+</code></pre></div></p>
+<p>Or use custom retry strategy:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pynotebooklm.retry</span><span class="w"> </span><span class="kn">import</span> <span class="n">RetryStrategy</span><span class="p">,</span> <span class="n">with_retry</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nd">@with_retry</span><span class="p">(</span><span class="n">RetryStrategy</span><span class="p">(</span><span class="n">max_attempts</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">base_delay</span><span class="o">=</span><span class="mf">2.0</span><span class="p">))</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">my_function</span><span class="p">():</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>    <span class="c1"># Your code here</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>    <span class="k">pass</span>
+</code></pre></div></p>
+<h2 id="content-generation">Content Generation<a class="headerlink" href="#content-generation" title="Permanent link">&para;</a></h2>
+<h3 id="q-how-long-does-content-generation-take">Q: How long does content generation take?<a class="headerlink" href="#q-how-long-does-content-generation-take" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> 
+- <strong>Audio overviews</strong>: 60-180 seconds
+- <strong>Video overviews</strong>: 120-300 seconds
+- <strong>Infographics</strong>: 60-120 seconds
+- <strong>Slide decks</strong>: 60-180 seconds
+- <strong>Flashcards/Quiz</strong>: 30-60 seconds</p>
+<p>Use <code>pynotebooklm studio status &lt;notebook_id&gt;</code> to check progress.</p>
+<h3 id="q-why-is-my-content-generation-stuck-in-progress">Q: Why is my content generation stuck "in progress"?<a class="headerlink" href="#q-why-is-my-content-generation-stuck-in-progress" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Content generation is asynchronous. It can take several minutes. If it's stuck for &gt; 10 minutes:
+1. Check if you have enough sources (minimum 1-2 recommended)
+2. Verify your network connection
+3. Try again - internal API might have had a temporary issue</p>
+<h3 id="q-can-i-download-generated-content">Q: Can I download generated content?<a class="headerlink" href="#q-can-i-download-generated-content" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! When generation completes, use:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pynotebooklm<span class="w"> </span>studio<span class="w"> </span>status<span class="w"> </span>&lt;notebook_id&gt;
+</code></pre></div>
+This shows download URLs for audio (MP3), video (MP4), infographics (PDF), etc.</p>
+<h3 id="q-how-many-sources-do-i-need-for-content-generation">Q: How many sources do I need for content generation?<a class="headerlink" href="#q-how-many-sources-do-i-need-for-content-generation" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Minimum 1 source, but 2-5 sources provide better results. Too many sources (&gt; 50) may make generation slower.</p>
+<h2 id="research-discovery">Research Discovery<a class="headerlink" href="#research-discovery" title="Permanent link">&para;</a></h2>
+<h3 id="q-whats-the-difference-between-standard-and-deep-research">Q: What's the difference between standard and deep research?<a class="headerlink" href="#q-whats-the-difference-between-standard-and-deep-research" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong>
+- <strong>Standard</strong>: Fast (~15-30s), finds 5-10 sources, good for quick research
+- <strong>Deep</strong>: Comprehensive (~60-120s), finds 10-20 sources, includes detailed report</p>
+<h3 id="q-can-i-search-google-drive-with-research">Q: Can I search Google Drive with research?<a class="headerlink" href="#q-can-i-search-google-drive-with-research" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! Use <code>--source drive</code> flag:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pynotebooklm<span class="w"> </span>research<span class="w"> </span>start<span class="w"> </span>&lt;notebook_id&gt;<span class="w"> </span><span class="s2">&quot;topic&quot;</span><span class="w"> </span>--source<span class="w"> </span>drive
+</code></pre></div></p>
+<h3 id="q-how-do-i-import-discovered-sources">Q: How do I import discovered sources?<a class="headerlink" href="#q-how-do-i-import-discovered-sources" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Two methods:</p>
+<ol>
+<li>
+<p>Automatic import while polling:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pynotebooklm<span class="w"> </span>research<span class="w"> </span>poll<span class="w"> </span>&lt;notebook_id&gt;<span class="w"> </span>--auto-import
+</code></pre></div></p>
+</li>
+<li>
+<p>Manual import after research completes:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>pynotebooklm<span class="w"> </span>research<span class="w"> </span>import<span class="w"> </span>&lt;notebook_id&gt;
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="q-can-i-import-specific-sources-not-all">Q: Can I import specific sources, not all?<a class="headerlink" href="#q-can-i-import-specific-sources-not-all" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! Use the <code>--indices</code> flag:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>pynotebooklm<span class="w"> </span>research<span class="w"> </span>import<span class="w"> </span>&lt;notebook_id&gt;<span class="w"> </span>--indices<span class="w"> </span><span class="m">0</span>,1,2
+</code></pre></div></p>
+<h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h2>
+<h3 id="q-why-is-browser-startup-slow">Q: Why is browser startup slow?<a class="headerlink" href="#q-why-is-browser-startup-slow" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> First startup takes 3-5 seconds as Playwright launches Chrome. This is normal. For better performance, reuse the client within a single async context:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="k">async</span> <span class="k">with</span> <span class="n">NotebookLMClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="c1"># Multiple operations here</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">notebooks</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">add_url</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="c1"># Browser stays open for all operations</span>
+</code></pre></div>
+<h3 id="q-can-i-make-operations-faster">Q: Can I make operations faster?<a class="headerlink" href="#q-can-i-make-operations-faster" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes:
+1. <strong>Reuse client context</strong> - keeps browser open
+2. <strong>Use batch operations</strong> - multiple calls in one session
+3. <strong>For bulk operations</strong> - consider parallel execution with <code>asyncio.gather()</code></p>
+<h3 id="q-is-there-a-way-to-keep-browser-open-between-scripts">Q: Is there a way to keep browser open between scripts?<a class="headerlink" href="#q-is-there-a-way-to-keep-browser-open-between-scripts" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Not currently. Each script invocation starts a new browser session. For long-running operations, wrap everything in a single async context.</p>
+<h2 id="errors-debugging">Errors &amp; Debugging<a class="headerlink" href="#errors-debugging" title="Permanent link">&para;</a></h2>
+<h3 id="q-im-getting-browser-automation-failed">Q: I'm getting "Browser automation failed"<a class="headerlink" href="#q-im-getting-browser-automation-failed" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> This usually means Playwright browser isn't installed:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>playwright<span class="w"> </span>install<span class="w"> </span>chromium
+</code></pre></div></p>
+<p>Or your system is missing dependencies. On Linux:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">    </span>libnss3<span class="w"> </span>libnspr4<span class="w"> </span>libatk1.0-0<span class="w"> </span>libatk-bridge2.0-0<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span>libcups2<span class="w"> </span>libdrm2<span class="w"> </span>libxkbcommon0<span class="w"> </span>libxcomposite1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span>libxdamage1<span class="w"> </span>libxfixes3<span class="w"> </span>libxrandr2<span class="w"> </span>libgbm1<span class="w"> </span>libasound2
+</code></pre></div></p>
+<h3 id="q-how-do-i-enable-debug-logging">Q: How do I enable debug logging?<a class="headerlink" href="#q-how-do-i-enable-debug-logging" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Set environment variable:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PYNOTEBOOKLM_DEBUG</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div></p>
+<p>Or in Python:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="q-im-getting-session-not-active-errors">Q: I'm getting "Session not active" errors<a class="headerlink" href="#q-im-getting-session-not-active-errors" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> You're trying to call methods outside the async context manager. Use:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="k">async</span> <span class="k">with</span> <span class="n">NotebookLMClient</span><span class="p">()</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>    <span class="c1"># All operations here</span>
+</code></pre></div></p>
+<h3 id="q-what-does-csrf-token-not-found-mean">Q: What does "CSRF token not found" mean?<a class="headerlink" href="#q-what-does-csrf-token-not-found-mean" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Rare error indicating the page structure changed or cookies are invalid. Try:
+1. Re-authenticate: <code>pynotebooklm auth login</code>
+2. Clear cookies: <code>rm ~/.pynotebooklm/auth.json</code> then login again
+3. Report bug if persistent</p>
+<h2 id="notebooks-sources">Notebooks &amp; Sources<a class="headerlink" href="#notebooks-sources" title="Permanent link">&para;</a></h2>
+<h3 id="q-what-types-of-sources-are-supported">Q: What types of sources are supported?<a class="headerlink" href="#q-what-types-of-sources-are-supported" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong>
+- <strong>URLs</strong>: Any public webpage
+- <strong>YouTube</strong>: Videos (auto-detected from URL)
+- <strong>Google Drive</strong>: Docs, Sheets, PDFs (requires Drive permission)
+- <strong>Text</strong>: Plain text snippets, notes, summaries</p>
+<h3 id="q-can-i-add-local-files">Q: Can I add local files?<a class="headerlink" href="#q-can-i-add-local-files" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Not directly. Workaround: add as text source by reading file content:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;file.txt&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a>    <span class="n">content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="n">notebook_id</span><span class="p">,</span> <span class="s2">&quot;My File&quot;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+</code></pre></div></p>
+<h3 id="q-how-many-notebookssources-can-i-have">Q: How many notebooks/sources can I have?<a class="headerlink" href="#q-how-many-notebookssources-can-i-have" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> NotebookLM doesn't publish hard limits. In practice:
+- <strong>Notebooks</strong>: 100+ is fine
+- <strong>Sources per notebook</strong>: 50+ works, but generation slows down</p>
+<h3 id="q-can-i-organize-notebooks-into-folders">Q: Can I organize notebooks into folders?<a class="headerlink" href="#q-can-i-organize-notebooks-into-folders" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> NotebookLM doesn't support folders natively. Use naming conventions:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">notebooks</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Project A - Research&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">notebooks</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Project A - Analysis&quot;</span><span class="p">)</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">notebooks</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s2">&quot;Project B - Planning&quot;</span><span class="p">)</span>
+</code></pre></div></p>
+<h2 id="docker-deployment">Docker &amp; Deployment<a class="headerlink" href="#docker-deployment" title="Permanent link">&para;</a></h2>
+<h3 id="q-can-i-run-pynotebooklm-in-docker">Q: Can I run PyNotebookLM in Docker?<a class="headerlink" href="#q-can-i-run-pynotebooklm-in-docker" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! A Dockerfile is provided. Note that authentication requires browser access, so you'll need to:
+1. Authenticate on host machine first
+2. Mount <code>~/.pynotebooklm/auth.json</code> into container
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-v<span class="w"> </span>~/.pynotebooklm:/root/.pynotebooklm<span class="w"> </span>pynotebooklm
+</code></pre></div></p>
+<h3 id="q-can-i-deploy-pynotebooklm-as-a-web-service">Q: Can I deploy PyNotebookLM as a web service?<a class="headerlink" href="#q-can-i-deploy-pynotebooklm-as-a-web-service" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Possible, but challenging. Each request needs a browser context. Consider:
+- <strong>Serverless</strong>: Cold starts are slow (~5s)
+- <strong>Long-running service</strong>: Better performance, but needs state management
+- <strong>Cookie rotation</strong>: Implement automatic refresh every 2 weeks</p>
+<h3 id="q-is-pynotebooklm-production-ready">Q: Is PyNotebookLM production-ready?<a class="headerlink" href="#q-is-pynotebooklm-production-ready" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> For automated workflows, yes. For high-traffic web services, consider:
+- Rate limiting (NotebookLM enforces limits)
+- Cookie refresh automation
+- Error handling and retry logic
+- Cost of browser automation (memory/CPU)</p>
+<h2 id="contributing-support">Contributing &amp; Support<a class="headerlink" href="#contributing-support" title="Permanent link">&para;</a></h2>
+<h3 id="q-how-do-i-report-bugs">Q: How do I report bugs?<a class="headerlink" href="#q-how-do-i-report-bugs" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Open an issue on GitHub with:
+- Error message and stack trace
+- Steps to reproduce
+- Python version and OS
+- Log output (with <code>PYNOTEBOOKLM_DEBUG=1</code>)</p>
+<h3 id="q-can-i-contribute">Q: Can I contribute?<a class="headerlink" href="#q-can-i-contribute" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Yes! See <code>CONTRIBUTING.md</code> for guidelines.</p>
+<h3 id="q-is-this-library-officially-supported-by-google">Q: Is this library officially supported by Google?<a class="headerlink" href="#q-is-this-library-officially-supported-by-google" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> No. This is an unofficial library using NotebookLM's internal APIs. It may break if Google changes their API.</p>
+<h3 id="q-will-google-block-my-account">Q: Will Google block my account?<a class="headerlink" href="#q-will-google-block-my-account" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> Unlikely if used reasonably. Don't:
+- Make thousands of requests per hour
+- Share your account cookies
+- Automate on behalf of many users</p>
+<h3 id="q-where-can-i-get-help">Q: Where can I get help?<a class="headerlink" href="#q-where-can-i-get-help" title="Permanent link">&para;</a></h3>
+<p><strong>A:</strong> 
+1. Check this FAQ and documentation
+2. Search GitHub issues
+3. Open a new issue with details
+4. Review examples in <code>examples/</code> directory</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
